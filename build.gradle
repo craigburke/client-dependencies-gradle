@@ -1,0 +1,36 @@
+plugins {
+    id 'groovy'
+    id 'maven-publish'
+}
+
+ext {
+    artifactId = 'npm-gradle'
+}
+
+group = 'com.craigburke.gradle'
+version = '1.0.0'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile gradleApi()
+    compile 'org.codehaus.gpars:gpars:1.2.1'
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+        exclude  module: 'groovy-all'
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId project.artifactId
+            from components.java
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.9'
+}
