@@ -1,11 +1,10 @@
 package com.craigburke.gradle.npm
 
-class NpmExtension {
+class ClientDependenciesExtension {
 
-    String repositoryUrl = 'https://registry.npmjs.org'
+    Registry registry
     String installDir
-    String cacheDir = 'build/npm-cache'
-
+    String cacheDir
     List<Dependency> rootDependencies = []
 
     class SourceCategory {

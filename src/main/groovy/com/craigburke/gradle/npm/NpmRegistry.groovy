@@ -8,16 +8,21 @@ import static groovyx.gpars.GParsPool.withExistingPool
 
 class NpmRegistry implements Registry {
 
+    NpmRegistry(String url = 'https://registry.npmjs.org') {
+        repositoryUrl = url
+    }
+
     private static String normalizeExpression(String expression) {
         expression?.startsWith('./') ? expression.substring(2) : expression
     }
 
-    private String getDependencySourceFolder(Dependency dependency) {
+    private String getDependencyFolder(Dependency dependency) {
         "${cacheDir}/${dependency.name}/${dependency.version.fullVersion}"
     }
 
-    private String getDownloadFilePath(Dependency dependency) {
-        "${getDependencySourceFolder(dependency)}/package.tgz"
+
+    private String getSourceFolder(Dependency dependency) {
+        "${getDependencyFolder(dependency)}/source/"
     }
 
     Dependency loadDependency(Dependency dependency) {
@@ -45,7 +50,7 @@ class NpmRegistry implements Registry {
         def versionJson = versionListJson[loadedDependency.version.fullVersion]
         loadedDependency.downloadUrl = versionJson.dist.tarball
 
-        File versionConfigFile = project.file("${getDependencySourceFolder(loadedDependency)}/package/package.json")
+        File versionConfigFile = project.file("${getDependencyFolder(loadedDependency)}/package/package.json")
 
         if (!versionConfigFile.exists()) {
             versionConfigFile.parentFile.mkdirs()
@@ -63,39 +68,50 @@ class NpmRegistry implements Registry {
     }
 
     void downloadDependency(Dependency dependency) {
-        File downloadFile = project.file(getDownloadFilePath(dependency))
+        File dependencySourceFolder = project.file(getSourceFolder(dependency))
+        File downloadFile = project.file("${getDependencyFolder(dependency)}/package/package.tgz")
 
         if (!downloadFile.exists()) {
             downloadFile.parentFile.mkdirs()
+
             downloadFile.withOutputStream { out ->
                 out << new URL(dependency.downloadUrl).openStream()
+            }
+        }
+
+        if (!dependencySourceFolder.exists()) {
+            dependencySourceFolder.mkdirs()
+
+            project.copy {
+                from project.tarTree(downloadFile.absolutePath).files
+                into dependencySourceFolder.absolutePath
+                eachFile { FileCopyDetails fileCopyDetails ->
+                    fileCopyDetails.path -= 'package/'
+                }
             }
         }
     }
 
     void installDependency(Dependency dependency) {
         project.file(installDir).mkdirs()
-
         dependency.sources.each { String source, String destination ->
             installDependencySource(dependency, source, destination)
         }
-
         if (!dependency.sources) {
-            installDependencySource(dependency, 'dist/*', '')
+            installDependencySource(dependency, '**', '')
         }
     }
 
     private void installDependencySource(Dependency dependency, String source, String destination) {
         String normalizedSource = normalizeExpression(source)
-        String includeExpression = "package/${normalizedSource}${normalizedSource.endsWith('/') ? '**' : ''}"
+        String includeExpression = "${normalizedSource}${normalizedSource.endsWith('/') ? '**' : ''}"
 
         project.copy {
-            from project.tarTree(getDownloadFilePath(dependency))
+            from project.file(getSourceFolder(dependency))
             include includeExpression
             into "${installDir}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
-                String relativePath = fileCopyDetails.path - 'package/'
-                fileCopyDetails.path = getDestinationPath(relativePath, source, destination)
+                fileCopyDetails.path = getDestinationPath(fileCopyDetails.path, source, destination)
             }
         }
     }
