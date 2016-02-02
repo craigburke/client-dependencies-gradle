@@ -21,7 +21,6 @@ trait Registry {
                     .collectParallel { Dependency dependency -> loadDependency(dependency) }
 
             flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
-                downloadDependency(dependency)
                 installDependency(dependency)
             }
 
@@ -62,6 +61,5 @@ trait Registry {
     }
 
     abstract Dependency loadDependency(Dependency dependency)
-    abstract void downloadDependency(Dependency dependency)
     abstract void installDependency(Dependency dependency)
 }

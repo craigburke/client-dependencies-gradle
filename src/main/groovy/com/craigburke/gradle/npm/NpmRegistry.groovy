@@ -16,19 +16,20 @@ class NpmRegistry implements Registry {
         expression?.startsWith('./') ? expression.substring(2) : expression
     }
 
-    private String getDependencyFolder(Dependency dependency) {
-        "${cacheDir}/${dependency.name}/${dependency.version.fullVersion}"
+    private String getMainFolderPath(Dependency dependency) {
+        "${cacheDir}/${dependency.name}"
     }
 
-
-    private String getSourceFolder(Dependency dependency) {
-        "${getDependencyFolder(dependency)}/source/"
+    private File getDependencyInfoFile(Dependency dependency) {
+        project.file("${getMainFolderPath(dependency)}/${dependency.version.fullVersion}/package/package.json")
     }
 
-    Dependency loadDependency(Dependency dependency) {
-        Dependency loadedDependency = dependency.clone()
+    private File getDownloadFile(Dependency dependency) {
+        project.file("${getMainFolderPath(dependency)}/${dependency.version.fullVersion}/package.tgz")
+    }
 
-        String mainConfigPath = "${cacheDir}/${loadedDependency.name}/package.json"
+    private getVersionListJson(Dependency dependency) {
+        String mainConfigPath = "${getMainFolderPath(dependency)}/main.json"
         File mainConfigFile = project.file(mainConfigPath)
 
         def versionListJson
@@ -37,21 +38,27 @@ class NpmRegistry implements Registry {
             versionListJson = new JsonSlurper().parse(mainConfigFile).versions
         }
         else {
-            URL url = new URL("${repositoryUrl}/${loadedDependency.name}")
+            URL url = new URL("${repositoryUrl}/${dependency.name}")
             def json = new JsonSlurper().parse(url)
 
             mainConfigFile.parentFile.mkdirs()
             mainConfigFile.text = JsonOutput.toJson(json).toString()
             versionListJson = json.versions
         }
+        versionListJson
+    }
 
+    Dependency loadDependency(Dependency dependency) {
+        Dependency loadedDependency = dependency.clone()
+
+        def versionListJson = getVersionListJson(dependency)
         List<Version> versionList = versionListJson.collect { new Version(it.key as String) }
         loadedDependency.version = VersionResolver.findMax(dependency.versionExpression, versionList)
+
         def versionJson = versionListJson[loadedDependency.version.fullVersion]
         loadedDependency.downloadUrl = versionJson.dist.tarball
 
-        File versionConfigFile = project.file("${getDependencyFolder(loadedDependency)}/package/package.json")
-
+        File versionConfigFile = getDependencyInfoFile(loadedDependency)
         if (!versionConfigFile.exists()) {
             versionConfigFile.parentFile.mkdirs()
             versionConfigFile.text = JsonOutput.toJson(versionJson).toString()
@@ -68,8 +75,7 @@ class NpmRegistry implements Registry {
     }
 
     void downloadDependency(Dependency dependency) {
-        File dependencySourceFolder = project.file(getSourceFolder(dependency))
-        File downloadFile = project.file("${getDependencyFolder(dependency)}/package/package.tgz")
+        File downloadFile = getDownloadFile(dependency)
 
         if (!downloadFile.exists()) {
             downloadFile.parentFile.mkdirs()
@@ -78,21 +84,11 @@ class NpmRegistry implements Registry {
                 out << new URL(dependency.downloadUrl).openStream()
             }
         }
-
-        if (!dependencySourceFolder.exists()) {
-            dependencySourceFolder.mkdirs()
-
-            project.copy {
-                from project.tarTree(downloadFile.absolutePath).files
-                into dependencySourceFolder.absolutePath
-                eachFile { FileCopyDetails fileCopyDetails ->
-                    fileCopyDetails.path -= 'package/'
-                }
-            }
-        }
     }
 
     void installDependency(Dependency dependency) {
+        downloadDependency(dependency)
+
         project.file(installDir).mkdirs()
         dependency.sources.each { String source, String destination ->
             installDependencySource(dependency, source, destination)
@@ -107,11 +103,12 @@ class NpmRegistry implements Registry {
         String includeExpression = "${normalizedSource}${normalizedSource.endsWith('/') ? '**' : ''}"
 
         project.copy {
-            from project.file(getSourceFolder(dependency))
+            from project.tarTree(getDownloadFile(dependency)).files
             include includeExpression
             into "${installDir}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
-                fileCopyDetails.path = getDestinationPath(fileCopyDetails.path, source, destination)
+                String relativePath = fileCopyDetails.path - '/package'
+                fileCopyDetails.path = getDestinationPath(relativePath, source, destination)
             }
         }
     }

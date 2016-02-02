@@ -1,11 +1,13 @@
 package com.craigburke.gradle.npm
 
+
 class ClientDependenciesExtension {
 
     Registry registry
     String installDir
     String cacheDir
     List<Dependency> rootDependencies = []
+
 
     class SourceCategory {
         static Map rightShift(String source, String path) {
