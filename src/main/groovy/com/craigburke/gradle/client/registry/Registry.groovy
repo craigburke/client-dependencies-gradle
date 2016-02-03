@@ -36,6 +36,14 @@ trait Registry {
         path
     }
 
+    String getMainFolderPath(String dependencyName) {
+        "${cacheDir}/${dependencyName}"
+    }
+
+    static String normalizeExpression(String expression) {
+        expression?.startsWith('./') ? expression.substring(2) : expression
+    }
+
     abstract Dependency loadDependency(SimpleDependency simpleDependency)
     abstract List<Version> getVersionList(String dependencyName)
     abstract void installDependency(Dependency dependency, Map sources)

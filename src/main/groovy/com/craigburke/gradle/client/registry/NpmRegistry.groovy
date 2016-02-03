@@ -16,14 +16,6 @@ class NpmRegistry implements Registry {
         repositoryUrl = url
     }
 
-    private static String normalizeExpression(String expression) {
-        expression?.startsWith('./') ? expression.substring(2) : expression
-    }
-
-    private String getMainFolderPath(String dependencyName) {
-        "${cacheDir}/${dependencyName}"
-    }
-
     private File getDependencyInfoFile(Dependency dependency) {
         project.file("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package/package.json")
     }
