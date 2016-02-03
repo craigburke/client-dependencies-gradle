@@ -1,4 +1,4 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client
 
 import spock.lang.Specification
 

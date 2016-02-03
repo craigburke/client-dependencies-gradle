@@ -1,4 +1,7 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.plugin
+
+import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.registry.Registry
 
 
 class ClientDependenciesExtension {
@@ -6,8 +9,7 @@ class ClientDependenciesExtension {
     Registry registry
     String installDir
     String cacheDir
-    List<Dependency> rootDependencies = []
-
+    List<RootDependency> rootDependencies = []
 
     class SourceCategory {
         static Map rightShift(String source, String path) {
@@ -32,7 +34,7 @@ class ClientDependenciesExtension {
             version = 'latest'
         }
 
-        Dependency dependency = new Dependency(name: dependencyName, versionExpression: version)
+        RootDependency dependency = new RootDependency(name: dependencyName, versionExpression: version)
 
         if (args && args.last() instanceof Closure) {
             Closure clonedClosure = args.last().rehydrate(dependency, dependency, dependency)

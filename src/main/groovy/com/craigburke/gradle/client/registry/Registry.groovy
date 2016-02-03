@@ -1,5 +1,9 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.registry
 
+import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.Version
 import jsr166y.ForkJoinPool
 import org.gradle.api.Project
 
@@ -13,17 +17,16 @@ trait Registry {
     String installDir
     ForkJoinPool pool = new ForkJoinPool(10)
 
-    void installDependencies(List<Dependency> dependencies) {
-        List<Dependency> rootDependencies = dependencies.asImmutable()
+    void installDependencies(List<RootDependency> rootDependencies) {
 
         withExistingPool(pool) {
             List<Dependency> loadedDependencies = rootDependencies
-                    .collectParallel { Dependency dependency -> loadDependency(dependency) }
+                    .collectParallel { RootDependency dependency -> loadDependency(dependency) }
 
             flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
-                installDependency(dependency)
+                Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
+                installDependency(dependency, sources)
             }
-
         }
     }
 
@@ -34,8 +37,6 @@ trait Registry {
     }
 
     static String getDestinationPath(String relativePath, String source, String destination) {
-
-        boolean sourceIsFolder = !source.contains('*')
         boolean maintainPath = source.contains('**')
 
         boolean destinationIsFolder = destination?.endsWith('/')
@@ -48,18 +49,15 @@ trait Registry {
             path = maintainPath ? relativePath : fileName
         }
         else if (destinationIsFolder) {
-            if (sourceIsFolder) {
-                String pathFromModuleRoot = relativePath - "${source}/"
-                path += pathFromModuleRoot
-            }
-            else {
-                path += maintainPath ? relativePath : fileName
-            }
+            List<String> pathParts = source.tokenize("**")
+            String pathCorrection = maintainPath && pathParts ? pathParts.first() : (relativePath - fileName)
+            path += relativePath - pathCorrection
         }
 
         path
     }
 
-    abstract Dependency loadDependency(Dependency dependency)
-    abstract void installDependency(Dependency dependency)
+    abstract Dependency loadDependency(SimpleDependency simpleDependency)
+    abstract List<Version> getVersionList(String dependencyName)
+    abstract void installDependency(Dependency dependency, Map sources)
 }

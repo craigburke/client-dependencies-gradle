@@ -1,4 +1,4 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.dependency
 
 import java.util.regex.Pattern
 

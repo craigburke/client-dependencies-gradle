@@ -1,4 +1,4 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.dependency
 
 import java.util.regex.Pattern
 
@@ -10,7 +10,7 @@ class VersionResolver {
     private static final Pattern LESS_THAN_EQUAL = ~/(?:\s*)(?:<=)(?:\s*)?v?(\d*\.\d*\.\d*.*)?/
     private static final Pattern GREATER_THAN_EQUAL = ~/(?:\s*)(?:>=)(?:\s*)?v?(\d*\.\d*\.\d*.*)?/
 
-    static Version findMax(String expression, List<Version> versions) {
+    static Version resolve(String expression, List<Version> versions) {
         List<Version> sortedVersions = versions.toSorted { v1, v2 -> v2 <=> v1 }
         sortedVersions.find { matches(it, expression) }
     }

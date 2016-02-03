@@ -1,19 +1,9 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.dependency
 
-import groovy.transform.AutoClone
-
-@AutoClone
-class Dependency {
-    String name
-    String versionExpression
-    String downloadUrl
-    Version version
+class RootDependency extends SimpleDependency {
 
     Map sources = [:]
     List excludes = []
-
-    Dependency parent
-    List<Dependency> children = []
 
     void source(String sourceValue) {
         source([(sourceValue):''])

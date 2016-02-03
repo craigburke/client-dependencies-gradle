@@ -1,5 +1,6 @@
-package com.craigburke.gradle.npm
+package com.craigburke.gradle.client.plugin
 
+import com.craigburke.gradle.client.registry.NpmRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
