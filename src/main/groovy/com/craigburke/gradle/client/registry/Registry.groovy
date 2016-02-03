@@ -44,7 +44,7 @@ trait Registry {
         expression?.startsWith('./') ? expression.substring(2) : expression
     }
 
-    abstract Dependency loadDependency(SimpleDependency simpleDependency)
     abstract List<Version> getVersionList(String dependencyName)
+    abstract Dependency loadDependency(SimpleDependency simpleDependency)
     abstract void installDependency(Dependency dependency, Map sources)
 }
