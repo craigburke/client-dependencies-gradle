@@ -6,9 +6,10 @@ import com.craigburke.gradle.client.registry.Registry
 
 class ClientDependenciesExtension {
 
-    Registry registry
     String installDir
     String cacheDir
+
+    Map<String, Registry> registryMap = [:]
     List<RootDependency> rootDependencies = []
 
     class SourceCategory {
@@ -17,24 +18,16 @@ class ClientDependenciesExtension {
         }
     }
 
-    def methodMissing(String name, args) {
-        String version
-        String dependencyName = name
+    def methodMissing(String registryName, args) {
+        Registry registry = registryMap[registryName]
 
-        if (dependencyName.contains(':')) {
-            (dependencyName, version) = dependencyName.tokenize(':')
-        }
-        else if (args instanceof String) {
-            version = args
-        }
-        else if (args) {
-            version = args.first() instanceof String ? args.first() : 'latest'
-        }
-        else {
-            version = 'latest'
-        }
+        def (dependencyName, version) = args.first().tokenize(':')
 
-        RootDependency dependency = new RootDependency(name: dependencyName, versionExpression: version)
+        RootDependency dependency = new RootDependency(
+                name: dependencyName,
+                versionExpression: version,
+                registry: registry
+        )
 
         if (args && args.last() instanceof Closure) {
             Closure clonedClosure = args.last().rehydrate(dependency, dependency, dependency)

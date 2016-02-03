@@ -1,6 +1,5 @@
-package com.craigburke.gradle.client
+package com.craigburke.gradle.client.registry
 
-import com.craigburke.gradle.client.registry.Registry
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll

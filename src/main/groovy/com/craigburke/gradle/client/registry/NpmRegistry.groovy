@@ -57,7 +57,7 @@ class NpmRegistry implements Registry {
 
     Dependency loadDependency(SimpleDependency simpleDependency) {
         String dependencyName = simpleDependency.name
-        Dependency dependency = new Dependency(name: dependencyName)
+        Dependency dependency = new Dependency(name: dependencyName, registry: this)
         dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
         def versionJson = getVersionJson(dependencyName, dependency.version.fullVersion)
         dependency.downloadUrl = versionJson.dist.tarball
@@ -70,7 +70,7 @@ class NpmRegistry implements Registry {
 
         withExistingPool(pool) {
             dependency.children = versionJson.dependencies.collectParallel { String name, String childVersion ->
-                Dependency childDependency = new Dependency(name: name, versionExpression: childVersion, parent: dependency)
+                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion)
                 loadDependency(childDependency)
             } ?: []
         }
@@ -81,30 +81,6 @@ class NpmRegistry implements Registry {
     List<Version> getVersionList(String dependencyName) {
         def versionListJson = getVersionListJson(dependencyName)
         versionListJson.collect { new Version(it.key as String) }
-    }
-
-    Dependency loadDependency(Dependency dependency) {
-        Dependency loadedDependency = dependency.clone()
-
-        loadedDependency.version = VersionResolver.findMax(dependency.versionExpression, getVersionList(dependency.name))
-        def versionJson = getVersionJson(dependency.name, loadedDependency.version.fullVersion)
-
-        loadedDependency.downloadUrl = versionJson.dist.tarball
-
-        File versionConfigFile = getDependencyInfoFile(loadedDependency)
-        if (!versionConfigFile.exists()) {
-            versionConfigFile.parentFile.mkdirs()
-            versionConfigFile.text = JsonOutput.toJson(versionJson).toString()
-        }
-
-        withExistingPool(pool) {
-            loadedDependency.children = versionJson.dependencies.collectParallel { String name, String childVersion ->
-                Dependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion)
-                loadDependency(childDependency)
-            } ?: []
-        }
-
-        loadedDependency
     }
 
     void downloadDependency(Dependency dependency) {

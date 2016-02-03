@@ -1,7 +1,5 @@
-package com.craigburke.gradle.client
+package com.craigburke.gradle.client.dependency
 
-import com.craigburke.gradle.client.dependency.Version
-import com.craigburke.gradle.client.dependency.VersionResolver
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -10,7 +8,7 @@ class VersionResolverSpec extends Specification {
     @Unroll("simple version #expression resolves correctly")
     def "simple expressions can be resolved"() {
         expect:
-        VersionResolver.findMax(expression, versions) == result
+        VersionResolver.resolve(expression, versions) == result
 
         where:
         expression  | result

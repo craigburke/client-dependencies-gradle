@@ -1,7 +1,10 @@
 package com.craigburke.gradle.client.dependency
 
+import com.craigburke.gradle.client.registry.Registry
+
 class RootDependency extends SimpleDependency {
 
+    Registry registry
     Map sources = [:]
     List excludes = []
 

@@ -6,6 +6,10 @@ import com.craigburke.gradle.client.dependency.Version
 
 class BowerRegistry implements Registry {
 
+    BowerRegistry(String url = 'https://bower.herokuapp.com') {
+        repositoryUrl = url
+    }
+
     List<Version> getVersionList(String dependencyName) {
         return null
     }

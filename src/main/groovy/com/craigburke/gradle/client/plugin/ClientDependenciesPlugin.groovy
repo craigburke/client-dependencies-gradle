@@ -1,8 +1,16 @@
 package com.craigburke.gradle.client.plugin
 
+import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
+import com.craigburke.gradle.client.registry.Registry
+import jsr166y.ForkJoinPool
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+
+import static groovyx.gpars.GParsPool.withExistingPool
 
 class ClientDependenciesPlugin implements Plugin<Project> {
 
@@ -12,21 +20,23 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String REFRESH_TASK = 'clientRefresh'
 
     ClientDependenciesExtension config
+    ForkJoinPool pool = new ForkJoinPool(10)
 
     void apply(Project project) {
         config = project.extensions.create('clientDependencies', ClientDependenciesExtension)
+        config.registryMap = [npm: new NpmRegistry(), bower: new BowerRegistry()]
 
         project.task(CLEAN_TASK, group: TASK_GROUP) {
             doLast {
-                project.delete config.registry.installDir
-                project.delete config.registry.cacheDir
+                project.delete config.installDir
+                project.delete config.cacheDir
             }
         }
 
         project.task(INSTALL_TASK, group: TASK_GROUP) {
             mustRunAfter CLEAN_TASK
             doLast {
-                config.registry.installDependencies(config.rootDependencies)
+                installDependencies(config.rootDependencies)
             }
         }
 
@@ -34,9 +44,33 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
             setDefaults(project)
-            config.registry = new NpmRegistry(installDir: config.installDir, cacheDir: config.cacheDir, project: project)
+            config.registryMap.each { String key, Registry registry ->
+                registry.project = project
+                registry.cacheDir = config.cacheDir
+                registry.installDir = config.installDir
+            }
         }
 
+    }
+
+    private void installDependencies(List<RootDependency> rootDependencies) {
+        withExistingPool(pool) {
+            List<Dependency> loadedDependencies = rootDependencies
+                    .collectParallel { RootDependency dependency ->
+                        dependency.registry.loadDependency(dependency as SimpleDependency)
+                    }
+
+            flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
+                Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
+                dependency.registry.installDependency(dependency, sources)
+            }
+        }
+    }
+
+    List<Dependency> flattenDependencies(List<Dependency> dependencies) {
+        dependencies + dependencies.findAll { it.children }
+                .collect { flattenDependencies(it.children) }
+                .unique(false) { it.name }
     }
 
     private void setDefaults(Project project) {

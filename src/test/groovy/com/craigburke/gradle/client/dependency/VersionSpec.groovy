@@ -1,6 +1,5 @@
-package com.craigburke.gradle.client
+package com.craigburke.gradle.client.dependency
 
-import com.craigburke.gradle.client.dependency.Version
 import spock.lang.Specification
 import spock.lang.Unroll
 
