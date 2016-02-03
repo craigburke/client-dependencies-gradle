@@ -25,7 +25,20 @@ class Version implements Comparable<Version> {
     }
 
     int compareTo(Version other) {
-        ((major <=> other.major) ?: (minor <=> other.minor)) ?: (patch <=> other.patch)
+        int value = (major <=> other.major)
+        if (value) { return value }
+
+        value = (minor <=> other.minor)
+        if (value) { return value }
+
+        value = (patch <=> other.patch)
+        if (value) { return value }
+
+        if (tag || other.tag) {
+            value = (tag <=> other.tag)
+        }
+
+        value
     }
 
     String getSimpleVersion() {

@@ -36,7 +36,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.task(INSTALL_TASK, group: TASK_GROUP) {
             mustRunAfter CLEAN_TASK
             doLast {
-                installDependencies(config.rootDependencies)
+                installDependencies(config.rootDependencies, project)
             }
         }
 
@@ -53,15 +53,19 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     }
 
-    private void installDependencies(List<RootDependency> rootDependencies) {
+    private void installDependencies(List<RootDependency> rootDependencies, Project project) {
         withExistingPool(pool) {
             List<Dependency> loadedDependencies = rootDependencies
                     .collectParallel { RootDependency dependency ->
+                        project.logger.info "Loading client dependency: ${dependency.name}@${dependency.versionExpression}"
                         dependency.registry.loadDependency(dependency as SimpleDependency)
                     }
 
+            println loadedDependencies.collect { "${it.name}:${it.version?.fullVersion}" }
+
             flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
                 Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
+                project.logger.info "Installing client dependency: ${dependency.name}@${dependency.version?.fullVersion}"
                 dependency.registry.installDependency(dependency, sources)
             }
         }
