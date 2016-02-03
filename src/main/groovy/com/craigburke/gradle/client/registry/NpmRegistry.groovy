@@ -51,6 +51,7 @@ class NpmRegistry implements Registry {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
         dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
+
         def versionJson = getVersionJson(dependencyName, dependency.version.fullVersion)
         dependency.downloadUrl = versionJson.dist.tarball
 
