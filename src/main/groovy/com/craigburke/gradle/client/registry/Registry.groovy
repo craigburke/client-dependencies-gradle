@@ -8,14 +8,18 @@ import jsr166y.ForkJoinPool
 trait Registry {
 
     String repositoryUrl
-    File cacheDir
-    File installDir
+    String cachePath
+    String installPath
     String sourcePathPrefix = ''
 
     static ForkJoinPool pool = new ForkJoinPool(10)
 
+    static String formatPath(String path) {
+        path.replace('\\', '/').replace('//', '/')
+    }
+
     String getMainFolderPath(String dependencyName) {
-        "${cacheDir.absolutePath}/${dependencyName}"
+        formatPath("${cachePath}/${dependencyName}")
     }
 
     String getDestinationPath(String relativePath, String source, String destination) {
@@ -44,7 +48,7 @@ trait Registry {
         "${sourcePathPrefix}${sourceExpression}"
     }
 
-    abstract File getCopySource(Dependency dependency)
+    abstract File getInstallSource(Dependency dependency)
     abstract List<Version> getVersionList(String dependencyName)
     abstract Dependency loadDependency(SimpleDependency simpleDependency)
 }

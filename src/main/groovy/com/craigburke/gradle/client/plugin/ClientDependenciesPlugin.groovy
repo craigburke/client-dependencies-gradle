@@ -46,8 +46,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.afterEvaluate {
             setDefaults(project)
             config.registryMap.each { String key, Registry registry ->
-                registry.cacheDir = project.file(config.cacheDir)
-                registry.installDir = project.file(config.installDir)
+                registry.cachePath = project.file(config.cacheDir).absolutePath
+                registry.installPath = project.file(config.installDir).absolutePath
             }
         }
 
@@ -80,12 +80,12 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     void installDependencySource(Project project, Dependency dependency, String source, String destination) {
         Registry registry = dependency.registry
-        File copySource = registry.getCopySource(dependency)
+        File copySource = registry.getInstallSource(dependency)
 
         project.copy {
             from copySource.isFile() ? project.tarTree(copySource) : copySource
             include registry.getSourceIncludeExpression(source)
-            into "${registry.installDir.absolutePath}/${dependency.name}/"
+            into "${registry.installPath}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
                 fileCopyDetails.path = registry.getDestinationPath(fileCopyDetails.path, source, destination)
             }

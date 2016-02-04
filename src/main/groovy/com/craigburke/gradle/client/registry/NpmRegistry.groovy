@@ -87,7 +87,7 @@ class NpmRegistry implements Registry {
         }
     }
 
-    File getCopySource(Dependency dependency) {
+    File getInstallSource(Dependency dependency) {
         downloadDependency(dependency)
         getDownloadFile(dependency)
     }

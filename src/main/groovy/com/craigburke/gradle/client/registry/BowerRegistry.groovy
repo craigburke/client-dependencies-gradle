@@ -65,7 +65,7 @@ class BowerRegistry implements Registry {
         repo.tag.list().collect { new Version(it.name as String) }
     }
 
-    File getCopySource(Dependency dependency) {
+    File getInstallSource(Dependency dependency) {
         checkoutVersion(dependency.name, dependency.version.fullVersion)
         getRepoPath(dependency.name)
     }
