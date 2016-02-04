@@ -9,6 +9,7 @@ import com.craigburke.gradle.client.registry.Registry
 import jsr166y.ForkJoinPool
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.FileCopyDetails
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
@@ -45,7 +46,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.afterEvaluate {
             setDefaults(project)
             config.registryMap.each { String key, Registry registry ->
-                registry.project = project
                 registry.cacheDir = project.file(config.cacheDir)
                 registry.installDir = project.file(config.installDir)
             }
@@ -53,7 +53,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     }
 
-    private void installDependencies(List<RootDependency> rootDependencies, Project project) {
+    void installDependencies(List<RootDependency> rootDependencies, Project project) {
         withExistingPool(pool) {
             List<Dependency> loadedDependencies = rootDependencies
                     .collectParallel { RootDependency dependency ->
@@ -61,10 +61,13 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                         dependency.registry.loadDependency(dependency as SimpleDependency)
                     }
 
-            flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
+            flattenDependencies(loadedDependencies).eachParallel {
+                Dependency dependency ->
                 Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
-                dependency.registry.installDependency(dependency, sources)
+                sources.each { String source, String destination ->
+                    installDependencySource(project, dependency, source, destination)
+                }
             }
         }
     }
@@ -75,7 +78,21 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 .unique(false) { it.name }
     }
 
-    private void setDefaults(Project project) {
+    void installDependencySource(Project project, Dependency dependency, String source, String destination) {
+        Registry registry = dependency.registry
+        File copySource = registry.getCopySource(dependency)
+
+        project.copy {
+            from copySource.isFile() ? project.tarTree(copySource) : copySource
+            include registry.getSourceIncludeExpression(source)
+            into "${registry.installDir.absolutePath}/${dependency.name}/"
+            eachFile { FileCopyDetails fileCopyDetails ->
+                fileCopyDetails.path = registry.getDestinationPath(fileCopyDetails.path, source, destination)
+            }
+        }
+    }
+
+    void setDefaults(Project project) {
 
         if (config.installDir == null) {
             boolean grailsPluginApplied = project.extensions.findByName('grails')

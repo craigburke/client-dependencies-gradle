@@ -6,7 +6,6 @@ import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.gradle.api.file.FileCopyDetails
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
@@ -14,6 +13,7 @@ class NpmRegistry implements Registry {
 
     NpmRegistry(String url = 'https://registry.npmjs.org') {
         repositoryUrl = url
+        sourcePathPrefix = 'package/'
     }
 
     private File getDependencyInfoFile(Dependency dependency) {
@@ -87,28 +87,9 @@ class NpmRegistry implements Registry {
         }
     }
 
-    void installDependency(Dependency dependency, Map sources) {
+    File getCopySource(Dependency dependency) {
         downloadDependency(dependency)
-        installDir.mkdirs()
-
-        sources.each { String source, String destination ->
-            installDependencySource(dependency, source, destination)
-        }
-    }
-
-    private void installDependencySource(Dependency dependency, String source, String destination) {
-        String normalizedSource = normalizeExpression(source)
-        String includeExpression = "package/${normalizedSource}"
-
-        project.copy {
-            from project.tarTree(getDownloadFile(dependency))
-            include includeExpression
-            into "${installDir}/${dependency.name}/"
-            eachFile { FileCopyDetails fileCopyDetails ->
-                String relativePath = fileCopyDetails.path - 'package/'
-                fileCopyDetails.path = getDestinationPath(relativePath, source, destination)
-            }
-        }
+        getDownloadFile(dependency)
     }
 
 }

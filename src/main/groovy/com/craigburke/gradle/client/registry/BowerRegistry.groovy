@@ -8,7 +8,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.ResetOp
-import org.gradle.api.file.FileCopyDetails
 
 class BowerRegistry implements Registry {
 
@@ -66,24 +65,9 @@ class BowerRegistry implements Registry {
         repo.tag.list().collect { new Version(it.name as String) }
     }
 
-    void installDependency(Dependency dependency, Map sources) {
+    File getCopySource(Dependency dependency) {
         checkoutVersion(dependency.name, dependency.version.fullVersion)
-        installDir.mkdirs()
-
-        sources.each { String source, String destination ->
-            installDependencySource(dependency, source, destination)
-        }
-    }
-
-    private void installDependencySource(Dependency dependency, String source, String destination) {
-        project.copy {
-            from getRepoPath(dependency.name)
-            include normalizeExpression(source)
-            into "${installDir}/${dependency.name}/"
-            eachFile { FileCopyDetails fileCopyDetails ->
-                fileCopyDetails.path = getDestinationPath(fileCopyDetails.path, source, destination)
-            }
-        }
+        getRepoPath(dependency.name)
     }
 
     Dependency loadDependency(SimpleDependency simpleDependency) {
