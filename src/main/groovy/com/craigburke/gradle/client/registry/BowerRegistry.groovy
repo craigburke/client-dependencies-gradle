@@ -17,8 +17,7 @@ class BowerRegistry implements Registry {
     }
 
     private getDependencyJson(String dependencyName) {
-        String mainConfigPath = "${getMainFolderPath(dependencyName)}/main.json"
-        File mainConfigFile = project.file(mainConfigPath)
+        File mainConfigFile = new File("${getMainFolderPath(dependencyName)}/main.json")
 
         def dependencyJson
 
@@ -36,7 +35,7 @@ class BowerRegistry implements Registry {
     }
 
     private File getRepoPath(String dependencyName) {
-        project.file("${getMainFolderPath(dependencyName)}/source/")
+       new File("${getMainFolderPath(dependencyName)}/source/")
     }
 
     private Grgit getRepository(String dependencyName) {
@@ -69,7 +68,7 @@ class BowerRegistry implements Registry {
 
     void installDependency(Dependency dependency, Map sources) {
         checkoutVersion(dependency.name, dependency.version.fullVersion)
-        project.file(installDir).mkdirs()
+        installDir.mkdirs()
 
         sources.each { String source, String destination ->
             installDependencySource(dependency, source, destination)

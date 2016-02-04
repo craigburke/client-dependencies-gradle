@@ -39,7 +39,7 @@ trait Registry {
     }
 
     String getMainFolderPath(String dependencyName) {
-        "${cacheDir}/${dependencyName}"
+        "${cacheDir.absolutePath}/${dependencyName}"
     }
 
     static String normalizeExpression(String expression) {

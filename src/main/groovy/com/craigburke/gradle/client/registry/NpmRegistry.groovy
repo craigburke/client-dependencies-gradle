@@ -17,16 +17,15 @@ class NpmRegistry implements Registry {
     }
 
     private File getDependencyInfoFile(Dependency dependency) {
-        project.file("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package/package.json")
+        new File("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package/package.json")
     }
 
     private File getDownloadFile(Dependency dependency) {
-        project.file("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package.tgz")
+        new File("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package.tgz")
     }
 
     private getVersionListJson(String dependencyName) {
-        String mainConfigPath = "${getMainFolderPath(dependencyName)}/main.json"
-        File mainConfigFile = project.file(mainConfigPath)
+        File mainConfigFile = new File("${getMainFolderPath(dependencyName)}/main.json")
 
         def versionListJson
 
@@ -90,7 +89,7 @@ class NpmRegistry implements Registry {
 
     void installDependency(Dependency dependency, Map sources) {
         downloadDependency(dependency)
-        project.file(installDir).mkdirs()
+        installDir.mkdirs()
 
         sources.each { String source, String destination ->
             installDependencySource(dependency, source, destination)
