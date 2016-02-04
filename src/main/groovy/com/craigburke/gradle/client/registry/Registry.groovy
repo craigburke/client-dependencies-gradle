@@ -11,8 +11,10 @@ trait Registry {
 
     Project project
     String repositoryUrl
-    String cacheDir
-    String installDir
+
+    File cacheDir
+    File installDir
+
     ForkJoinPool pool = new ForkJoinPool(10)
 
     static String getDestinationPath(String relativePath, String source, String destination) {

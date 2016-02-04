@@ -46,8 +46,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             setDefaults(project)
             config.registryMap.each { String key, Registry registry ->
                 registry.project = project
-                registry.cacheDir = config.cacheDir
-                registry.installDir = config.installDir
+                registry.cacheDir = project.file(config.cacheDir)
+                registry.installDir = project.file(config.installDir)
             }
         }
 
@@ -57,15 +57,13 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         withExistingPool(pool) {
             List<Dependency> loadedDependencies = rootDependencies
                     .collectParallel { RootDependency dependency ->
-                        project.logger.info "Loading client dependency: ${dependency.name}@${dependency.versionExpression}"
+                        project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
                         dependency.registry.loadDependency(dependency as SimpleDependency)
                     }
 
-            println loadedDependencies.collect { "${it.name}:${it.version?.fullVersion}" }
-
             flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
                 Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
-                project.logger.info "Installing client dependency: ${dependency.name}@${dependency.version?.fullVersion}"
+                project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
                 dependency.registry.installDependency(dependency, sources)
             }
         }
