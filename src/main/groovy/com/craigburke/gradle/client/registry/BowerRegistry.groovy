@@ -12,7 +12,7 @@ import org.ajoberstar.grgit.operation.ResetOp
 class BowerRegistry implements Registry {
 
     BowerRegistry(String url = 'https://bower.herokuapp.com') {
-        repositoryUrl = url
+        this.registryUrl = url
     }
 
     private getDependencyJson(String dependencyName) {
@@ -23,7 +23,7 @@ class BowerRegistry implements Registry {
         if (mainConfigFile.exists()) {
             dependencyJson = new JsonSlurper().parse(mainConfigFile)
         } else {
-            URL url = new URL("${repositoryUrl}/packages/${dependencyName}")
+            URL url = new URL("${this.registryUrl}/packages/${dependencyName}")
             def json = new JsonSlurper().parse(url)
 
             mainConfigFile.parentFile.mkdirs()

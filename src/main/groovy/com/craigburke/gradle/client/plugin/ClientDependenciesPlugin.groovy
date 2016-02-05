@@ -19,6 +19,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String INSTALL_TASK = 'clientInstall'
     static final String CLEAN_TASK = 'clientClean'
     static final String REFRESH_TASK = 'clientRefresh'
+    static final String[] DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'karmaRun', 'karmaWatch']
+
 
     ClientDependenciesExtension config
     ForkJoinPool pool = new ForkJoinPool(10)
@@ -45,6 +47,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.afterEvaluate {
             setDefaults(project)
+            setTaskDependencies(project)
             config.registryMap.each { String key, Registry registry ->
                 registry.cachePath = project.file(config.cacheDir).absolutePath
                 registry.installPath = project.file(config.installDir).absolutePath
@@ -95,7 +98,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     }
 
     void setDefaults(Project project) {
-
         if (config.installDir == null) {
             boolean grailsPluginApplied = project.extensions.findByName('grails')
             config.installDir = grailsPluginApplied ? 'grails-app/assets/vendor' : 'src/assets/vendor'
@@ -104,8 +106,15 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         if (config.cacheDir == null) {
             config.cacheDir = "${project.buildDir.path}/client-cache"
         }
-
     }
 
+    static void setTaskDependencies(Project project) {
+        DEPENDENT_TASKS.each { String taskName ->
+            def task = project.tasks.findByName(taskName)
+            if (task) {
+                task.dependsOn INSTALL_TASK
+            }
+        }
+    }
 
 }

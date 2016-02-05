@@ -12,7 +12,7 @@ import static groovyx.gpars.GParsPool.withExistingPool
 class NpmRegistry implements Registry {
 
     NpmRegistry(String url = 'https://registry.npmjs.org') {
-        repositoryUrl = url
+        this.registryUrl = url
         sourcePathPrefix = 'package/'
     }
 
@@ -32,7 +32,7 @@ class NpmRegistry implements Registry {
         if (mainConfigFile.exists()) {
             versionListJson = new JsonSlurper().parse(mainConfigFile).versions
         } else {
-            URL url = new URL("${repositoryUrl}/${dependencyName}")
+            URL url = new URL("${this.registryUrl}/${dependencyName}")
             def json = new JsonSlurper().parse(url)
 
             mainConfigFile.parentFile.mkdirs()

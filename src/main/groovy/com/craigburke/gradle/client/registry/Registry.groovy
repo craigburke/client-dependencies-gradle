@@ -7,7 +7,7 @@ import jsr166y.ForkJoinPool
 
 trait Registry {
 
-    String repositoryUrl
+    String registryUrl
     String cachePath
     String installPath
     String sourcePathPrefix = ''
