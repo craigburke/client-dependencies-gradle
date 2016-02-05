@@ -50,7 +50,9 @@ class NpmRegistry implements Registry {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
         dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
-
+        if (!dependency.version) {
+            throw new Exception("Couldn't resolve ${dependencyName}@${simpleDependency.versionExpression}")
+        }
         def versionJson = getVersionJson(dependencyName, dependency.version.fullVersion)
         dependency.downloadUrl = versionJson.dist.tarball
 
@@ -61,7 +63,7 @@ class NpmRegistry implements Registry {
         }
 
         withExistingPool(pool) {
-            dependency.children = versionJson.dependencies.collectParallel { String name, String childVersion ->
+            dependency.children = versionJson.dependencies?.collectParallel { String name, String childVersion ->
                 SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion)
                 loadDependency(childDependency)
             } ?: []

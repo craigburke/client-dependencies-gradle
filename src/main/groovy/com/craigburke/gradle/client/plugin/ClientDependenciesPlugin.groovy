@@ -61,8 +61,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                         dependency.registry.loadDependency(dependency as SimpleDependency)
                     }
 
-            flattenDependencies(loadedDependencies).eachParallel {
-                Dependency dependency ->
+            println flattenDependencies(loadedDependencies).collect { it.name }
+
+            flattenDependencies(loadedDependencies).eachParallel { Dependency dependency ->
                 Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
                 sources.each { String source, String destination ->
@@ -75,6 +76,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     List<Dependency> flattenDependencies(List<Dependency> dependencies) {
         dependencies + dependencies.findAll { it.children }
                 .collect { flattenDependencies(it.children) }
+                .flatten()
                 .unique(false) { it.name }
     }
 

@@ -3,7 +3,6 @@ package com.craigburke.gradle.client.plugin
 import com.craigburke.gradle.client.dependency.RootDependency
 import com.craigburke.gradle.client.registry.Registry
 
-
 class ClientDependenciesExtension {
 
     String installDir

@@ -16,11 +16,11 @@ class RootDependency extends SimpleDependency {
         sources += sourceValue
     }
 
-    void excludes(String exclude) {
+    void exclude(String exclude) {
         excludes << exclude
     }
 
-    void excludes(List exclude) {
+    void exclude(List exclude) {
         excludes += exclude
     }
 }
