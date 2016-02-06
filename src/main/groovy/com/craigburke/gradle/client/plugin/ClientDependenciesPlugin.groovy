@@ -92,7 +92,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             include registry.getSourceIncludeExpression(source)
             into "${registry.installPath}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
-                fileCopyDetails.path = registry.getDestinationPath(fileCopyDetails.path, source, destination)
+                String relativePath = fileCopyDetails.path - registry.sourcePathPrefix
+                fileCopyDetails.path = registry.getDestinationPath(relativePath, source, destination)
             }
         }
     }

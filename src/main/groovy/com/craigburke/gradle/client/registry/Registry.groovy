@@ -23,22 +23,17 @@ trait Registry {
     }
 
     String getDestinationPath(String relativePath, String source, String destination) {
-        String adjustedPath = relativePath - sourcePathPrefix
-        boolean maintainPath = source.contains('**')
+        boolean maintainPath = source != '**' && source.contains('**')
+        String adjustedPath = relativePath - (maintainPath ? source.tokenize('**').first() : '')
+        String fileName = adjustedPath.contains('/') ? adjustedPath.tokenize('/').last() : adjustedPath
 
-        boolean destinationIsFolder = destination?.endsWith('/')
+        boolean destinationIsFolder = destination?.endsWith('/') || !destination
         boolean absolutePath = destination?.startsWith('/')
 
-        String fileName = adjustedPath.contains('/') ? adjustedPath.tokenize('/').last() : adjustedPath
         String path = absolutePath ? "..${destination}" : destination
 
-        if (!destination) {
-            path = maintainPath ? adjustedPath : fileName
-        }
-        else if (destinationIsFolder) {
-            List<String> pathParts = source.tokenize("**")
-            String pathCorrection = maintainPath && pathParts ? pathParts.first() : (adjustedPath - fileName)
-            path += adjustedPath - pathCorrection
+        if (destinationIsFolder) {
+            path += maintainPath ? adjustedPath : fileName
         }
 
         path

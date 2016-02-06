@@ -19,32 +19,23 @@ class RegistrySpec extends Specification {
         mockRegistry.getDestinationPath(path, source, destination) == result
 
         where:
-        path                | source          | destination | result
-        'source.js'         | '**'            | '/foo/'     | '../foo/source.js'
-        'source.js'         | '**'            | 'foo/'      | 'foo/source.js'
-        'source.js'         | '**'            | 'foo'       | 'foo'
-        'css/style.css'     | 'css/style.css' | 'style/'    | 'style/style.css'
-        'foo/css/style.css' | 'foo/**'        | 'style/'    | 'style/css/style.css'
-        'foo/css/style.css' | 'foo/**'        | 'style'     | 'style'
-    }
+        path                | source              | destination | result
+        'source.js'         | '**'                | '/foo/'     | '../foo/source.js'
+        'source.js'         | '**'                | 'foo/'      | 'foo/source.js'
+        'source.js'         | '**'                | 'foo'       | 'foo'
+        'css/style.css'     | 'css/style.css'     | 'style/'    | 'style/style.css'
+        'foo/css/style.css' | 'foo/**'            | 'style/'    | 'style/css/style.css'
+        'foo/css/style.css' | 'foo/**'            | 'style'     | 'style'
 
-    @Unroll
-    def "#path from #source (prefix: #prefix) to #destination resolves to #result"() {
-        setup:
-        mockRegistry.sourcePathPrefix = prefix
+        'foo/source.js'     | '**'                | '/foo/'     | '../foo/source.js'
+        'foo/source.js'     | '**'                | 'foo/'      | 'foo/source.js'
+        'foo/source.js'     | '**'                | 'foo'       | 'foo'
 
-        expect:
-        mockRegistry.getDestinationPath(path, source, destination) == result
-
-        where:
-        path                    | prefix     | source          | destination | result
-        'foo/source.js'         | 'foo/'     | '**'            | '/foo/'     | '../foo/source.js'
-        'foo/source.js'         | 'foo/'     | '**'            | 'foo/'      | 'foo/source.js'
-        'foo/source.js'         | 'foo/'     | '**'            | 'foo'       | 'foo'
-        'foo/css/style.css'     | 'foo/'     | 'css/style.css' | 'style/'    | 'style/style.css'
-        'foo/foo/css/style.css' | 'foo/'     | 'foo/**'        | 'style/'    | 'style/css/style.css'
-        'foo/foo/css/style.css' | 'foo/'     | 'foo/**'        | 'style'     | 'style'
-        'foo/bar/style.css'     | 'foo/bar/' | 'foo/bar/**'    | 'baz/'      | 'baz/style.css'
+        'foo/css/style.css' | 'foo/css/style.css' | 'style/'    | 'style/style.css'
+        'foo/css/style.css' | 'foo/**'            | 'style/'    | 'style/css/style.css'
+        'foo/css/style.css' | 'foo/**'            | 'style'     | 'style'
+        'foo/css/style.css' | 'foo/**'            | ''          | 'css/style.css'
+        'foo/bar/style.css' | 'foo/bar/**'        | 'baz/'      | 'baz/style.css'
     }
 
     @Unroll
