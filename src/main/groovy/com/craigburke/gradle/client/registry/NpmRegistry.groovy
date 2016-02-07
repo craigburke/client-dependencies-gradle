@@ -9,7 +9,7 @@ import groovy.json.JsonSlurper
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
-class NpmRegistry implements Registry {
+class NpmRegistry extends RegistryBase implements Registry {
 
     NpmRegistry(String url = 'https://registry.npmjs.org') {
         this.registryUrl = url

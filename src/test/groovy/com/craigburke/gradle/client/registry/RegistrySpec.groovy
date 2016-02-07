@@ -7,10 +7,10 @@ import spock.lang.Unroll
 class RegistrySpec extends Specification {
 
     @Shared
-    Registry mockRegistry
+    RegistryBase mockRegistry
 
     def setup() {
-        mockRegistry = [:] as Registry
+        mockRegistry = [:] as RegistryBase
     }
 
     @Unroll

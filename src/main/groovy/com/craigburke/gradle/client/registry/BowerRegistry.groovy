@@ -9,7 +9,7 @@ import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.ResetOp
 
-class BowerRegistry implements Registry {
+class BowerRegistry extends RegistryBase implements Registry {
 
     BowerRegistry(String url = 'https://bower.herokuapp.com') {
         this.registryUrl = url

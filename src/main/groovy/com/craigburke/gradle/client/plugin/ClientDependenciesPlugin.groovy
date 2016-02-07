@@ -6,7 +6,7 @@ import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
-import jsr166y.ForkJoinPool
+import com.craigburke.gradle.client.registry.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.FileCopyDetails
@@ -21,9 +21,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String REFRESH_TASK = 'clientRefresh'
     static final String[] DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'karmaRun', 'karmaWatch']
 
-
     ClientDependenciesExtension config
-    ForkJoinPool pool = new ForkJoinPool(10)
 
     void apply(Project project) {
         config = project.extensions.create('clientDependencies', ClientDependenciesExtension)
@@ -48,16 +46,12 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.afterEvaluate {
             setDefaults(project)
             setTaskDependencies(project)
-            config.registryMap.each { String key, Registry registry ->
-                registry.cachePath = project.file(config.cacheDir).absolutePath
-                registry.installPath = project.file(config.installDir).absolutePath
-            }
         }
 
     }
 
     void installDependencies(List<RootDependency> rootDependencies, Project project) {
-        withExistingPool(pool) {
+        withExistingPool(RegistryBase.pool) {
             List<Dependency> loadedDependencies = rootDependencies
                     .collectParallel { RootDependency dependency ->
                         project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
@@ -93,7 +87,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             into "${registry.installPath}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
                 String relativePath = fileCopyDetails.path - registry.sourcePathPrefix
-                fileCopyDetails.path = registry.getDestinationPath(relativePath, source, destination)
+                fileCopyDetails.path = RegistryBase.getDestinationPath(relativePath, source, destination)
             }
         }
     }
@@ -101,11 +95,16 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     void setDefaults(Project project) {
         if (config.installDir == null) {
             boolean grailsPluginApplied = project.extensions.findByName('grails')
-            config.installDir = grailsPluginApplied ? 'grails-app/assets/vendor' : 'src/assets/vendor'
+            config.installDir = project.file(grailsPluginApplied ? 'grails-app/assets/vendor' : 'src/assets/vendor').absolutePath
         }
 
         if (config.cacheDir == null) {
             config.cacheDir = "${project.buildDir.path}/client-cache"
+        }
+
+        config.registryMap.each { String key, Registry registry ->
+            registry.cachePath = project.file(config.cacheDir).absolutePath
+            registry.installPath = project.file(config.installDir).absolutePath
         }
     }
 
