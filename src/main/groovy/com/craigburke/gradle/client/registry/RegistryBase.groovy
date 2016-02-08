@@ -24,8 +24,16 @@ class RegistryBase {
     }
 
     static String getDestinationPath(String relativePath, String source, String destination) {
-        boolean maintainPath = source != '**' && source.contains('**')
-        String adjustedPath = relativePath - (maintainPath ? source.tokenize('**').first() : '')
+        boolean maintainPath = source.contains('**')
+
+        String adjustedPath
+        if (source == '**' || !maintainPath) {
+            adjustedPath = relativePath
+        }
+        else {
+            adjustedPath = relativePath - source.tokenize('**').first()
+        }
+
         String fileName = adjustedPath.contains('/') ? adjustedPath.tokenize('/').last() : adjustedPath
 
         boolean destinationIsFolder = destination?.endsWith('/') || !destination
