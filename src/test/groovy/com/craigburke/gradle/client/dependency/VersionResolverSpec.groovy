@@ -9,7 +9,7 @@ class VersionResolverSpec extends Specification {
     def "simple expressions can be resolved"() {
         given:
         Version version = result ? new Version(result) : null
-        List<Version> versionList = versionList(versions)
+        List<Version> versionList = Version.toList(versions)
 
         expect:
         VersionResolver.resolve(expression, versionList) == version
@@ -55,7 +55,7 @@ class VersionResolverSpec extends Specification {
     def "caret range expressions can be resolved"() {
         given:
         Version version = result ? new Version(result) : null
-        List<Version> versionList = versionList(versions)
+        List<Version> versionList = Version.toList(versions)
 
         expect:
         VersionResolver.resolve(expression, versionList) == version
@@ -78,10 +78,4 @@ class VersionResolverSpec extends Specification {
                     '1.0.0', '1.1.0', '1.2.0', '1.3.0', '1.3.1',
                     '2.0.0']
     }
-
-
-    List<Version> versionList(List versions) {
-        versions.collect { new Version(it as String) }
-    }
-
 }

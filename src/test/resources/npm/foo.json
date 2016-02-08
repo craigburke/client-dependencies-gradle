@@ -1,0 +1,39 @@
+{
+    "name": "foo",
+    "versions": {
+        "1.0.0": {
+            "name": "foo",
+            "dependencies": {
+                "bar": "1.0.0",
+                "baz": "1.0.0"
+            },
+            "dist": {
+                "tarball": "http://registry.npmjs.org/foo/-/foo-1.0.0.tgz"
+            }
+        },
+        "1.1.0": {
+            "name": "foo",
+            "dist": {
+                "tarball": "http://registry.npmjs.org/foo/-/foo-1.1.0.tgz"
+            }
+        },
+        "1.1.1": {
+            "name": "foo",
+            "dist": {
+                "tarball": "http://registry.npmjs.org/foo/-/foo-1.1.1.tgz"
+            }
+        },
+        "1.2.0": {
+            "name": "foo",
+            "dist": {
+                "tarball": "http://registry.npmjs.org/foo/-/foo-1.2.0.tgz"
+            }
+        },
+        "2.0.0": {
+            "name": "foo",
+            "dist": {
+                "tarball": "http://registry.npmjs.org/foo/-/foo-2.0.0.tgz"
+            }
+        }
+    }
+}

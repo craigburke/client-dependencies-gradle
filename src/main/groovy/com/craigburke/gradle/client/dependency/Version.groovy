@@ -53,4 +53,7 @@ class Version implements Comparable<Version> {
         fullVersion
     }
 
+    static List<Version> toList(List<String> versions) {
+        versions.collect { new Version(it) }
+    }
 }

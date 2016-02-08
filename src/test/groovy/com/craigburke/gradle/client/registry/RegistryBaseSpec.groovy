@@ -4,19 +4,18 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class RegistrySpec extends Specification {
+class RegistryBaseSpec extends Specification {
 
-    @Shared
-    RegistryBase mockRegistry
+    @Shared RegistryBase registryBase
 
     def setup() {
-        mockRegistry = [:] as RegistryBase
+        registryBase = new RegistryBase()
     }
 
     @Unroll
     def "#path from #source to #destination resolves to #result"() {
         expect:
-        mockRegistry.getDestinationPath(path, source, destination) == result
+        registryBase.getDestinationPath(path, source, destination) == result
 
         where:
         path                | source              | destination | result
@@ -41,10 +40,10 @@ class RegistrySpec extends Specification {
     @Unroll
     def "#sourceExpression (prefix: #prefix) resolves to #result"() {
         setup:
-        mockRegistry.sourcePathPrefix = prefix
+        registryBase.sourcePathPrefix = prefix
 
         expect:
-        mockRegistry.getSourceIncludeExpression(sourceExpression) == result
+        registryBase.getSourceIncludeExpression(sourceExpression) == result
 
         where:
         prefix | sourceExpression | result
@@ -62,10 +61,10 @@ class RegistrySpec extends Specification {
     @Unroll
     def "main folder path for #dependency matches #result"() {
         setup:
-        mockRegistry.cachePath = cachePath
+        registryBase.cachePath = cachePath
 
         expect:
-        mockRegistry.getMainFolderPath(dependencyName) == result
+        registryBase.getMainFolderPath(dependencyName) == result
 
         where:
         cachePath  | dependencyName | result
