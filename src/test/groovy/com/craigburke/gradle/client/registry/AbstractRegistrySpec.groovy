@@ -50,7 +50,7 @@ abstract class AbstractRegistrySpec extends Specification {
         httpMock.stop()
     }
 
-    void setResponses( Map<String, Object> mockedResponses) {
+    void setResponses(Map<String, Object> mockedResponses) {
         mockedResponses.each { String url, content ->
             def response = aResponse().withStatus(200).withBody(content)
             httpMock.stubFor(get(urlEqualTo(url)).willReturn(response))
@@ -99,5 +99,32 @@ abstract class AbstractRegistrySpec extends Specification {
         'foo'    | '2.0.0' | []
         'foobar' | '1.0.0' | ['foo@1.0.0', 'bar@1.0.0', 'baz@1.0.0']
     }
+
+
+    @Unroll
+    def "can load #name@#version with exclusions"() {
+        given:
+        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version, excludes: exclusions)
+
+        when:
+        Dependency dependency = registry.loadDependency(simpleDependency)
+        List<Dependency> childDependencies = Dependency.flattenList(dependency.children)
+
+        then:
+        dependency.name == name
+
+        and:
+        dependency.version.fullVersion == version
+
+        and:
+        childDependencies.collect { "${it.name}@${it.version}" as String } == children
+
+        where:
+        name     | version | exclusions | children
+        'foo'    | '1.0.0' | ['bar']    | ['baz@1.0.0']
+        'foo'    | '1.0.0' | ['baz']    | ['bar@1.0.0']
+        'foobar' | '1.0.0' | ['foo']    | []
+    }
+
 
 }

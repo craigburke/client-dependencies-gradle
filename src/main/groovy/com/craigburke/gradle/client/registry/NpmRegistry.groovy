@@ -63,8 +63,10 @@ class NpmRegistry extends RegistryBase implements Registry {
         }
 
         withExistingPool(pool) {
-            dependency.children = versionJson.dependencies?.collectParallel { String name, String childVersion ->
-                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion)
+            dependency.children = versionJson.dependencies
+                .findAll { String name, String childVersion -> !simpleDependency.excludes.contains(name)}
+                .collectParallel { String name, String childVersion ->
+                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: simpleDependency.excludes)
                 loadDependency(childDependency)
             } ?: []
         }

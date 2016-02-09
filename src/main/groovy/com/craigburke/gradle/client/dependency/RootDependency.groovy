@@ -5,8 +5,7 @@ import com.craigburke.gradle.client.registry.Registry
 class RootDependency extends SimpleDependency {
 
     Registry registry
-    Map sources = [:]
-    List excludes = []
+    Map<String, String> sources = [:]
 
     void source(String sourceValue) {
         source([(sourceValue):''])
