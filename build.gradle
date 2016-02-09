@@ -1,6 +1,7 @@
 plugins {
     id 'groovy'
     id 'maven-publish'
+    id 'idea'
 }
 
 ext {
@@ -22,6 +23,14 @@ dependencies {
         exclude  module: 'groovy-all'
     }
     testCompile 'com.github.tomakehurst:wiremock:1.58:standalone'
+}
+
+processTestResources {
+    duplicatesStrategy = 'exclude'
+    eachFile {
+        it.path = it.path.replace('/_git/', '/.git/')
+    }
+    includeEmptyDirs = false
 }
 
 publishing {

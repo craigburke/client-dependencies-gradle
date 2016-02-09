@@ -4,19 +4,19 @@
         "0.0.1": {
             "name": "baz",
             "dist": {
-                "tarball": "http://registry.npmjs.org/baz/-/baz-0.0.1.tgz"
+                "tarball": "http://registry.npmjs.org/baz-0.0.1.tgz"
             }
         },
         "1.0.0": {
             "name": "baz",
             "dist": {
-                "tarball": "http://registry.npmjs.org/baz/-/baz-1.0.0.tgz"
+                "tarball": "http://registry.npmjs.org/baz-1.0.0.tgz"
             }
         },
         "2.0.0": {
             "name": "baz",
             "dist": {
-                "tarball": "http://registry.npmjs.org/baz/-/baz-2.0.0.tgz"
+                "tarball": "http://registry.npmjs.org/baz-2.0.0.tgz"
             }
         }
     }

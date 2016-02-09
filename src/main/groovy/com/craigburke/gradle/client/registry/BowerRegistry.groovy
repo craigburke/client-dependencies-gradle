@@ -9,6 +9,8 @@ import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.ResetOp
 
+import static groovyx.gpars.GParsPool.withExistingPool
+
 class BowerRegistry extends RegistryBase implements Registry {
 
     BowerRegistry(String url = 'https://bower.herokuapp.com') {
@@ -31,6 +33,16 @@ class BowerRegistry extends RegistryBase implements Registry {
             dependencyJson = json
         }
         dependencyJson
+    }
+
+    private List<SimpleDependency> getChildDependencies(String dependencyName, String version) {
+        checkoutVersion(dependencyName, version)
+        File bowerConfigFile = new File("${getRepoPath(dependencyName)}/bower.json")
+        def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
+
+        bowerConfigJson.dependencies?.collect { String name, String versionExpression ->
+            new SimpleDependency(name: name, versionExpression: versionExpression)
+        } ?: []
     }
 
     private File getRepoPath(String dependencyName) {
@@ -78,6 +90,11 @@ class BowerRegistry extends RegistryBase implements Registry {
 
         dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
         dependency.downloadUrl = dependencyJson.url
+
+        withExistingPool(pool) {
+            dependency.children = getChildDependencies(dependency.name, dependency.version.fullVersion)
+                    .collectParallel { SimpleDependency childDependency -> loadDependency(childDependency) } ?: []
+        }
 
         dependency
     }

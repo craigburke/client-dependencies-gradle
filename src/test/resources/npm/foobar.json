@@ -1,13 +1,13 @@
 {
-  "name": "foo",
+  "name": "foobar",
   "versions": {
     "1.0.0": {
-      "name": "foo",
+      "name": "foobar",
       "dependencies": {
         "foo": "1.0.0"
       },
       "dist": {
-        "tarball": "http://registry.npmjs.org/foo/-/foobar-1.0.0.tgz"
+        "tarball": "http://registry.npmjs.org/foobar-1.0.0.tgz"
       }
     }
   }
