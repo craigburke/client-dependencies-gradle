@@ -126,5 +126,29 @@ abstract class AbstractRegistrySpec extends Specification {
         'foobar' | '1.0.0' | ['foo']    | []
     }
 
+    @Unroll
+    def "can load #name@#version without transitive dependencies"() {
+        given:
+        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version, transitive: false)
+
+        when:
+        Dependency dependency = registry.loadDependency(simpleDependency)
+        List<Dependency> childDependencies = Dependency.flattenList(dependency.children)
+
+        then:
+        dependency.name == name
+
+        and:
+        dependency.version.fullVersion == version
+
+        and:
+        childDependencies == []
+
+        where:
+        name     | version
+        'foo'    | '1.0.0'
+        'foo'    | '1.0.0'
+    }
+
 
 }

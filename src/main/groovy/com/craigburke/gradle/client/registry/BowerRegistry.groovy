@@ -35,16 +35,18 @@ class BowerRegistry extends RegistryBase implements Registry {
         dependencyJson
     }
 
-    private List<SimpleDependency> getChildDependencies(String dependencyName, String version, List<String> exclusions) {
+    private List<Dependency> loadChildDependencies(String dependencyName, String version, List<String> exclusions) {
         checkoutVersion(dependencyName, version)
         File bowerConfigFile = new File("${getRepoPath(dependencyName)}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
-
-        bowerConfigJson.dependencies
-                .findAll { String name, String versionExpression -> !exclusions.contains(name) }
-                .collect { String name, String versionExpression ->
-                    new SimpleDependency(name: name, versionExpression: versionExpression)
-                } ?: []
+        withExistingPool(pool) {
+            bowerConfigJson.dependencies
+                    .findAll { String name, String versionExpression -> !exclusions.contains(name) }
+                    .collectParallel { String name, String versionExpression ->
+                        SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: versionExpression)
+                        loadDependency(childDependency)
+                    } ?: []
+        } as List<Dependency>
     }
 
     private File getRepoPath(String dependencyName) {
@@ -93,9 +95,8 @@ class BowerRegistry extends RegistryBase implements Registry {
         dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
         dependency.downloadUrl = dependencyJson.url
 
-        withExistingPool(pool) {
-            dependency.children = getChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)
-                    .collectParallel { SimpleDependency childDependency -> loadDependency(childDependency) } ?: []
+        if (simpleDependency.transitive) {
+            dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)
         }
 
         dependency

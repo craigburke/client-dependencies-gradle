@@ -62,16 +62,22 @@ class NpmRegistry extends RegistryBase implements Registry {
             versionConfigFile.text = JsonOutput.toJson(versionJson).toString()
         }
 
-        withExistingPool(pool) {
-            dependency.children = versionJson.dependencies
-                .findAll { String name, String childVersion -> !simpleDependency.excludes.contains(name)}
-                .collectParallel { String name, String childVersion ->
-                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: simpleDependency.excludes)
-                loadDependency(childDependency)
-            } ?: []
+        if (simpleDependency.transitive) {
+            dependency.children = loadChildDependencies(versionJson, simpleDependency.excludes)
         }
 
         dependency
+    }
+
+    private List<Dependency> loadChildDependencies(versionJson, List<String> exclusions) {
+        withExistingPool(pool) {
+            versionJson.dependencies
+                    .findAll { String name, String childVersion -> !exclusions.contains(name)}
+                    .collectParallel { String name, String childVersion ->
+                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: exclusions)
+                loadDependency(childDependency)
+            } ?: []
+        } as List<Dependency>
     }
 
     List<Version> getVersionList(String dependencyName) {

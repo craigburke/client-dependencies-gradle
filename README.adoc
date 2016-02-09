@@ -63,6 +63,10 @@ clientDependencies {
 
             exclude 'jquery' // <4>
         }
+
+        'restangular'('1.5.0') {
+            transitive = false // <5>
+        }
     }
 }
 ----
@@ -70,3 +74,4 @@ clientDependencies {
 <2> This copies the *angular.js* file from npm to the default location (`src/assets/vendor/angular/angular.js`)
 <3> An absolute path is used here so `angular-animate.js` will be copied to `src/assets/vendor/angular/modules/angular-animate.js`
 <4> Exclude the transitive dependency jquery
+<5> Exclude all transitive dependencies

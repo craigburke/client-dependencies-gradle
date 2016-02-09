@@ -4,4 +4,5 @@ class SimpleDependency {
     String name
     String versionExpression
     List<String> excludes = []
+    boolean transitive = true
 }
