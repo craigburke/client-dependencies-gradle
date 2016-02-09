@@ -9,6 +9,10 @@ class RegistryBase {
     String installPath
     String sourcePathPrefix = ''
 
+    RegistryBase(String url) {
+        registryUrl = url
+    }
+
     static ForkJoinPool pool = new ForkJoinPool(10)
 
     static String formatPath(String path) {

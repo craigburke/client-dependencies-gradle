@@ -12,7 +12,7 @@ import static groovyx.gpars.GParsPool.withExistingPool
 class NpmRegistry extends RegistryBase implements Registry {
 
     NpmRegistry(String url = 'https://registry.npmjs.org') {
-        this.registryUrl = url
+        super(url)
         sourcePathPrefix = 'package/'
     }
 

@@ -12,7 +12,7 @@ import org.ajoberstar.grgit.operation.ResetOp
 class BowerRegistry extends RegistryBase implements Registry {
 
     BowerRegistry(String url = 'https://bower.herokuapp.com') {
-        this.registryUrl = url
+        super(url)
     }
 
     private getDependencyJson(String dependencyName) {

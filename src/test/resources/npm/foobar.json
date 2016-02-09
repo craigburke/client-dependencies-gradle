@@ -1,0 +1,14 @@
+{
+  "name": "foo",
+  "versions": {
+    "1.0.0": {
+      "name": "foo",
+      "dependencies": {
+        "foo": "1.0.0"
+      },
+      "dist": {
+        "tarball": "http://registry.npmjs.org/foo/-/foobar-1.0.0.tgz"
+      }
+    }
+  }
+}
