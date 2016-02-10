@@ -53,20 +53,30 @@ class BowerRegistry extends RegistryBase implements Registry {
        new File("${getMainFolderPath(dependencyName)}/source/")
     }
 
-    private Grgit getRepository(String dependencyName) {
-        def dependencyJson = getDependencyJson(dependencyName)
-        String gitUrl = dependencyJson.url
+    private void downloadRepository(SimpleDependency dependency) {
+        File repoPath = getRepoPath(dependency.name)
 
+        if (!repoPath.exists()) {
+            String gitUrl
+            if (isGitUrl(dependency.versionExpression)) {
+                gitUrl = dependency.versionExpression
+            } else {
+                def dependencyJson = getDependencyJson(dependency.name)
+                gitUrl = dependencyJson.url
+            }
+            repoPath.mkdirs()
+            Grgit.clone(dir: repoPath.absolutePath, uri: gitUrl, refToCheckout: 'master')
+        }
+    }
+
+    private Grgit getRepository(String dependencyName) {
         File repoPath = getRepoPath(dependencyName)
         Grgit repo
 
-        if (!repoPath.exists()) {
-            repoPath.mkdirs()
-            repo = Grgit.clone(dir: repoPath.absolutePath, uri: gitUrl, refToCheckout: 'master')
-        }
-        else {
+        if (repoPath.exists()) {
             repo = Grgit.open(dir: repoPath.absolutePath)
         }
+
         repo
     }
 
@@ -76,8 +86,9 @@ class BowerRegistry extends RegistryBase implements Registry {
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
-    List<Version> getVersionList(String dependencyName) {
-        def repo = getRepository(dependencyName)
+    List<Version> getVersionList(SimpleDependency dependency) {
+        downloadRepository(dependency)
+        def repo = getRepository(dependency.name)
         repo.tag.list().collect { new Version(it.name as String) }
     }
 
@@ -87,13 +98,19 @@ class BowerRegistry extends RegistryBase implements Registry {
     }
 
     Dependency loadDependency(SimpleDependency simpleDependency) {
+        downloadRepository(simpleDependency)
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
-        def dependencyJson = getDependencyJson(simpleDependency.name)
+        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
 
-        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
-        dependency.downloadUrl = dependencyJson.url
+        if (isGitUrl(simpleDependency.versionExpression)) {
+            dependency.downloadUrl = simpleDependency.versionExpression
+        }
+        else {
+            def dependencyJson = getDependencyJson(simpleDependency.name)
+            dependency.downloadUrl = dependencyJson.url
+        }
 
         if (simpleDependency.transitive) {
             dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)

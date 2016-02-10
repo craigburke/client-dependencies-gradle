@@ -6,7 +6,7 @@ import com.craigburke.gradle.client.dependency.Version
 
 interface Registry {
     File getInstallSource(Dependency dependency)
-    List<Version> getVersionList(String dependencyName)
+    List<Version> getVersionList(SimpleDependency simpleDependency)
     Dependency loadDependency(SimpleDependency simpleDependency)
     String getSourceIncludeExpression(String sourceExpression)
 

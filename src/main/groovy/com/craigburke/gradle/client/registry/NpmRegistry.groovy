@@ -49,7 +49,7 @@ class NpmRegistry extends RegistryBase implements Registry {
     Dependency loadDependency(SimpleDependency simpleDependency) {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
-        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(dependencyName))
+        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
         if (!dependency.version) {
             throw new Exception("Couldn't resolve ${dependencyName}@${simpleDependency.versionExpression}")
         }
@@ -80,9 +80,14 @@ class NpmRegistry extends RegistryBase implements Registry {
         } as List<Dependency>
     }
 
-    List<Version> getVersionList(String dependencyName) {
-        def versionListJson = getVersionListJson(dependencyName)
-        versionListJson.collect { new Version(it.key as String) }
+    List<Version> getVersionList(SimpleDependency dependency) {
+        if (isGitUrl(dependency.versionExpression)) {
+            []
+        }
+        else {
+            def versionListJson = getVersionListJson(dependency.name)
+            versionListJson.collect { new Version(it.key as String) }
+        }
     }
 
     void downloadDependency(Dependency dependency) {

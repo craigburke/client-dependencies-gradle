@@ -7,16 +7,7 @@ import spock.lang.Unroll
 class NpmRegistrySpec extends AbstractRegistrySpec {
 
     def setup() {
-        setupRegistry(NpmRegistry)
-
-        responses = [
-                '/foo'          : resource('npm/foo.json').text,
-                '/bar'          : resource('npm/bar.json').text,
-                '/baz'          : resource('npm/baz.json').text,
-                '/foobar'       : resource('npm/foobar.json').text,
-                '/foo-1.0.0.tgz': resource('npm/foo-1.0.0.tgz').bytes,
-                '/bar-1.0.0.tgz': resource('npm/bar-1.0.0.tgz').bytes
-        ]
+        setupRegistry(NpmRegistry, 'http://www.example.com/npm')
     }
 
     @Unroll

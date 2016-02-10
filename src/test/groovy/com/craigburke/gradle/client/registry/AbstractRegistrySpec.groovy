@@ -15,11 +15,12 @@ import java.security.MessageDigest
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import static com.github.tomakehurst.wiremock.client.WireMock.get
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 
 abstract class AbstractRegistrySpec extends Specification {
 
     static final int PROXY_PORT = 9999
-    static WireMockServer httpMock = new WireMockServer(PROXY_PORT)
+    static WireMockServer httpMock = new WireMockServer(9999)
 
     @Subject
     Registry registry
@@ -34,8 +35,8 @@ abstract class AbstractRegistrySpec extends Specification {
         AbstractRegistrySpec.classLoader.getResource(path)
     }
 
-    void setupRegistry(Class<Registry> clazz) {
-        registry = clazz.newInstance(['http://www.example.com'] as Object[])
+    void setupRegistry(Class<Registry> clazz, String url) {
+        registry = clazz.newInstance([url] as Object[])
         registry.cachePath = cacheFolder.root.absolutePath
         registry.installPath = installFolder.root.absolutePath
     }
@@ -50,13 +51,6 @@ abstract class AbstractRegistrySpec extends Specification {
         httpMock.stop()
     }
 
-    void setResponses(Map<String, Object> mockedResponses) {
-        mockedResponses.each { String url, content ->
-            def response = aResponse().withStatus(200).withBody(content)
-            httpMock.stubFor(get(urlEqualTo(url)).willReturn(response))
-        }
-    }
-
     String getChecksum(byte[] data) {
         MessageDigest.getInstance("SHA1")
                 .digest(data)
@@ -65,14 +59,17 @@ abstract class AbstractRegistrySpec extends Specification {
     }
 
     @Unroll
-    def "get version list for #dependency"() {
+    def "get version list for #name"() {
+        setup:
+        SimpleDependency dependency = new SimpleDependency(name: name, versionExpression: '1.0.0')
+
         expect:
         registry.getVersionList(dependency).sort() == Version.toList(versions)
 
         where:
-        dependency | versions
-        'foo'      | ['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0']
-        'bar'      | ['0.0.1', '1.0.0', '2.0.0']
+        name  | versions
+        'foo' | ['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0']
+        'bar' | ['0.0.1', '1.0.0', '2.0.0']
     }
 
     @Unroll
@@ -145,9 +142,24 @@ abstract class AbstractRegistrySpec extends Specification {
         childDependencies == []
 
         where:
-        name     | version
-        'foo'    | '1.0.0'
-        'foo'    | '1.0.0'
+        name  | version
+        'foo' | '1.0.0'
+        'foo' | '1.0.0'
+    }
+
+    def "can load module directly from git repo"() {
+        given:
+        String gitRepoUrl = AbstractRegistrySpec.classLoader.getResource('__files/bower/foo.git').path
+        SimpleDependency simpleDependency = new SimpleDependency(name: 'foo-git', versionExpression: gitRepoUrl)
+
+        when:
+        Dependency dependency = registry.loadDependency(simpleDependency)
+
+        then:
+        dependency.name == 'foo-git'
+
+        and:
+        dependency.version.fullVersion == '1.0.0'
     }
 
 
