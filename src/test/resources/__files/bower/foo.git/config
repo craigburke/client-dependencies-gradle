@@ -4,5 +4,3 @@
 	bare = true
 	ignorecase = true
 	precomposeunicode = true
-[remote "origin"]
-	url = /Users/craig/src/client-dependencies-gradle/src/test/resources/__files/bower/foo.git

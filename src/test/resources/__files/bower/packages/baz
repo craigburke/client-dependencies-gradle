@@ -1,1 +1,1 @@
-{"name":"baz","url":"http://www.example.com/bower/baz.git","hits":0}
+{"name":"baz","url":"$GIT_URL_BASE/baz.git","hits":0}

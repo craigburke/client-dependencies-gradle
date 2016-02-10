@@ -62,7 +62,7 @@ class NpmRegistry extends RegistryBase implements Registry {
             versionConfigFile.text = JsonOutput.toJson(versionJson).toString()
         }
 
-        if (simpleDependency.transitive) {
+        if (simpleDependency.transitive && !simpleDependency.gitDependency) {
             dependency.children = loadChildDependencies(versionJson, simpleDependency.excludes)
         }
 
@@ -81,7 +81,7 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     List<Version> getVersionList(SimpleDependency dependency) {
-        if (isGitUrl(dependency.versionExpression)) {
+        if (dependency.gitDependency) {
             []
         }
         else {

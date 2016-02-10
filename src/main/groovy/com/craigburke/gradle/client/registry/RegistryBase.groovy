@@ -27,10 +27,6 @@ class RegistryBase {
         "${sourcePathPrefix}${sourceExpression}"
     }
 
-    static boolean isGitUrl(String versionExpression) {
-        ['http://', 'https://', 'file://', 'ssh://', 'git://'].any { versionExpression.startsWith(it) }
-    }
-
     static String getDestinationPath(String relativePath, String source, String destination) {
         boolean maintainPath = source.contains('**')
 

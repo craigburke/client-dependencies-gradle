@@ -12,15 +12,13 @@ import spock.lang.Unroll
 
 import java.security.MessageDigest
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
-import static com.github.tomakehurst.wiremock.client.WireMock.get
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
+import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 abstract class AbstractRegistrySpec extends Specification {
 
     static final int PROXY_PORT = 9999
     static WireMockServer httpMock = new WireMockServer(9999)
+    private String resourceFolder
 
     @Subject
     Registry registry
@@ -32,19 +30,28 @@ abstract class AbstractRegistrySpec extends Specification {
     TemporaryFolder installFolder = new TemporaryFolder()
 
     URL resource(String path) {
-        AbstractRegistrySpec.classLoader.getResource(path)
+        AbstractRegistrySpec.classLoader.getResource("__files/${path}")
     }
 
-    void setupRegistry(Class<Registry> clazz, String url) {
-        registry = clazz.newInstance([url] as Object[])
+    void init(Class<Registry> clazz, String resourceFolder) {
+        registry = clazz.newInstance(["http://www.example.com/${resourceFolder}"] as Object[])
         registry.cachePath = cacheFolder.root.absolutePath
         registry.installPath = installFolder.root.absolutePath
+        this.resourceFolder = resourceFolder
     }
 
     def setup() {
         httpMock.start()
+
         System.properties['http.proxyHost'] = 'localhost'
         System.properties['http.proxyPort'] = PROXY_PORT as String
+    }
+
+    void setMockResponses(Map<String, Object> mockedResponses) {
+        mockedResponses.each { String url, content ->
+            def response = aResponse().withStatus(200).withBody(content)
+            httpMock.stubFor(get(urlEqualTo(url)).willReturn(response))
+        }
     }
 
     def cleanup() {
@@ -149,7 +156,7 @@ abstract class AbstractRegistrySpec extends Specification {
 
     def "can load module directly from git repo"() {
         given:
-        String gitRepoUrl = AbstractRegistrySpec.classLoader.getResource('__files/bower/foo.git').path
+        String gitRepoUrl = "file://${resource(resourceFolder).path}/foo.git"
         SimpleDependency simpleDependency = new SimpleDependency(name: 'foo-git', versionExpression: gitRepoUrl)
 
         when:

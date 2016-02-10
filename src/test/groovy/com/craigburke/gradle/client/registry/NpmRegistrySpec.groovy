@@ -7,7 +7,7 @@ import spock.lang.Unroll
 class NpmRegistrySpec extends AbstractRegistrySpec {
 
     def setup() {
-        setupRegistry(NpmRegistry, 'http://www.example.com/npm')
+        init(NpmRegistry, 'npm')
     }
 
     @Unroll

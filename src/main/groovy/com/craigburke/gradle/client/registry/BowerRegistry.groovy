@@ -58,7 +58,7 @@ class BowerRegistry extends RegistryBase implements Registry {
 
         if (!repoPath.exists()) {
             String gitUrl
-            if (isGitUrl(dependency.versionExpression)) {
+            if (dependency.gitDependency) {
                 gitUrl = dependency.versionExpression
             } else {
                 def dependencyJson = getDependencyJson(dependency.name)
@@ -102,17 +102,20 @@ class BowerRegistry extends RegistryBase implements Registry {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
-        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
-
-        if (isGitUrl(simpleDependency.versionExpression)) {
+        if (simpleDependency.gitDependency) {
             dependency.downloadUrl = simpleDependency.versionExpression
+            File bowerConfigFile = new File("${getRepoPath(dependencyName)}/bower.json")
+            def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
+            dependency.version = new Version(bowerConfigJson.version)
+            
         }
         else {
             def dependencyJson = getDependencyJson(simpleDependency.name)
+            dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
             dependency.downloadUrl = dependencyJson.url
         }
 
-        if (simpleDependency.transitive) {
+        if (simpleDependency.transitive && !simpleDependency.gitDependency) {
             dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)
         }
 

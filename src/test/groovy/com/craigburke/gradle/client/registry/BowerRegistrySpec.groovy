@@ -7,8 +7,18 @@ import spock.lang.Unroll
 
 class BowerRegistrySpec extends AbstractRegistrySpec {
 
+    final static String GIT_URL_PLACEHOLDER = '$GIT_URL_BASE'
+
     def setup() {
-        setupRegistry(BowerRegistry, 'http://www.example.com/bower')
+        init(BowerRegistry, 'bower')
+        String gitUrl = "file://${resource('bower').path}"
+
+        mockResponses = [
+            '/bower/packages/foo'          : resource('bower/packages/foo').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
+            '/bower/packages/bar'          : resource('bower/packages/bar').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
+            '/bower/packages/baz'          : resource('bower/packages/baz').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
+            '/bower/packages/foobar'       : resource('bower/packages/foobar').text.replace(GIT_URL_PLACEHOLDER, gitUrl)
+        ]
     }
 
     @Unroll
