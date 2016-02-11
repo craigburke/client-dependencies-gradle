@@ -156,8 +156,8 @@ abstract class AbstractRegistrySpec extends Specification {
 
     def "can load module directly from git repo"() {
         given:
-        String gitRepoUrl = "file://${resource(resourceFolder).path}/foo.git"
-        SimpleDependency simpleDependency = new SimpleDependency(name: 'foo-git', versionExpression: gitRepoUrl)
+        String gitRepoUrl = "file://${resource(resourceFolder).path}/foo-git.git"
+        SimpleDependency simpleDependency = new SimpleDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency)

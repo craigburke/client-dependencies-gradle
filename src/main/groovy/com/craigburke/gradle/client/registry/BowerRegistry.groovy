@@ -58,12 +58,13 @@ class BowerRegistry extends RegistryBase implements Registry {
 
         if (!repoPath.exists()) {
             String gitUrl
-            if (dependency.gitDependency) {
-                gitUrl = dependency.versionExpression
+            if (dependency.url) {
+                gitUrl = dependency.url
             } else {
                 def dependencyJson = getDependencyJson(dependency.name)
                 gitUrl = dependencyJson.url
             }
+
             repoPath.mkdirs()
             Grgit.clone(dir: repoPath.absolutePath, uri: gitUrl, refToCheckout: 'master')
         }
@@ -102,20 +103,10 @@ class BowerRegistry extends RegistryBase implements Registry {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
-        if (simpleDependency.gitDependency) {
-            dependency.downloadUrl = simpleDependency.versionExpression
-            File bowerConfigFile = new File("${getRepoPath(dependencyName)}/bower.json")
-            def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
-            dependency.version = new Version(bowerConfigJson.version)
-            
-        }
-        else {
-            def dependencyJson = getDependencyJson(simpleDependency.name)
-            dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
-            dependency.downloadUrl = dependencyJson.url
-        }
+        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
+        dependency.downloadUrl = simpleDependency.url ? simpleDependency.url : getDependencyJson(simpleDependency.name).url
 
-        if (simpleDependency.transitive && !simpleDependency.gitDependency) {
+        if (simpleDependency.transitive) {
             dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)
         }
 

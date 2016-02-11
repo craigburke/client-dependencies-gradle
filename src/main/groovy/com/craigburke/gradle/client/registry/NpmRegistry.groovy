@@ -16,10 +16,6 @@ class NpmRegistry extends RegistryBase implements Registry {
         sourcePathPrefix = 'package/'
     }
 
-    private File getDependencyInfoFile(Dependency dependency) {
-        new File("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package/package.json")
-    }
-
     private File getDownloadFile(Dependency dependency) {
         new File("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package.tgz")
     }
@@ -42,46 +38,64 @@ class NpmRegistry extends RegistryBase implements Registry {
         versionListJson
     }
 
-    private getVersionJson(String dependencyName, String version) {
-        getVersionListJson(dependencyName)[version]
+    private getVersionJson(String dependencyName, Version version) {
+        getVersionListJson(dependencyName)[version.simpleVersion]
     }
 
     Dependency loadDependency(SimpleDependency simpleDependency) {
         String dependencyName = simpleDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
-        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
+
+        if (simpleDependency.url) {
+            dependency.version = new Version(simpleDependency.versionExpression)
+        }
+        else {
+            dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
+        }
+
         if (!dependency.version) {
             throw new Exception("Couldn't resolve ${dependencyName}@${simpleDependency.versionExpression}")
         }
-        def versionJson = getVersionJson(dependencyName, dependency.version.fullVersion)
-        dependency.downloadUrl = versionJson.dist.tarball
 
-        File versionConfigFile = getDependencyInfoFile(dependency)
-        if (!versionConfigFile.exists()) {
-            versionConfigFile.parentFile.mkdirs()
-            versionConfigFile.text = JsonOutput.toJson(versionJson).toString()
+        def versionJson
+        if (simpleDependency.url) {
+            dependency.downloadUrl = simpleDependency.url
+        }
+        else {
+            versionJson = getVersionJson(dependencyName, dependency.version)
+            dependency.downloadUrl = versionJson.dist.tarball
         }
 
-        if (simpleDependency.transitive && !simpleDependency.gitDependency) {
-            dependency.children = loadChildDependencies(versionJson, simpleDependency.excludes)
+        if (simpleDependency.transitive) {
+            dependency.children = loadChildDependencies(simpleDependency, dependency.version)
         }
 
         dependency
     }
 
-    private List<Dependency> loadChildDependencies(versionJson, List<String> exclusions) {
+    private Map<String, String> getDependencies(SimpleDependency simpleDependency, Version version) {
+        if (simpleDependency.url) {
+            return [:]
+        }
+        else {
+            getVersionJson(simpleDependency.name, version).dependencies as Map<String, String>
+        }
+    }
+
+    private List<Dependency> loadChildDependencies(SimpleDependency simpleDependency, Version version) {
+
         withExistingPool(pool) {
-            versionJson.dependencies
-                    .findAll { String name, String childVersion -> !exclusions.contains(name)}
+            getDependencies(simpleDependency, version)
+                    .findAll { String name, String childVersion -> !simpleDependency.excludes.contains(name)}
                     .collectParallel { String name, String childVersion ->
-                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: exclusions)
+                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: simpleDependency.excludes)
                 loadDependency(childDependency)
             } ?: []
         } as List<Dependency>
     }
 
     List<Version> getVersionList(SimpleDependency dependency) {
-        if (dependency.gitDependency) {
+        if (dependency.url) {
             []
         }
         else {

@@ -2,7 +2,7 @@
 
 = Client Dependencies Gradle Plugin
 
-The Gradle plugin allows you to declare client side dependencies in *build.gradle* from __files.bower, __files.npm or git and
+The Gradle plugin allows you to declare client side dependencies in *build.gradle* from bower, npm or git and
 with a much clearer dependencies resolution model.
 
 == Getting Started
@@ -32,7 +32,7 @@ The plugin adds the following tasks to your build:
 
 == Declaring dependencies
 
-You can specify dependencies from different sources (__files.npm, __files.bower or git) and control which files are included in your project by using the DSL shown below.
+You can specify dependencies from different sources (npm, bower or git) and control which files are included in your project by using the DSL shown below.
 
 [source,gradle,subs='attributes']
 ----
@@ -42,13 +42,13 @@ plugins {
 
 clientDependencies {
 
-    __files.bower {
+    bower {
         'jquery'('2.0.0') {
             source 'jquery.js' // <1>
          }
     }
 
-    __files.npm {
+    npm {
         'angular'('1.5.0') {
             source 'angular.js' // <2>
         }
@@ -67,11 +67,14 @@ clientDependencies {
         'restangular'('1.5.0') {
             transitive = false // <5>
         }
+
+        'animate.css'('1.0.0', url: 'https://github.com/daneden/animate.css.git') // <6>
     }
 }
 ----
-<1> Installs jquery from __files.bower and copies jquery.js into the default location (`src/assets/vendor/jquery/jquery.js`)
-<2> This copies the *angular.js* file from __files.npm to the default location (`src/assets/vendor/angular/angular.js`)
+<1> Installs jquery from bower and copies jquery.js into the default location (`src/assets/vendor/jquery/jquery.js`)
+<2> This copies the *angular.js* file from npm to the default location (`src/assets/vendor/angular/angular.js`)
 <3> An absolute path is used here so `angular-animate.js` will be copied to `src/assets/vendor/angular/modules/angular-animate.js`
 <4> Exclude the transitive dependency jquery
 <5> Exclude all transitive dependencies
+<6> Use the url property to use a git repo as a dependency source

@@ -19,18 +19,25 @@ class DependencyBuilder {
     }
 
     def methodMissing(String name, args) {
-        String version
-        String dependencyName
+        Map props = [:]
+        props.registry = registry
 
         if (name.contains(':')) {
-            (dependencyName, version) = name.tokenize(':')
+            List<String> nameParts = name.tokenize(":")
+            props.name = nameParts[0]
+            props.versionExpression = nameParts[1]
         }
-        else if (args && args.first() instanceof String) {
-            dependencyName = name
-            version = args.first()
+        else {
+            props.name = name
+            props.versionExpression = args.find { it instanceof String }
         }
 
-        RootDependency dependency = new RootDependency(name: dependencyName, versionExpression: version, registry: registry)
+        Map additionalProps = args.find { it instanceof Map }
+        if (additionalProps) {
+            props += additionalProps
+        }
+
+        RootDependency dependency = new RootDependency(props)
 
         if (args && args.last() instanceof Closure) {
             Closure clonedClosure = args.last().rehydrate(dependency, dependency, dependency)
