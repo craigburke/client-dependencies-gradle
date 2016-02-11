@@ -53,11 +53,11 @@ clientDependencies {
             source 'angular.js' // <2>
         }
 
-        'angular-animate'('1.3.x') {
+        'angular-animate'('1.5.0') {
             source 'angular-animate.js' >> '/angular/modules/' // <3>
         }
 
-        'bootstrap'('3.3.x') {
+        'bootstrap'('3.3.6') {
             source 'dist/css/*.min.css' >> 'styles/'
             source 'dist/fonts/**' >> 'fonts/'
 
