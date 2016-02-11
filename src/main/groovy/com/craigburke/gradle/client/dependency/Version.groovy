@@ -4,23 +4,35 @@ import java.util.regex.Pattern
 
 class Version implements Comparable<Version> {
 
-    int major
-    int minor
-    int patch
+    Integer major
+    Integer minor
+    Integer patch
     String build
     String tag
 
-    Version(String expression) {
-        Pattern semVersion = ~/(\d*)\.(\d*)\.(\d*)(\-[^+]*)?(\+.*)?/
+    static final List<String> X_RANGE_VALUES = ['x', 'X', '*']
+    static final Pattern VERSION_PATTERN = ~/^(\d*|x|X|\*)?\.?(\d*|x|X|\*)?\.?(\d*|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
 
-        expression.find(semVersion) { String match, String major, String minor, String patch,
+    Version(String expression) {
+
+        expression.find(VERSION_PATTERN) { String match, String major, String minor, String patch,
                                       String tag, String build ->
 
-            this.major = Integer.valueOf(major)
-            this.minor = Integer.valueOf(minor)
-            this.patch = Integer.valueOf(patch)
+            this.major = formatTupleMatch(major)
+            this.minor = formatTupleMatch(minor)
+            this.patch = formatTupleMatch(patch)
             this.tag = tag ? tag - '-' : ''
             this.build = build ? build - '+' : ''
+        }
+    }
+
+    private Integer formatTupleMatch(String match) {
+        String value = match ? (match - '.') : match
+        if (!value || X_RANGE_VALUES.contains(value)) {
+            null
+        }
+        else {
+            Integer.valueOf(value)
         }
     }
 
@@ -42,11 +54,19 @@ class Version implements Comparable<Version> {
     }
 
     String getSimpleVersion() {
-        "${major}.${minor}.${patch}"
+        "${formatTuple(major)}.${formatTuple(minor)}.${formatTuple(patch)}"
+    }
+
+    String formatTuple(Integer tuple) {
+        tuple == null ? 'x' : tuple
     }
 
     String getFullVersion() {
         "${simpleVersion}${tag ? '-' : ''}${tag}${build ? '+' : ''}${build}"
+    }
+
+    boolean isFuzzy() {
+        (major == null || minor == null || patch == null)
     }
 
     String toString() {

@@ -71,4 +71,41 @@ class VersionSpec extends Specification {
         versionExpression = "${simpleVersion}${tagExpression}${buildExpression}" as String
     }
 
+    @Unroll
+    def "Can create fuzzy version #versionExpression"() {
+        when:
+        Version version = new Version(versionExpression)
+
+        then:
+        version.major == major
+
+        and:
+        version.minor == minor
+
+        and:
+        version.patch == patch
+
+        and:
+        version.fullVersion == fullVersion
+
+        and:
+        version.fuzzy
+
+        where:
+        versionExpression | major | minor | patch | fullVersion
+        '1.1.x'           | 1     | 1     | null  | '1.1.x'
+        '1.1.X'           | 1     | 1     | null  | '1.1.x'
+        '1.1.*'           | 1     | 1     | null  | '1.1.x'
+        '1.1'             | 1     | 1     | null  | '1.1.x'
+        '1.x'             | 1     | null  | null  | '1.x.x'
+        '1.X'             | 1     | null  | null  | '1.x.x'
+        '1.*'             | 1     | null  | null  | '1.x.x'
+        '1'               | 1     | null  | null  | '1.x.x'
+        'x'               | null  | null  | null  | 'x.x.x'
+        'X'               | null  | null  | null  | 'x.x.x'
+        '*'               | null  | null  | null  | 'x.x.x'
+        ''                | null  | null  | null  | 'x.x.x'
+    }
+
+
 }
