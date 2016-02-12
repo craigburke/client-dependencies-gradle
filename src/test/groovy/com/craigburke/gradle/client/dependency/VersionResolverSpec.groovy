@@ -8,7 +8,7 @@ class VersionResolverSpec extends Specification {
     @Unroll("expression #expression resolves correctly")
     def "simple expressions can be resolved"() {
         given:
-        Version version = result ? new Version(result) : null
+        Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)
 
         expect:
@@ -59,7 +59,7 @@ class VersionResolverSpec extends Specification {
     @Unroll("#expression resolves correctly")
     def "caret range expressions can be resolved"() {
         given:
-        Version version = result ? new Version(result) : null
+        Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)
 
         expect:
@@ -87,7 +87,7 @@ class VersionResolverSpec extends Specification {
     @Unroll("#expression resolves correctly")
     def "combined expressions can be resolved"() {
         given:
-        Version version = result ? new Version(result) : null
+        Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)
 
         expect:

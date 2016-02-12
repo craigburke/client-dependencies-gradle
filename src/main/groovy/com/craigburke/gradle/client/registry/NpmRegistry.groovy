@@ -47,7 +47,7 @@ class NpmRegistry extends RegistryBase implements Registry {
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
         if (simpleDependency.url) {
-            dependency.version = new Version(simpleDependency.versionExpression)
+            dependency.version = Version.parse(simpleDependency.versionExpression)
         }
         else {
             dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
@@ -100,7 +100,7 @@ class NpmRegistry extends RegistryBase implements Registry {
         }
         else {
             def versionListJson = getVersionListJson(dependency.name)
-            versionListJson.collect { new Version(it.key as String) }
+            versionListJson.collect { Version.parse(it.key as String) }
         }
     }
 

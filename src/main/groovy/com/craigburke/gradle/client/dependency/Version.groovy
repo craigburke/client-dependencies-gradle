@@ -7,28 +7,31 @@ class Version implements Comparable<Version> {
     Integer major
     Integer minor
     Integer patch
-    String build
-    String tag
+    String build = ''
+    String tag = ''
 
-    static final List<String> X_RANGE_VALUES = ['x', 'X', '*']
-    static final Pattern VERSION_PATTERN = ~/^(\d*|x|X|\*)?\.?(\d*|x|X|\*)?\.?(\d*|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
+    static final List<String> XRANGE_VALUES = ['x', 'X', '*']
+    static final Pattern PATTERN_SIMPLE = ~/(?:\d+|x|X|\*)\.?(?:\d+|x|X|\*)?\.?(?:\d+|x|x|X|\*)?(?:\-[^+]*)?(?:\+.*)?/
+    static final Pattern PATTERN_GROUPED = ~/^(\d+|x|X|\*)?\.?(\d+|x|X|\*)?\.?(\d+|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
 
-    Version(String expression) {
+    static Version parse(String expression) {
+        Version version = new Version()
 
-        expression.find(VERSION_PATTERN) { String match, String major, String minor, String patch,
+        expression.find(PATTERN_GROUPED) { String match, String major, String minor, String patch,
                                       String tag, String build ->
-
-            this.major = formatTupleMatch(major)
-            this.minor = formatTupleMatch(minor)
-            this.patch = formatTupleMatch(patch)
-            this.tag = tag ? tag - '-' : ''
-            this.build = build ? build - '+' : ''
+            version.major = formatTupleMatch(major)
+            version.minor = formatTupleMatch(minor)
+            version.patch = formatTupleMatch(patch)
+            version.tag = tag ? tag - '-' : ''
+            version.build = build ? build - '+' : ''
         }
+
+        version
     }
 
-    private Integer formatTupleMatch(String match) {
+    static Integer formatTupleMatch(String match) {
         String value = match ? (match - '.') : match
-        if (!value || X_RANGE_VALUES.contains(value)) {
+        if (!value || XRANGE_VALUES.contains(value)) {
             null
         }
         else {
@@ -53,11 +56,48 @@ class Version implements Comparable<Version> {
         value
     }
 
+    Version getCeiling() {
+        Version ceiling = new Version()
+
+        if (major == null) {
+            ceiling.major = 1
+        }
+        else if (minor == null) {
+            ceiling.major = major + 1
+        }
+        else {
+            ceiling.major = major ?: 0
+        }
+
+        if (minor == null) {
+            ceiling.minor = 0
+        }
+        else if (patch == null) {
+            ceiling.minor = minor + 1
+        }
+        else {
+            ceiling.minor = minor ?: 0
+        }
+
+        ceiling.patch = patch ?: 0
+
+        ceiling
+    }
+
+    Version getFloor() {
+        Version floor = new Version()
+        floor.major = major ?: 0
+        floor.minor = minor ?: 0
+        floor.patch = patch ?: 0
+
+        floor
+    }
+
     String getSimpleVersion() {
         "${formatTuple(major)}.${formatTuple(minor)}.${formatTuple(patch)}"
     }
 
-    String formatTuple(Integer tuple) {
+    static String formatTuple(Integer tuple) {
         tuple == null ? 'x' : tuple
     }
 
@@ -74,6 +114,6 @@ class Version implements Comparable<Version> {
     }
 
     static List<Version> toList(List<String> versions) {
-        versions.collect { new Version(it) }
+        versions.collect { parse(it) }
     }
 }

@@ -90,7 +90,7 @@ class BowerRegistry extends RegistryBase implements Registry {
     List<Version> getVersionList(SimpleDependency dependency) {
         downloadRepository(dependency)
         def repo = getRepository(dependency.name)
-        repo.tag.list().collect { new Version(it.name as String) }
+        repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
     File getInstallSource(Dependency dependency) {

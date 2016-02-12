@@ -8,7 +8,7 @@ class VersionSpec extends Specification {
     @Unroll('Simple version #versionExpression can be created')
     def "Can create simple versions"() {
         when:
-        Version version = new Version(versionExpression)
+        Version version = Version.parse(versionExpression)
 
         then:
         version.major == major
@@ -37,7 +37,7 @@ class VersionSpec extends Specification {
     @Unroll('version #versionExpression can be created')
     def "Can create versions with tags and build info"() {
         when:
-        Version version = new Version(versionExpression)
+        Version version = Version.parse(versionExpression)
 
         then:
         version.tag == tag
@@ -74,7 +74,7 @@ class VersionSpec extends Specification {
     @Unroll
     def "Can create fuzzy version #versionExpression"() {
         when:
-        Version version = new Version(versionExpression)
+        Version version = Version.parse(versionExpression)
 
         then:
         version.major == major
@@ -107,5 +107,33 @@ class VersionSpec extends Specification {
         ''                | null  | null  | null  | 'x.x.x'
     }
 
+    @Unroll
+    def "floor and ceiling values are correct for #versionExpression"() {
+        when:
+        Version version = Version.parse(versionExpression)
+
+        then:
+        version.floor == Version.parse(floor)
+
+        and:
+        version.ceiling == Version.parse(ceiling)
+
+        where:
+        versionExpression | floor   | ceiling
+        '1.2.3'           | '1.2.3' | '1.2.3'
+        '1.1.x'           | '1.1.0' | '1.2.0'
+        '1.1.X'           | '1.1.0' | '1.2.0'
+        '1.1.*'           | '1.1.0' | '1.2.0'
+        '1.1'             | '1.1.0' | '1.2.0'
+        '1.x'             | '1.0.0' | '2.0.0'
+        '1.X'             | '1.0.0' | '2.0.0'
+        '1.*'             | '1.0.0' | '2.0.0'
+        '1'               | '1.0.0' | '2.0.0'
+        'x'               | '0.0.0' | '1.0.0'
+        'X'               | '0.0.0' | '1.0.0'
+        '*'               | '0.0.0' | '1.0.0'
+        ''                | '0.0.0' | '1.0.0'
+    }
 
 }
+
