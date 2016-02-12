@@ -29,30 +29,53 @@ class VersionResolver {
         List<Boolean> results = []
 
         expression.find(EQUALS) { String match, String versionExpression ->
-            results += version == Version.parse(versionExpression)
+            Version matchedVersion = Version.parse(versionExpression)
+
+            if (matchedVersion.fuzzy) {
+                results += (version >= matchedVersion.floor && version < matchedVersion.ceiling)
+            }
+            else {
+                results += version == matchedVersion
+            }
         }
 
         expression.find(LESS_THAN) { String match, String versionExpression ->
-            results += version < Version.parse(versionExpression)
+            Version matchedVersion = Version.parse(versionExpression)
+
+            if (!matchedVersion.fuzzy) {
+                results += version < matchedVersion
+            }
         }
 
         expression.find(GREATER_THAN) { String match, String versionExpression ->
-            results += version > Version.parse(versionExpression)
+            Version matchedVersion = Version.parse(versionExpression)
+
+            if (!matchedVersion.fuzzy) {
+                results += version >matchedVersion
+            }
         }
 
         expression.find(LESS_THAN_EQUAL) { String match, String versionExpression ->
-            results += version <= Version.parse(versionExpression)
+            Version matchedVersion = Version.parse(versionExpression)
+
+            if (!matchedVersion.fuzzy) {
+                results += version <= matchedVersion
+            }
         }
 
         expression.find(GREATER_THAN_EQUAL) { String match, String versionExpression ->
-            results += version >= Version.parse(versionExpression)
+            Version matchedVersion = Version.parse(versionExpression)
+
+            if (!matchedVersion.fuzzy) {
+                results += version >= matchedVersion
+            }
         }
 
         expression.find(HYPHEN_RANGE) { String match, String expression1, String expression2 ->
-            Version rangeBottom = Version.parse(expression1).floor
-            Version rangeTop = Version.parse(expression2).ceiling
+            Version rangeBottom = Version.parse(expression1)
+            Version rangeTop = Version.parse(expression2)
 
-            results += (version >= rangeBottom && version <= rangeTop)
+            results += (version >= rangeBottom.floor && (rangeTop.fuzzy ? (version < rangeTop.ceiling) : (version <= rangeTop)))
         }
 
         expression.find(CARET_RANGE) { String match, String versionExpression ->
