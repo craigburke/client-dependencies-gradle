@@ -28,49 +28,35 @@ class VersionResolver {
     private static boolean matchesExpression(Version version, String expression) {
         List<Boolean> results = []
 
-        if (expression ==~ EQUALS) {
-            expression.find(EQUALS) { String match, String versionExpression ->
-                results += version == Version.parse(versionExpression)
-            }
+        expression.find(EQUALS) { String match, String versionExpression ->
+            results += version == Version.parse(versionExpression)
         }
 
-        if (expression ==~ LESS_THAN) {
-            expression.find(LESS_THAN) { String match, String versionExpression ->
-                results += version < Version.parse(versionExpression)
-            }
+        expression.find(LESS_THAN) { String match, String versionExpression ->
+            results += version < Version.parse(versionExpression)
         }
 
-        if (expression ==~ GREATER_THAN) {
-            expression.find(GREATER_THAN) { String match, String versionExpression ->
-                results += version > Version.parse(versionExpression)
-            }
+        expression.find(GREATER_THAN) { String match, String versionExpression ->
+            results += version > Version.parse(versionExpression)
         }
 
-        if (expression ==~ LESS_THAN_EQUAL) {
-            expression.find(LESS_THAN_EQUAL) { String match, String versionExpression ->
-                results += version <= Version.parse(versionExpression)
-            }
+        expression.find(LESS_THAN_EQUAL) { String match, String versionExpression ->
+            results += version <= Version.parse(versionExpression)
         }
 
-        if (expression ==~ GREATER_THAN_EQUAL) {
-            expression.find(GREATER_THAN_EQUAL) { String match, String versionExpression ->
-                results += version >= Version.parse(versionExpression)
-            }
+        expression.find(GREATER_THAN_EQUAL) { String match, String versionExpression ->
+            results += version >= Version.parse(versionExpression)
         }
 
-        if (expression ==~ HYPHEN_RANGE) {
-            expression.find(HYPHEN_RANGE) { String match, String expression1, String expression2 ->
-                Version rangeBottom = Version.parse(expression1).floor
-                Version rangeTop = Version.parse(expression2).ceiling
+        expression.find(HYPHEN_RANGE) { String match, String expression1, String expression2 ->
+            Version rangeBottom = Version.parse(expression1).floor
+            Version rangeTop = Version.parse(expression2).ceiling
 
-                results += (version >= rangeBottom && version <= rangeTop)
-            }
+            results += (version >= rangeBottom && version <= rangeTop)
         }
 
-        if (expression ==~ CARET_RANGE) {
-            expression.find(CARET_RANGE) { String match, String versionExpression ->
-                results += matchesCaretRange(version, versionExpression)
-            }
+        expression.find(CARET_RANGE) { String match, String versionExpression ->
+            results += matchesCaretRange(version, versionExpression)
         }
 
         results.every { it }
