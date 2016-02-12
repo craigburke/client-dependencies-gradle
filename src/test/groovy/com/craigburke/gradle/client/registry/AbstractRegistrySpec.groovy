@@ -166,6 +166,9 @@ abstract class AbstractRegistrySpec extends Specification {
         dependency.name == 'foo-git'
 
         and:
+        dependency.children.collect { it.name } == ['bar', 'baz']
+
+        and:
         dependency.version.fullVersion == '1.0.0'
     }
 
