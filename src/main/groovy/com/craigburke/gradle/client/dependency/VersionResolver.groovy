@@ -86,19 +86,21 @@ class VersionResolver {
     }
 
     private static boolean matchesCaretRange(Version version, String rangeExpression) {
-        Version rangeVersion = Version.parse(rangeExpression)
+        Version matchedVersion = Version.parse(rangeExpression)
+        Version rangeBottom = matchedVersion.floor
+        Version rangeTop
 
-        if (rangeVersion.major != 0) {
-            Version ceiling = new Version(major: (rangeVersion.major + 1), minor: 0, patch: 0)
-            return (version >= rangeVersion && version < ceiling)
+        if (matchedVersion.major) {
+            rangeTop = new Version(major: matchedVersion.major + 1, minor: 0, patch: 0)
         }
-        else if (rangeVersion.minor != 0) {
-            Version ceiling = new Version(major: rangeVersion.major, minor: (rangeVersion.minor + 1), patch: 0)
-            return (version >= rangeVersion && version < ceiling)
+        else if (matchedVersion.minor) {
+            rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor + 1, patch: 0)
         }
         else {
-            return (version == rangeVersion)
+            rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor, patch: matchedVersion.patch + 1)
         }
+
+        (version >= rangeBottom && version < rangeTop)
     }
 
 
