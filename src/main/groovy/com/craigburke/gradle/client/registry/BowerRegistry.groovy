@@ -93,7 +93,7 @@ class BowerRegistry extends RegistryBase implements Registry {
         repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
-    File getInstallSource(Dependency dependency) {
+    File getSourceFolder(Dependency dependency) {
         checkoutVersion(dependency.name, dependency.version.fullVersion)
         getRepoPath(dependency.name)
     }

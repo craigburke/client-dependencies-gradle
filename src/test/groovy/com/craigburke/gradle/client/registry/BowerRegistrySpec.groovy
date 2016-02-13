@@ -28,7 +28,7 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         Dependency dependency = registry.loadDependency(simpleDependency)
 
         when:
-        File source = registry.getInstallSource(dependency)
+        File source = registry.getSourceFolder(dependency)
 
         then:
         source.name == 'source'

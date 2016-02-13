@@ -7,7 +7,6 @@ class RegistryBase {
     String registryUrl
     String cachePath
     String installPath
-    String sourcePathPrefix = ''
 
     RegistryBase(String url) {
         registryUrl = url
@@ -21,10 +20,6 @@ class RegistryBase {
 
     String getMainFolderPath(String dependencyName) {
         formatPath("${cachePath}/${dependencyName}")
-    }
-
-    String getSourceIncludeExpression(String sourceExpression) {
-        "${sourcePathPrefix}${sourceExpression}"
     }
 
     static String getDestinationPath(String relativePath, String source, String destination) {

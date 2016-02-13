@@ -7,5 +7,4 @@ class SimpleDependency {
 
     List<String> excludes = []
     boolean transitive = true
-
 }

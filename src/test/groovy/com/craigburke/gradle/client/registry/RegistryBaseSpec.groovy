@@ -39,27 +39,6 @@ class RegistryBaseSpec extends Specification {
     }
 
     @Unroll
-    def "#sourceExpression (prefix: #prefix) resolves to #result"() {
-        setup:
-        registryBase.sourcePathPrefix = prefix
-
-        expect:
-        registryBase.getSourceIncludeExpression(sourceExpression) == result
-
-        where:
-        prefix | sourceExpression | result
-        ''     | '**'             | '**'
-        ''     | 'foo.js'         | 'foo.js'
-        ''     | 'foo/foo.js'     | 'foo/foo.js'
-        ''     | 'foo/**/foo.js'  | 'foo/**/foo.js'
-        'foo/' | '**'             | 'foo/**'
-        'foo/' | 'foo.js'         | 'foo/foo.js'
-        'foo/' | 'foo/foo.js'     | 'foo/foo/foo.js'
-        'foo/' | 'foo/**/foo.js'  | 'foo/foo/**/foo.js'
-    }
-
-
-    @Unroll
     def "main folder path for #dependency matches #result"() {
         setup:
         registryBase.cachePath = cachePath

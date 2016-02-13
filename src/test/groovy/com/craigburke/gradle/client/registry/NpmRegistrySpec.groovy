@@ -17,18 +17,18 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         Dependency dependency = registry.loadDependency(simpleDependency)
 
         when:
-        File source = registry.getInstallSource(dependency)
+        File source = registry.getSourceFolder(dependency)
 
         then:
-        source.name == "package.tgz"
+        source.name == "source"
 
         and:
-        getChecksum(source.bytes) == checksum
+        new File("${source.absolutePath}/${name}.js").exists()
 
         where:
-        name  | version | checksum
-        'foo' | '1.0.0' | '117f23ed600939d08eb0cf258439c842c7feea2d'
-        'bar' | '1.0.0' | 'f097c2eb1f6e27d34566ccabe689f25881a03558'
+        name  | version
+        'foo' | '1.0.0'
+        'bar' | '1.0.0'
     }
 
 

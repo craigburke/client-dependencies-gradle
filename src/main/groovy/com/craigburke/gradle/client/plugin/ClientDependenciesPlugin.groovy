@@ -71,15 +71,13 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     void installDependencySource(Project project, Dependency dependency, String source, String destination) {
         Registry registry = dependency.registry
-        File copySource = registry.getInstallSource(dependency)
 
         project.copy {
-            from copySource.isFile() ? project.tarTree(copySource) : copySource
-            include registry.getSourceIncludeExpression(source)
+            from registry.getSourceFolder(dependency)
+            include source
             into "${registry.installPath}/${dependency.name}/"
             eachFile { FileCopyDetails fileCopyDetails ->
-                String relativePath = fileCopyDetails.path - registry.sourcePathPrefix
-                fileCopyDetails.path = RegistryBase.getDestinationPath(relativePath, source, destination)
+                fileCopyDetails.path = RegistryBase.getDestinationPath(fileCopyDetails.path, source, destination)
             }
         }
     }
