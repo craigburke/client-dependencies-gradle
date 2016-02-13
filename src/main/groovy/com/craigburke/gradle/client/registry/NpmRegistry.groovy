@@ -126,6 +126,7 @@ class NpmRegistry extends RegistryBase implements Registry {
             }
 
             AntBuilder builder = new AntBuilder()
+            builder.project.buildListeners.first().setMessageOutputLevel(0)
             builder.untar(src: downloadFile.absolutePath, dest: sourceFolder.absolutePath, compression:'gzip', overwrite:true) {
                 patternset {
                     include(name: 'package/**')
