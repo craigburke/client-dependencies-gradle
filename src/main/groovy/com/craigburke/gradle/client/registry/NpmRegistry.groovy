@@ -38,8 +38,8 @@ class NpmRegistry extends RegistryBase implements Registry {
         versionListJson
     }
 
-    private getVersionInfoFromNpm(String dependencyName, Version version) {
-        getVersionListFromNpm(dependencyName)[version.fullVersion]
+    private String getDownloadUrlFromNpm(Dependency dependency) {
+        getVersionListFromNpm(dependency.name)[dependency.version.fullVersion]?.dist?.tarball
     }
 
     Dependency loadDependency(SimpleDependency simpleDependency) {
@@ -57,15 +57,7 @@ class NpmRegistry extends RegistryBase implements Registry {
             throw new Exception("Couldn't resolve ${dependencyName}@${simpleDependency.versionExpression}")
         }
 
-        def versionJson
-        if (simpleDependency.url) {
-            dependency.downloadUrl = simpleDependency.url
-        }
-        else {
-            versionJson = getVersionInfoFromNpm(dependencyName, dependency.version)
-            dependency.downloadUrl = versionJson.dist.tarball
-        }
-
+        dependency.downloadUrl = simpleDependency.url ?: getDownloadUrlFromNpm(dependency)
         downloadDependency(dependency)
 
         if (simpleDependency.transitive) {
@@ -99,13 +91,8 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     List<Version> getVersionList(SimpleDependency dependency) {
-        if (dependency.url) {
-            [Version.parse(dependency.versionExpression)]
-        }
-        else {
-            def versionListJson = getVersionListFromNpm(dependency.name)
-            versionListJson.collect { Version.parse(it.key as String) }
-        }
+        def versionListJson = getVersionListFromNpm(dependency.name)
+        versionListJson.collect { Version.parse(it.key as String) }
     }
 
     void downloadDependency(Dependency dependency) {
