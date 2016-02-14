@@ -60,7 +60,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
 
             Dependency.flattenList(loadedDependencies).eachParallel { Dependency dependency ->
-                Map sources = rootDependencies.find { it.name == dependency.name }?.sources ?: ['**': '']
+                RootDependency rootDependency = rootDependencies.find { it.name == dependency.name }
+                Map sources = rootDependency?.sources ?: dependency.registry.getDefaultSources(dependency)
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
                 sources.each { String source, String destination ->
                     installDependencySource(project, dependency, source, destination)
@@ -73,6 +74,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         Registry registry = dependency.registry
 
         project.copy {
+            includeEmptyDirs = false
             from registry.getSourceFolder(dependency)
             include source
             into "${registry.installPath}/${dependency.name}/"

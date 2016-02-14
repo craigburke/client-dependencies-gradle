@@ -134,4 +134,14 @@ class NpmRegistry extends RegistryBase implements Registry {
         new File("${getSourceFolderPath(dependency)}")
     }
 
+    Map<String, String> getDefaultSources(Dependency dependency) {
+        File sourceFolder = getSourceFolder(dependency)
+        if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
+            ['dist/**': '']
+        }
+        else {
+            ['**': '']
+        }
+    }
+
 }

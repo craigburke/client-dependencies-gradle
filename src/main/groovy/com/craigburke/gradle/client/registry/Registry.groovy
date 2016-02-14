@@ -5,7 +5,6 @@ import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.dependency.Version
 
 interface Registry {
-
     File getSourceFolder(Dependency dependency)
     List<Version> getVersionList(SimpleDependency simpleDependency)
     Dependency loadDependency(SimpleDependency simpleDependency)
@@ -14,4 +13,6 @@ interface Registry {
     String getInstallPath()
 
     void setCachePath(String cachePath)
+
+    Map<String, String> getDefaultSources(Dependency dependency)
 }
