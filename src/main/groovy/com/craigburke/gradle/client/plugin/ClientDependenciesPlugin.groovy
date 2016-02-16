@@ -8,7 +8,6 @@ import com.craigburke.gradle.client.registry.Registry
 import com.craigburke.gradle.client.registry.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCopyDetails
 
 import static groovyx.gpars.GParsPool.withExistingPool
@@ -36,6 +35,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.task(INSTALL_TASK, group: TASK_GROUP) {
             mustRunAfter CLEAN_TASK
+            outputs.upToDateWhen {
+                project.file(config.installDir).exists()
+            }
             doLast {
                 installDependencies(config.rootDependencies, project)
             }
