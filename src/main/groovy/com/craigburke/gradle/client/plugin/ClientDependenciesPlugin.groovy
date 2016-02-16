@@ -99,7 +99,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         File sourceFolder = registry.getSourceFolder(dependency)
 
         return {
-            exclude '**/*.min.js', '**/*.min.css', '**/Gruntfile.js'
+            exclude '**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js'
 
             if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
                 include 'dist/**/*.js', 'dist/**/*.css'

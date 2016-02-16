@@ -2,11 +2,14 @@ plugins {
     id 'groovy'
     id 'maven-publish'
     id 'idea'
+    id 'com.gradle.plugin-publish' version '0.9.3'
 }
 
 ext {
     artifactId = 'client-dependencies'
 }
+
+targetCompatibility = 1.6
 
 group = 'com.craigburke.gradle'
 version = '0.1.0'
@@ -33,6 +36,21 @@ publishing {
         }
     }
 }
+
+pluginBundle {
+    website = 'https://github.com/craigburke/client-dependencies-gradle'
+    vcsUrl = 'https://github.com/craigburke/client-dependencies-gradle'
+    description = 'Install client side dependencies from NPM or Bower by declaring dependencies in build.gradle.'
+    tags = ['npm', 'bower', 'client', 'web']
+
+    plugins {
+        clientDependencies {
+            id = 'com.craigburke.client-dependencies'
+            displayName = 'Client Dependencies Plugin'
+        }
+    }
+}
+
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.9'
