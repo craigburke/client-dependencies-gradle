@@ -1,21 +1,15 @@
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.registry.Registry
 
 class DependencyBuilder {
 
     Registry registry
-    List<RootDependency> rootDependencies = []
+    List<DeclaredDependency> rootDependencies = []
 
     DependencyBuilder(Registry registry) {
         this.registry = registry
-    }
-
-    class SourceCategory {
-        static Map rightShift(String source, String path) {
-            ["${source}": path]
-        }
     }
 
     def methodMissing(String name, args) {
@@ -37,13 +31,10 @@ class DependencyBuilder {
             props += additionalProps
         }
 
-        RootDependency dependency = new RootDependency(props)
+        DeclaredDependency dependency = new DeclaredDependency(props)
 
         if (args && args.last() instanceof Closure) {
-            Closure clonedClosure = args.last().rehydrate(dependency, dependency, dependency)
-            use (SourceCategory) {
-                clonedClosure()
-            }
+            dependency.copyConfig = args.last()
         }
 
         rootDependencies += dependency

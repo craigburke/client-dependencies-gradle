@@ -1,7 +1,7 @@
 package com.craigburke.gradle.client.registry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonOutput
@@ -42,26 +42,26 @@ class NpmRegistry extends RegistryBase implements Registry {
         getVersionListFromNpm(dependency.name)[dependency.version.fullVersion]?.dist?.tarball
     }
 
-    Dependency loadDependency(SimpleDependency simpleDependency) {
-        String dependencyName = simpleDependency.name
+    Dependency loadDependency(DeclaredDependency declaredDependency) {
+        String dependencyName = declaredDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
-        if (simpleDependency.url) {
-            dependency.version = Version.parse(simpleDependency.versionExpression)
+        if (declaredDependency.url) {
+            dependency.version = Version.parse(declaredDependency.versionExpression)
         }
         else {
-            dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
+            dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
         }
 
         if (!dependency.version) {
-            throw new Exception("Couldn't resolve ${dependencyName}@${simpleDependency.versionExpression}")
+            throw new Exception("Couldn't resolve ${dependencyName}@${declaredDependency.versionExpression}")
         }
 
-        dependency.downloadUrl = simpleDependency.url ?: getDownloadUrlFromNpm(dependency)
+        dependency.downloadUrl = declaredDependency.url ?: getDownloadUrlFromNpm(dependency)
         downloadDependency(dependency)
 
-        if (simpleDependency.transitive) {
-            dependency.children = loadChildDependencies(dependency, simpleDependency.excludes)
+        if (declaredDependency.transitive) {
+            dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
         }
 
         dependency
@@ -84,19 +84,19 @@ class NpmRegistry extends RegistryBase implements Registry {
             getDependencies(dependency)
                     .findAll { String name, String childVersion -> !excludes.contains(name)}
                     .collectParallel { String name, String childVersion ->
-                SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: childVersion, excludes: excludes)
+                DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: childVersion, exclude: excludes)
                 loadDependency(childDependency)
             } ?: []
         } as List<Dependency>
     }
 
-    List<Version> getVersionList(SimpleDependency dependency) {
-        def versionListJson = getVersionListFromNpm(dependency.name)
+    List<Version> getVersionList(DeclaredDependency declaredDependency) {
+        def versionListJson = getVersionListFromNpm(declaredDependency.name)
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
     void downloadDependency(Dependency dependency) {
-        File sourceFolder = new File("${getSourceFolderPath(dependency)}")
+        File sourceFolder = new File("${getSourceFolderPath(dependency)}/")
 
         if (sourceFolder.exists()) {
             return
@@ -132,16 +132,6 @@ class NpmRegistry extends RegistryBase implements Registry {
 
     File getSourceFolder(Dependency dependency) {
         new File("${getSourceFolderPath(dependency)}")
-    }
-
-    Map<String, String> getDefaultSources(Dependency dependency) {
-        File sourceFolder = getSourceFolder(dependency)
-        if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
-            ['dist/**': '']
-        }
-        else {
-            ['**': '']
-        }
     }
 
 }

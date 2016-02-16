@@ -13,32 +13,6 @@ class RegistryBaseSpec extends Specification {
     }
 
     @Unroll
-    def "#path from #source to #destination resolves to #result"() {
-        expect:
-        registryBase.getDestinationPath(path, source, destination) == result
-
-        where:
-        path                | source              | destination | result
-        'source.js'         | '**'                | '/foo/'     | '../foo/source.js'
-        'source.js'         | '**'                | 'foo/'      | 'foo/source.js'
-        'source.js'         | '**'                | 'foo'       | 'foo'
-        'css/style.css'     | 'css/style.css'     | 'style/'    | 'style/style.css'
-        'foo/css/style.css' | 'foo/**'            | 'style/'    | 'style/css/style.css'
-        'foo/css/style.css' | 'foo/**'            | 'style'     | 'style'
-
-        'foo/source.js'     | '**'                | '/foo/'     | '../foo/foo/source.js'
-        'foo/source.js'     | '**'                | 'foo/'      | 'foo/foo/source.js'
-        'foo/source.js'     | '**'                | 'foo'       | 'foo'
-
-        'foo/css/style.css' | 'foo/css/style.css' | 'style/'    | 'style/style.css'
-        'foo/css/style.css' | 'foo/**'            | 'style/'    | 'style/css/style.css'
-        'foo/css/style.css' | 'foo/**'            | 'style'     | 'style'
-        'foo/css/style.css' | 'foo/**'            | ''          | 'css/style.css'
-        'foo/bar/style.css' | 'foo/bar/**'        | 'baz/'      | 'baz/style.css'
-        'foo/bar/style.css' | '**'                | ''          | 'foo/bar/style.css'
-    }
-
-    @Unroll
     def "main folder path for #dependency matches #result"() {
         setup:
         registryBase.cachePath = cachePath

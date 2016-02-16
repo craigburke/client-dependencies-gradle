@@ -1,6 +1,6 @@
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import spock.lang.Specification
 import spock.lang.Subject
 
@@ -52,7 +52,7 @@ class DependencyBuilderSpec extends Specification {
 
         when:
         dependencies.call()
-        RootDependency dependency = builder.rootDependencies.first()
+        DeclaredDependency dependency = builder.rootDependencies.first()
 
         then:
         dependency.name == 'foo'
@@ -69,7 +69,7 @@ class DependencyBuilderSpec extends Specification {
         }
     }
 
-    List<String> formatDependencies(List<RootDependency> dependencies) {
+    List<String> formatDependencies(List<DeclaredDependency> dependencies) {
         dependencies.collect { "${it.name}@${it.versionExpression}" }.sort()
     }
 

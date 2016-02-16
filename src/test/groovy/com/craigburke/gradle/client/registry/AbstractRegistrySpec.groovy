@@ -1,7 +1,7 @@
 package com.craigburke.gradle.client.registry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import com.github.tomakehurst.wiremock.WireMockServer
 import org.junit.Rule
@@ -68,7 +68,7 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "get version list for #name"() {
         setup:
-        SimpleDependency dependency = new SimpleDependency(name: name, versionExpression: '1.0.0')
+        DeclaredDependency dependency = new DeclaredDependency(name: name, versionExpression: '1.0.0')
 
         expect:
         registry.getVersionList(dependency).sort() == Version.toList(versions)
@@ -82,7 +82,7 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version and child dependencies"() {
         given:
-        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version)
+        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency)
@@ -108,7 +108,7 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version with exclusions"() {
         given:
-        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version, excludes: exclusions)
+        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclusions)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency)
@@ -133,7 +133,7 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version without transitive dependencies"() {
         given:
-        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version, transitive: false)
+        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version, transitive: false)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency)
@@ -157,7 +157,7 @@ abstract class AbstractRegistrySpec extends Specification {
     def "can load module directly from git repo"() {
         given:
         String gitRepoUrl = "file://${resource(resourceFolder).path}/foo-git.git"
-        SimpleDependency simpleDependency = new SimpleDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
+        DeclaredDependency simpleDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency)

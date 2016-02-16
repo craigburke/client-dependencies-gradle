@@ -1,6 +1,6 @@
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.dependency.RootDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.registry.Registry
 
 class ClientDependenciesExtension {
@@ -9,7 +9,7 @@ class ClientDependenciesExtension {
     String cacheDir
 
     Map<String, Registry> registryMap = [:]
-    List<RootDependency> rootDependencies = []
+    List<DeclaredDependency> rootDependencies = []
 
     def methodMissing(String registryName, args) {
        if (args && args.last() instanceof Closure) {

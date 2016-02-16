@@ -1,14 +1,14 @@
 package com.craigburke.gradle.client.plugin
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.RootDependency
-import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
 import com.craigburke.gradle.client.registry.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCopyDetails
 
 import static groovyx.gpars.GParsPool.withExistingPool
@@ -50,40 +50,32 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     }
 
-    void installDependencies(List<RootDependency> rootDependencies, Project project) {
+    void installDependencies(List<DeclaredDependency> rootDependencies, Project project) {
         withExistingPool(RegistryBase.pool) {
             List<Dependency> loadedDependencies = rootDependencies
-                    .collectParallel { RootDependency dependency ->
+                    .collectParallel { DeclaredDependency dependency ->
                         project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
-                        dependency.registry.loadDependency(dependency as SimpleDependency)
+                        dependency.registry.loadDependency(dependency as DeclaredDependency)
                     }
 
 
             Dependency.flattenList(loadedDependencies).eachParallel { Dependency dependency ->
-                RootDependency rootDependency = rootDependencies.find { it.name == dependency.name }
-                Map sources = rootDependency?.sources ?: dependency.registry.getDefaultSources(dependency)
+                DeclaredDependency rootDependency = rootDependencies.find { it.name == dependency.name }
+                Registry registry = dependency.registry
+
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
-                sources.each { String source, String destination ->
-                    installDependencySource(project, dependency, source, destination)
+                Closure copyConfig = rootDependency?.copyConfig ?: getDefaultCopyConfig(dependency)
+
+                project.copy {
+                    includeEmptyDirs = false
+                    into "${registry.installPath}/${dependency.name}"
+                    from("${registry.getSourceFolder(dependency)}") {
+                        with copyConfig
+                    }
                 }
             }
         }
     }
-
-    void installDependencySource(Project project, Dependency dependency, String source, String destination) {
-        Registry registry = dependency.registry
-
-        project.copy {
-            includeEmptyDirs = false
-            from registry.getSourceFolder(dependency)
-            include source
-            into "${registry.installPath}/${dependency.name}/"
-            eachFile { FileCopyDetails fileCopyDetails ->
-                fileCopyDetails.path = RegistryBase.getDestinationPath(fileCopyDetails.path, source, destination)
-            }
-        }
-    }
-
     void setDefaults(Project project) {
         if (config.installDir == null) {
             boolean grailsPluginApplied = project.extensions.findByName('grails')
@@ -97,6 +89,25 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         config.registryMap.each { String key, Registry registry ->
             registry.cachePath = project.file(config.cacheDir).absolutePath
             registry.installPath = project.file(config.installDir).absolutePath
+        }
+    }
+
+    Closure getDefaultCopyConfig(Dependency dependency) {
+        Registry registry = dependency.registry
+        File sourceFolder = registry.getSourceFolder(dependency)
+
+        return {
+            exclude '**/*.min.js', '**/*.min.css', '**/Gruntfile.js'
+
+            if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
+                include 'dist/**/*.js', 'dist/**/*.css'
+                eachFile { FileCopyDetails fileCopyDetails ->
+                    fileCopyDetails.path -= 'dist/'
+                }
+            }
+            else {
+                include '**/*.js', '**/*.css'
+            }
         }
     }
 

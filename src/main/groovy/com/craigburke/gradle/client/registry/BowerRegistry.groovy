@@ -1,13 +1,14 @@
 package com.craigburke.gradle.client.registry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.ResetOp
+import org.gradle.api.file.CopySpec
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
@@ -43,7 +44,7 @@ class BowerRegistry extends RegistryBase implements Registry {
             bowerConfigJson.dependencies
                     .findAll { String name, String versionExpression -> !exclusions.contains(name) }
                     .collectParallel { String name, String versionExpression ->
-                        SimpleDependency childDependency = new SimpleDependency(name: name, versionExpression: versionExpression)
+                        DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: versionExpression)
                         loadDependency(childDependency)
                     } ?: []
         } as List<Dependency>
@@ -53,7 +54,7 @@ class BowerRegistry extends RegistryBase implements Registry {
        new File("${getMainFolderPath(dependencyName)}/source/")
     }
 
-    private void downloadRepository(SimpleDependency dependency) {
+    private void downloadRepository(DeclaredDependency dependency) {
         File repoPath = getRepoPath(dependency.name)
 
         if (!repoPath.exists()) {
@@ -87,9 +88,9 @@ class BowerRegistry extends RegistryBase implements Registry {
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
-    List<Version> getVersionList(SimpleDependency dependency) {
-        downloadRepository(dependency)
-        def repo = getRepository(dependency.name)
+    List<Version> getVersionList(DeclaredDependency declaredDependency) {
+        downloadRepository(declaredDependency)
+        def repo = getRepository(declaredDependency.name)
         repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
@@ -98,29 +99,19 @@ class BowerRegistry extends RegistryBase implements Registry {
         getRepoPath(dependency.name)
     }
 
-    Dependency loadDependency(SimpleDependency simpleDependency) {
-        downloadRepository(simpleDependency)
-        String dependencyName = simpleDependency.name
+    Dependency loadDependency(DeclaredDependency declaredDependency) {
+        downloadRepository(declaredDependency)
+        String dependencyName = declaredDependency.name
         Dependency dependency = new Dependency(name: dependencyName, registry: this)
 
-        dependency.version = VersionResolver.resolve(simpleDependency.versionExpression, getVersionList(simpleDependency))
-        dependency.downloadUrl = simpleDependency.url ? simpleDependency.url : getDependencyJson(simpleDependency.name).url
+        dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
+        dependency.downloadUrl = declaredDependency.url ? declaredDependency.url : getDependencyJson(declaredDependency.name).url
 
-        if (simpleDependency.transitive) {
-            dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, simpleDependency.excludes)
+        if (declaredDependency.transitive) {
+            dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, declaredDependency.exclude)
         }
 
         dependency
-    }
-
-    Map<String, String> getDefaultSources(Dependency dependency) {
-        File sourceFolder = getSourceFolder(dependency)
-        if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
-            ['dist/**': '']
-        }
-        else {
-            ['**': '']
-        }
     }
 
 }

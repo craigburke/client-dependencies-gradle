@@ -1,7 +1,7 @@
 package com.craigburke.gradle.client.registry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.SimpleDependency
+import com.craigburke.gradle.client.dependency.DeclaredDependency
 import org.ajoberstar.grgit.Grgit
 import spock.lang.Unroll
 
@@ -24,7 +24,7 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
     @Unroll
     def "can get source for #name@#version"() {
         given:
-        SimpleDependency simpleDependency = new SimpleDependency(name: name, versionExpression: version)
+        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version)
         Dependency dependency = registry.loadDependency(simpleDependency)
 
         when:
