@@ -97,18 +97,20 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     Closure getDefaultCopyConfig(Dependency dependency) {
         Registry registry = dependency.registry
         File sourceFolder = registry.getSourceFolder(dependency)
+        List<String> distFolders = ['dist', 'release']
+        List<String> allowedExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2']
+        String pathPrefix = sourceFolder
+                .listFiles()
+                .find { it.directory && distFolders.contains(it.name)}?.name ?: ''
 
         return {
-            exclude '**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js'
+            exclude '**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js', 'index.js', 'gulpfile.js', 'source/**'
 
-            if (sourceFolder.listFiles().find { it.directory && it.name == 'dist'}) {
-                include 'dist/**/*.js', 'dist/**/*.css'
-                eachFile { FileCopyDetails fileCopyDetails ->
-                    fileCopyDetails.path -= 'dist/'
-                }
-            }
-            else {
-                include '**/*.js', '**/*.css'
+            include allowedExtensions
+                    .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}"}
+
+            if (pathPrefix) {
+                eachFile { it.path -= "${pathPrefix}/" }
             }
         }
     }

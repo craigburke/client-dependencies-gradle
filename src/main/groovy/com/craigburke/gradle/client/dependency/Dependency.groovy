@@ -11,9 +11,9 @@ class Dependency {
     List<Dependency> children = []
 
     static flattenList(List<Dependency> dependencies) {
-        dependencies + dependencies.findAll { it.children }
+        (dependencies + dependencies.findAll { it.children }
                 .collect { flattenList(it.children) }
                 .flatten()
-                .unique(false) { it.name }
+        ).unique(false) { it.name }
     }
 }

@@ -15,16 +15,8 @@ class DependencyBuilder {
     def methodMissing(String name, args) {
         Map props = [:]
         props.registry = registry
-
-        if (name.contains(':')) {
-            List<String> nameParts = name.tokenize(":")
-            props.name = nameParts[0]
-            props.versionExpression = nameParts[1]
-        }
-        else {
-            props.name = name
-            props.versionExpression = args.find { it instanceof String }
-        }
+        props.name = name
+        props.versionExpression = args.find { it instanceof String }
 
         Map additionalProps = args.find { it instanceof Map }
         if (additionalProps) {

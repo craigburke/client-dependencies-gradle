@@ -16,7 +16,13 @@ class VersionResolver {
 
     static Version resolve(String expression, List<Version> versions) {
         List<Version> sortedVersions = versions.toSorted { v1, v2 -> v2 <=> v1 }
-        sortedVersions.find { matches(it, expression) }
+
+        if (expression?.trim() in ['latest', '*', '']) {
+            sortedVersions.first()
+        }
+        else {
+            sortedVersions.find { matches(it, expression) }
+        }
     }
 
     static boolean matches(Version version, String expression) {
