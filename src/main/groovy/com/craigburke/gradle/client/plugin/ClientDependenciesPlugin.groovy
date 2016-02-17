@@ -8,7 +8,6 @@ import com.craigburke.gradle.client.registry.Registry
 import com.craigburke.gradle.client.registry.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.FileCopyDetails
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
@@ -23,7 +22,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     ClientDependenciesExtension config
 
     void apply(Project project) {
-        config = project.extensions.create('clientDependencies', ClientDependenciesExtension)
+        config = project.extensions.create('clientDependencies', ClientDependenciesExtension, project)
         config.registryMap = [npm: new NpmRegistry(), bower: new BowerRegistry()]
 
         project.task(CLEAN_TASK, group: TASK_GROUP) {
