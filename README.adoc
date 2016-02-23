@@ -1,4 +1,4 @@
-:version: 0.1.2
+:version: 0.2.0
 
 = Client Dependencies Gradle Plugin
 
@@ -57,11 +57,44 @@ clientDependencies {
 <4> Installs restangular from npm but doesn't include any child dependencies
 <4> Use the url property to use a git repo as a dependency source
 
-== Overriding the copy task
+== The copy task
 
-By passing a closure as the last argument you have full control of what files get copied and where they get copied to.
-See: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Copy.html[Gradle Copy]
+The files are copied using the DSL of Gradle's copy task. See: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Copy.html[Gradle Copy].
 
+=== Default copy task
+
+When the files for a dependency are copied to the install directory, the plugin uses reasonable defaults for what to include and exclude.
+This default behavior can be controlled with the following properties:
+
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    fileExtensions = ['css', 'js'] // <1>
+    releaseFolders = ['dist', 'release'] // <2>
+    copyIncludes = [] // <3>
+    copyExcludes = [] // <4>
+}
+----
+<1> File extensions to include when copying the source. The
+<2> Release folders to search for. If these folder are found then the file extension includes are relative to this folder. (ex `dist/**/*.js` instead of `**/*.js`)
+<3> Additional includes to append to the end of the copy task
+<4> Additional excludes to append to the end of the copy task
+
+You can also completely override the default copy task (which also ignores the settings above)
+
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    defaultCopy = {
+        include '**'
+        exclude '**/*.less', '**/*.sass'
+    }
+}
+----
+
+=== Overriding the copy task for an individual dependency
+
+By passing a closure as the last argument of the dependency declaration you have full control of what files get copied and where they get copied to.
 
 For example:
 [source,gradle,subs='attributes']

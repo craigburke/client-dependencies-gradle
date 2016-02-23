@@ -80,18 +80,20 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 Registry registry = dependency.registry
 
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
-                Closure copyConfig = rootDependency?.copyConfig ?: getDefaultCopyConfig(dependency)
+                File sourceFolder = registry.getSourceFolder(dependency)
+                Closure copyConfig = rootDependency?.copyConfig ?: config.getDefaultCopyConfig(sourceFolder)
 
                 project.copy {
                     includeEmptyDirs = false
                     into "${registry.installPath}/${dependency.name}"
-                    from("${registry.getSourceFolder(dependency)}") {
+                    from("${sourceFolder}") {
                         with copyConfig
                     }
                 }
             }
         }
     }
+
     void setDefaults(Project project) {
         if (config.installDir == null) {
             boolean grailsPluginApplied = project.extensions.findByName('grails')
@@ -105,27 +107,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         config.registryMap.each { String key, Registry registry ->
             registry.cachePath = project.file(config.cacheDir).absolutePath
             registry.installPath = project.file(config.installDir).absolutePath
-        }
-    }
-
-    Closure getDefaultCopyConfig(Dependency dependency) {
-        Registry registry = dependency.registry
-        File sourceFolder = registry.getSourceFolder(dependency)
-        List<String> distFolders = ['dist', 'release']
-        List<String> allowedExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2']
-        String pathPrefix = sourceFolder
-                .listFiles()
-                .find { it.directory && distFolders.contains(it.name)}?.name ?: ''
-
-        return {
-            exclude '**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js', 'index.js', 'gulpfile.js', 'source/**'
-
-            include allowedExtensions
-                    .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}"}
-
-            if (pathPrefix) {
-                eachFile { it.path -= "${pathPrefix}/" }
-            }
         }
     }
 
