@@ -109,5 +109,24 @@ class VersionResolverSpec extends Specification {
                     '2.0.0']
     }
 
+    @Unroll
+    def "tagged release #expression resolves to #result"() {
+        given:
+        Version version = result ? Version.parse(result) : null
+        List<Version> versionList = Version.toList(versions)
+
+        expect:
+        VersionResolver.resolve(expression, versionList) == version
+
+        where:
+        expression      | result
+        '=1.0.0'        | null
+        '=1.0.0-alpha'  | '1.0.0-alpha'
+        '> 1.0.0-alpha' | '2.0.1'
+        '> 1.3.1'       | '2.0.1'
+
+        versions = ['1.0.0-alpha', '1.1.0-alpha', '1.2.0',
+                    '1.3.0', '1.3.1', '2.0.0-alpha', '2.0.1', '2.0.2-alpha']
+    }
 
 }

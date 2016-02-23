@@ -103,7 +103,12 @@ class VersionResolver {
             results += matchesCaretRange(version, versionExpression)
         }
 
-        results.every { it }
+        if (version.tag && !expression.matches(EQUALS)) {
+            false
+        }
+        else {
+            results.every { it }
+        }
     }
 
     private static boolean matchesCaretRange(Version version, String rangeExpression) {
