@@ -21,6 +21,8 @@ import org.gradle.api.Project
 
 class ClientDependenciesExtension {
 
+    int threadPoolSize = 15
+
     Project project
     String installDir
     String cacheDir

@@ -23,10 +23,14 @@ class RegistryBase {
     String cachePath
     String installPath
 
-    static ForkJoinPool pool = new ForkJoinPool(10)
+    static ForkJoinPool pool
 
     RegistryBase(String url) {
         registryUrl = url
+    }
+
+    static void setThreadPoolSize(int poolSize) {
+        pool = new ForkJoinPool(poolSize)
     }
 
     static String formatPath(String path) {

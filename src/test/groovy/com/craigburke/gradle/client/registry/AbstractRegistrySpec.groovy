@@ -34,6 +34,7 @@ abstract class AbstractRegistrySpec extends Specification {
     }
 
     void init(Class<Registry> clazz, String resourceFolder) {
+        RegistryBase.threadPoolSize = 15
         registry = clazz.newInstance(["http://www.example.com/${resourceFolder}"] as Object[])
         registry.cachePath = cacheFolder.root.absolutePath
         registry.installPath = installFolder.root.absolutePath

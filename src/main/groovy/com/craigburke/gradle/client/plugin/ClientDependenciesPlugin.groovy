@@ -60,6 +60,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.task(REFRESH_TASK, group: TASK_GROUP, dependsOn: [CLEAN_TASK, INSTALL_TASK])
 
         project.afterEvaluate {
+            RegistryBase.threadPoolSize = config.threadPoolSize
             setDefaults(project)
             setTaskDependencies(project)
         }
