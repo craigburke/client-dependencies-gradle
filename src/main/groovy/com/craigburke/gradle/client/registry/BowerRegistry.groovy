@@ -40,7 +40,7 @@ class BowerRegistry extends RegistryBase implements Registry {
         if (mainConfigFile.exists()) {
             dependencyJson = new JsonSlurper().parse(mainConfigFile)
         } else {
-            URL url = new URL("${this.registryUrl}/packages/${dependencyName}")
+            URL url = new URL("${this.url}/packages/${dependencyName}")
             def json = new JsonSlurper().parse(url)
 
             mainConfigFile.parentFile.mkdirs()

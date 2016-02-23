@@ -16,6 +16,8 @@
 package com.craigburke.gradle.client.plugin
 
 import com.craigburke.gradle.client.dependency.DeclaredDependency
+import com.craigburke.gradle.client.registry.BowerRegistry
+import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
 import org.gradle.api.Project
 
@@ -50,6 +52,12 @@ class ClientDependenciesExtension {
            clonedClosure()
            rootDependencies += dependencyBuilder.rootDependencies
        }
+    }
+
+    void registry(Map props) {
+        String url = props.url as String
+        Registry registry = (props.type == 'bower' ? new BowerRegistry(url) : new NpmRegistry(url))
+        registryMap[props.name as String] = registry
     }
 
     Closure getDefaultCopyConfig(File sourceFolder) {

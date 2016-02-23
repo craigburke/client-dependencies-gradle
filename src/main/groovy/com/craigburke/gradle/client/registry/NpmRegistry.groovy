@@ -43,7 +43,7 @@ class NpmRegistry extends RegistryBase implements Registry {
         if (mainConfigFile.exists()) {
             versionListJson = new JsonSlurper().parse(mainConfigFile).versions
         } else {
-            URL url = new URL("${this.registryUrl}/${dependencyName}")
+            URL url = new URL("${this.url}/${dependencyName}")
             def json = new JsonSlurper().parse(url)
 
             mainConfigFile.parentFile.mkdirs()

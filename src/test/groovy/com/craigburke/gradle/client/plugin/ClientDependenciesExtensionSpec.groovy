@@ -1,5 +1,8 @@
 package com.craigburke.gradle.client.plugin
 
+import com.craigburke.gradle.client.registry.BowerRegistry
+import com.craigburke.gradle.client.registry.NpmRegistry
+import com.craigburke.gradle.client.registry.Registry
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -93,6 +96,25 @@ class ClientDependenciesExtensionSpec extends Specification {
             include '**'
             exclude '*.less'
         }
+    }
+
+    @Unroll
+    def "can register custom registry #name"() {
+        when:
+        extension.registry(name: name, type: type, url: url)
+        Registry registry = extension.registryMap[name]
+
+        then:
+        registry.url == url
+
+        and:
+        registry.getClass() == expectedClass
+
+        where:
+        name         | type    | url                            | expectedClass
+        'npmLocal'   | 'npm'   | 'http://www.example.com/npm'   | NpmRegistry
+        'bowerLocal' | 'bower' | 'http://www.example.com/bower' | BowerRegistry
+
     }
 
     Map getDefaultCopyResults() {

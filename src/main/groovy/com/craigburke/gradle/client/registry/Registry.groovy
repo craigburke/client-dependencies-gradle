@@ -28,4 +28,6 @@ interface Registry {
     String getInstallPath()
 
     void setCachePath(String cachePath)
+
+    String getUrl()
 }

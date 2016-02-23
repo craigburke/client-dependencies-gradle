@@ -19,14 +19,14 @@ import jsr166y.ForkJoinPool
 
 class RegistryBase {
 
-    String registryUrl
+    String url
     String cachePath
     String installPath
 
     static ForkJoinPool pool
 
     RegistryBase(String url) {
-        registryUrl = url
+        this.url = url
     }
 
     static void setThreadPoolSize(int poolSize) {
