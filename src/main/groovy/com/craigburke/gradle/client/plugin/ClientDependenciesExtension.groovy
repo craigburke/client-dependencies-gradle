@@ -25,6 +25,13 @@ class ClientDependenciesExtension {
     String installDir
     String cacheDir
 
+    List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
+    List<String> releaseFolders = ['dist', 'release']
+    List<String> copyIncludes = []
+    List<String> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js', 'index.js', 'gulpfile.js', 'source/**']
+
+    Closure defaultCopy
+
     ClientDependenciesExtension(Project project) {
         this.project = project
     }
@@ -43,4 +50,26 @@ class ClientDependenciesExtension {
        }
     }
 
+    Closure getDefaultCopyConfig(File sourceFolder) {
+        if (defaultCopy) {
+            return defaultCopy
+        }
+
+        String pathPrefix = sourceFolder
+                .listFiles()
+                .find { it.directory && releaseFolders.contains(it.name)}?.name ?: ''
+
+        List<String> includes = fileExtensions
+                .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}"} + copyIncludes
+
+        List<String> excludes = copyExcludes
+
+        return {
+            exclude excludes
+            include includes
+            if (pathPrefix) {
+                eachFile { it.path -= "${pathPrefix}/" }
+            }
+        }
+    }
 }

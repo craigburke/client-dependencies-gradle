@@ -26,4 +26,5 @@ class ClientDependenciesPluginSpec extends Specification {
         taskName << [CLEAN_TASK, INSTALL_TASK, REFRESH_TASK]
     }
 
+
 }
