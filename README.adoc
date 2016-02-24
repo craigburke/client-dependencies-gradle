@@ -76,7 +76,7 @@ clientDependencies {
 }
 ----
 <1> File extensions to include when copying the source.
-<2> The names of release folders to look for. If these folder are found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
+<2> The names of release folders to look for. If a folder by this name is found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
 <3> Additional includes to append to the end of the copy task
 <4> Additional excludes to append to the end of the copy task
 
