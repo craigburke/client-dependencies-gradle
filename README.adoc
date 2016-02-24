@@ -75,8 +75,8 @@ clientDependencies {
     copyExcludes = [] // <4>
 }
 ----
-<1> File extensions to include when copying the source. The
-<2> Release folders to search for. If these folder are found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
+<1> File extensions to include when copying the source.
+<2> The names of release folders to look for. If these folder are found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
 <3> Additional includes to append to the end of the copy task
 <4> Additional excludes to append to the end of the copy task
 
@@ -94,7 +94,7 @@ clientDependencies {
 
 === Overriding the copy task for an individual dependency
 
-By passing a closure as the last argument of the dependency declaration you have full control of what files get copied and where they get copied to.
+By passing a closure as the last argument of a dependency declaration you have full control of what files get copied and where they get copied to.
 
 For example:
 [source,gradle,subs='attributes']
