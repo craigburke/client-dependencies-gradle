@@ -83,10 +83,10 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version and child dependencies"() {
         given:
-        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version)
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version)
 
         when:
-        Dependency dependency = registry.loadDependency(simpleDependency)
+        Dependency dependency = registry.loadDependency(declaredDependency, null)
         List<Dependency> childDependencies = Dependency.flattenList(dependency.children)
 
         then:
@@ -109,10 +109,10 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version with exclusions"() {
         given:
-        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclusions)
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclusions)
 
         when:
-        Dependency dependency = registry.loadDependency(simpleDependency)
+        Dependency dependency = registry.loadDependency(declaredDependency, null)
         List<Dependency> childDependencies = Dependency.flattenList(dependency.children)
 
         then:
@@ -134,10 +134,10 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version without transitive dependencies"() {
         given:
-        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version, transitive: false)
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, transitive: false)
 
         when:
-        Dependency dependency = registry.loadDependency(simpleDependency)
+        Dependency dependency = registry.loadDependency(declaredDependency, null)
         List<Dependency> childDependencies = Dependency.flattenList(dependency.children)
 
         then:
@@ -158,10 +158,10 @@ abstract class AbstractRegistrySpec extends Specification {
     def "can load module directly from git repo"() {
         given:
         String gitRepoUrl = "file://${resource(resourceFolder).path}/foo-git.git"
-        DeclaredDependency simpleDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
 
         when:
-        Dependency dependency = registry.loadDependency(simpleDependency)
+        Dependency dependency = registry.loadDependency(declaredDependency, null)
 
         then:
         dependency.name == 'foo-git'
@@ -173,5 +173,29 @@ abstract class AbstractRegistrySpec extends Specification {
         dependency.version.fullVersion == '1.0.0'
     }
 
+    def "parent dependencies are assigned correctly"() {
+        setup:
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo', versionExpression: '1.0.0')
+
+        when:
+        Dependency dependency = registry.loadDependency(declaredDependency, null)
+
+        then:
+        dependency.parent == null
+
+        and:
+        dependency.children.every { it.parent == dependency }
+    }
+
+    def "circular dependencies are detected"() {
+        setup:
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'circular1', versionExpression: '1.0.0')
+
+        when:
+        registry.loadDependency(declaredDependency, null)
+
+        then:
+        thrown(CircularDependencyException)
+    }
 
 }

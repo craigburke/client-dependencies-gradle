@@ -1,0 +1,14 @@
+{
+  "name": "circular2",
+  "versions": {
+    "1.0.0": {
+      "name": "circular2",
+      "dependencies": {
+        "circular1": "1.0.0"
+      },
+      "dist": {
+        "tarball": "http://www.example.com/npm/circular2-1.0.0.tgz"
+      }
+    }
+  }
+}

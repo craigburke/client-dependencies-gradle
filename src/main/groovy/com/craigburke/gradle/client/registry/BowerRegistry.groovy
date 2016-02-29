@@ -50,16 +50,20 @@ class BowerRegistry extends RegistryBase implements Registry {
         dependencyJson
     }
 
-    private List<Dependency> loadChildDependencies(String dependencyName, String version, List<String> exclusions) {
-        checkoutVersion(dependencyName, version)
-        File bowerConfigFile = new File("${getRepoPath(dependencyName)}/bower.json")
+    private List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
+        checkoutVersion(dependency.name, dependency.version.fullVersion)
+        File bowerConfigFile = new File("${getRepoPath(dependency.name)}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
         withExistingPool(pool) {
             bowerConfigJson.dependencies
                     .findAll { String name, String versionExpression -> !exclusions.contains(name) }
                     .collectParallel { String name, String versionExpression ->
+                        if (dependency.ancestorsAndSelf*.name.contains(name)) {
+                            throw new CircularDependencyException("Circular dependency created by dependency ${name}@${versionExpression}")
+                        }
+
                         DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: versionExpression)
-                        loadDependency(childDependency)
+                        loadDependency(childDependency, dependency)
                     } ?: []
         } as List<Dependency>
     }
@@ -113,16 +117,16 @@ class BowerRegistry extends RegistryBase implements Registry {
         getRepoPath(dependency.name)
     }
 
-    Dependency loadDependency(DeclaredDependency declaredDependency) {
+    Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         downloadRepository(declaredDependency)
         String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, registry: this)
+        Dependency dependency = new Dependency(name: dependencyName, registry: this, parent: parent)
 
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
         dependency.downloadUrl = declaredDependency.url ? declaredDependency.url : getDependencyJson(declaredDependency.name).url
 
         if (declaredDependency.transitive) {
-            dependency.children = loadChildDependencies(dependency.name, dependency.version.fullVersion, declaredDependency.exclude)
+            dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
         }
 
         dependency

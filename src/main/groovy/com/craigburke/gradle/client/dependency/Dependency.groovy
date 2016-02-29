@@ -22,8 +22,14 @@ class Dependency {
     Version version
     String downloadUrl
     Registry registry
+    Dependency parent
 
     List<Dependency> children = []
+
+    void setChildren(List<Dependency> children) {
+        children*.parent = this
+        this.children = children
+    }
 
     static flattenList(List<Dependency> dependencies) {
         (dependencies + dependencies.findAll { it.children }
@@ -31,4 +37,18 @@ class Dependency {
                 .flatten()
         ).unique(false) { it.name }
     }
+
+    List<Dependency> getAncestorsAndSelf() {
+        collectAncestors(this)
+    }
+
+    private static List<Dependency> collectAncestors(Dependency dependency) {
+        if (dependency.parent) {
+            [dependency] + collectAncestors(dependency.parent)
+        }
+        else {
+            [dependency]
+        }
+    }
+
 }

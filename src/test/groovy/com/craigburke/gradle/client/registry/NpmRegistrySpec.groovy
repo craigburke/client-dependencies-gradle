@@ -14,7 +14,7 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
     def "can get source for #name@#version"() {
         given:
         DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version)
-        Dependency dependency = registry.loadDependency(simpleDependency)
+        Dependency dependency = registry.loadDependency(simpleDependency, null)
 
         when:
         File source = registry.getSourceFolder(dependency)

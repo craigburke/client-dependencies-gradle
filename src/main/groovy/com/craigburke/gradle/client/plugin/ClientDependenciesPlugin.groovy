@@ -74,7 +74,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             List<Dependency> loadedDependencies = rootDependencies
                     .collectParallel { DeclaredDependency dependency ->
                         project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
-                        dependency.registry.loadDependency(dependency as DeclaredDependency)
+                        dependency.registry.loadDependency(dependency as DeclaredDependency, null)
                     }
 
 
@@ -126,8 +126,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 task.dependsOn CLEAN_TASK
             }
         }
-
-
     }
 
 }

@@ -57,9 +57,9 @@ class NpmRegistry extends RegistryBase implements Registry {
         getVersionListFromNpm(dependency.name)[dependency.version.fullVersion]?.dist?.tarball
     }
 
-    Dependency loadDependency(DeclaredDependency declaredDependency) {
+    Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, registry: this)
+        Dependency dependency = new Dependency(name: dependencyName, parent: parent, registry: this)
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
@@ -99,8 +99,13 @@ class NpmRegistry extends RegistryBase implements Registry {
             getDependencies(dependency)
                     .findAll { String name, String childVersion -> !excludes.contains(name)}
                     .collectParallel { String name, String childVersion ->
+
+                if (dependency.ancestorsAndSelf*.name.contains(name)) {
+                    throw new CircularDependencyException("Circular dependency created by dependency ${name}@${childVersion}")
+                }
+
                 DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: childVersion, exclude: excludes)
-                loadDependency(childDependency)
+                loadDependency(childDependency, dependency)
             } ?: []
         } as List<Dependency>
     }
