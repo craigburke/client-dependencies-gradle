@@ -135,5 +135,28 @@ class VersionSpec extends Specification {
         ''                | '0.0.0' | '1.0.0'
     }
 
+    @Unroll
+    def "Version #v1 #messageVerb #v2"() {
+        setup:
+        Version version1 = Version.parse(v1)
+        Version version2 = Version.parse(v2)
+
+        expect:
+        version1.compatibleWith(version2) == result
+
+        and:
+        version2.compatibleWith(version1) == result
+
+        where:
+        v1          | v2          | result
+        '1.0.0'     | '1.0.1'     | true
+        '1.0.0'     | '1.1.1'     | true
+        '1.0.0'     | '2.0.0'     | false
+        '1.0.0-foo' | '1.0.0-foo' | true
+        '1.0.0-foo' | '1.0.0-bar' | false
+
+        messageVerb = result ? 'is compatible with' : 'is not compatible with'
+    }
+
 }
 

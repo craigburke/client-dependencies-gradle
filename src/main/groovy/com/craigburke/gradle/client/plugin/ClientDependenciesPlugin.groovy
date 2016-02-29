@@ -63,7 +63,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.task(REPORT_TASK, group: TASK_GROUP) {
             doLast {
                 List<Dependency> allDependencies = loadDependencies(config.rootDependencies, project)
-                List<Dependency> finalDependencies = getFinalDependencies(config.rootDependencies, project)
+                List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
 
                 println ""
                 printDependencies(allDependencies, finalDependencies, 1)
@@ -109,10 +109,21 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     }
 
     void installDependencies(List<DeclaredDependency> rootDependencies, Project project) {
-        List<Dependency> dependencies = getFinalDependencies(rootDependencies, project)
+        List<Dependency> allDependencies = loadDependencies(rootDependencies, project)
+        List<Dependency> allDependenciesFlattened = Dependency.flattenList(allDependencies)
+        List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
+
+        finalDependencies.each { Dependency dependency ->
+            List<Dependency> conflicts = allDependenciesFlattened
+                    .findAll { it.name == dependency.name && !it.version.compatibleWith(dependency.version) }
+
+            if (conflicts) {
+                println "Version conflict with module ${dependency.name}. Declared versions: ${dependency.versionExpression}, ${conflicts*.versionExpression.join(', ')}"
+            }
+        }
 
         withExistingPool(RegistryBase.pool) {
-            dependencies.eachParallel { Dependency dependency ->
+            finalDependencies.eachParallel { Dependency dependency ->
                 DeclaredDependency rootDependency = rootDependencies.find { it.name == dependency.name }
                 Registry registry = dependency.registry
 
@@ -129,10 +140,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 }
             }
         }
-    }
-
-    List<Dependency> getFinalDependencies(List<DeclaredDependency> rootDependencies, Project project) {
-        Dependency.flattenList(loadDependencies(rootDependencies, project)).unique(false) { it.name }
     }
 
     List<Dependency> loadDependencies(List<DeclaredDependency> rootDependencies, Project project) {

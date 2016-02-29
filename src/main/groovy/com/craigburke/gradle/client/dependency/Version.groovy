@@ -128,6 +128,15 @@ class Version implements Comparable<Version> {
         fullVersion
     }
 
+    boolean compatibleWith(Version version) {
+        if (this.tag || version.tag) {
+            this == version
+        }
+        else {
+            this.major == version.major
+        }
+    }
+
     static List<Version> toList(List<String> versions) {
         versions.collect { parse(it) }
     }
