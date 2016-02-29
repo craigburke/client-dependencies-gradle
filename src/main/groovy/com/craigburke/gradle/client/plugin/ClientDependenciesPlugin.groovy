@@ -32,7 +32,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String INSTALL_TASK = 'clientInstall'
     static final String CLEAN_TASK = 'clientClean'
     static final String REFRESH_TASK = 'clientRefresh'
-    static final String[] DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'karmaRun', 'karmaWatch']
+
+    static final String[] INSTALL_DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'karmaRun', 'karmaWatch']
+    static final String[] CLEAN_DEPENDENT_TASKS = ['clean']
 
     ClientDependenciesExtension config
 
@@ -112,12 +114,20 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     }
 
     static void setTaskDependencies(Project project) {
-        DEPENDENT_TASKS.each { String taskName ->
+        INSTALL_DEPENDENT_TASKS.each { String taskName ->
             def task = project.tasks.findByName(taskName)
             if (task) {
                 task.dependsOn INSTALL_TASK
             }
         }
+        CLEAN_DEPENDENT_TASKS.each { String taskName ->
+            def task = project.tasks.findByName(taskName)
+            if (task) {
+                task.dependsOn CLEAN_TASK
+            }
+        }
+
+
     }
 
 }
