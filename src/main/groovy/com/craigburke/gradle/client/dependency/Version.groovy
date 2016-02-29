@@ -15,8 +15,11 @@
  */
 package com.craigburke.gradle.client.dependency
 
+import groovy.transform.CompileStatic
+
 import java.util.regex.Pattern
 
+@CompileStatic
 class Version implements Comparable<Version> {
 
     Integer major

@@ -15,8 +15,10 @@
  */
 package com.craigburke.gradle.client.registry
 
+import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
 
 @InheritConstructors
+@CompileStatic
 class CircularDependencyException extends RuntimeException {
 }

@@ -18,7 +18,9 @@ package com.craigburke.gradle.client.registry
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
+import groovy.transform.CompileStatic
 
+@CompileStatic
 interface Registry {
     File getSourceFolder(Dependency dependency)
     List<Version> getVersionList(DeclaredDependency declaredDependency)

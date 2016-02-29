@@ -15,8 +15,10 @@
  */
 package com.craigburke.gradle.client.registry
 
+import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 
+@CompileStatic
 class RegistryBase {
 
     String url

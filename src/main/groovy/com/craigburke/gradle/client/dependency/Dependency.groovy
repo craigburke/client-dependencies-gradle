@@ -15,6 +15,9 @@
  */
 package com.craigburke.gradle.client.dependency
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 class Dependency extends DeclaredDependency {
 
     Version version
@@ -29,10 +32,12 @@ class Dependency extends DeclaredDependency {
         this.children = children
     }
 
-    static flattenList(List<Dependency> dependencies) {
-        dependencies + dependencies.findAll { it.children }
-                .collect { flattenList(it.children) }
-                .flatten()
+    static List<Dependency> flattenList(List<Dependency> dependencies) {
+        List<Dependency> children = dependencies
+                .findAll { it.children }
+                .collect { flattenList(it.children) }.flatten() as List<Dependency>
+        
+        dependencies + children
     }
 
     List<Dependency> getAncestorsAndSelf() {

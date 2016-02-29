@@ -15,8 +15,11 @@
  */
 package com.craigburke.gradle.client.dependency
 
+import groovy.transform.CompileStatic
+
 import java.util.regex.Pattern
 
+@CompileStatic
 class VersionResolver {
 
     private static final String VERSION_GROUP = /v?(${Version.PATTERN_SIMPLE})/

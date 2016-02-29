@@ -16,7 +16,9 @@
 package com.craigburke.gradle.client.dependency
 
 import com.craigburke.gradle.client.registry.Registry
+import groovy.transform.CompileStatic
 
+@CompileStatic
 class DeclaredDependency {
 
     Registry registry
