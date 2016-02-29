@@ -28,6 +28,8 @@ The plugin adds the following tasks to your build:
 
 | clientClean | Removes client dependencies and clears the cache
 
+| clientReport | Prints a report of all dependencies and the resolved versions
+
 |===
 
 == Declaring dependencies

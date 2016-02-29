@@ -59,7 +59,7 @@ class NpmRegistry extends RegistryBase implements Registry {
 
     Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, parent: parent, registry: this)
+        Dependency dependency = new Dependency(name: dependencyName, versionExpression: declaredDependency.versionExpression, parent: parent, registry: this)
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)

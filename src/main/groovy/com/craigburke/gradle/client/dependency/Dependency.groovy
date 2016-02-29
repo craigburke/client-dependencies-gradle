@@ -15,16 +15,14 @@
  */
 package com.craigburke.gradle.client.dependency
 
-import com.craigburke.gradle.client.registry.Registry
+class Dependency extends DeclaredDependency {
 
-class Dependency {
-    String name
     Version version
     String downloadUrl
-    Registry registry
     Dependency parent
 
     List<Dependency> children = []
+    List<String> exclude = []
 
     void setChildren(List<Dependency> children) {
         children*.parent = this
@@ -32,10 +30,9 @@ class Dependency {
     }
 
     static flattenList(List<Dependency> dependencies) {
-        (dependencies + dependencies.findAll { it.children }
+        dependencies + dependencies.findAll { it.children }
                 .collect { flattenList(it.children) }
                 .flatten()
-        ).unique(false) { it.name }
     }
 
     List<Dependency> getAncestorsAndSelf() {

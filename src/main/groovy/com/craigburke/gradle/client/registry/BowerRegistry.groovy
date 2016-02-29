@@ -120,7 +120,7 @@ class BowerRegistry extends RegistryBase implements Registry {
     Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         downloadRepository(declaredDependency)
         String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, registry: this, parent: parent)
+        Dependency dependency = new Dependency(name: dependencyName, registry: this, versionExpression: declaredDependency.versionExpression, parent: parent)
 
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
         dependency.downloadUrl = declaredDependency.url ? declaredDependency.url : getDependencyJson(declaredDependency.name).url

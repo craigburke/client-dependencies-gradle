@@ -32,6 +32,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String INSTALL_TASK = 'clientInstall'
     static final String CLEAN_TASK = 'clientClean'
     static final String REFRESH_TASK = 'clientRefresh'
+    static final String REPORT_TASK = 'clientReport'
 
     static final String[] INSTALL_DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'karmaRun', 'karmaWatch']
     static final String[] CLEAN_DEPENDENT_TASKS = ['clean']
@@ -59,6 +60,16 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             }
         }
 
+        project.task(REPORT_TASK, group: TASK_GROUP) {
+            doLast {
+                List<Dependency> allDependencies = loadDependencies(config.rootDependencies, project)
+                List<Dependency> finalDependencies = getFinalDependencies(config.rootDependencies, project)
+
+                println ""
+                printDependencies(allDependencies, finalDependencies, 1)
+            }
+        }
+
         project.task(REFRESH_TASK, group: TASK_GROUP, dependsOn: [CLEAN_TASK, INSTALL_TASK])
 
         project.afterEvaluate {
@@ -69,16 +80,39 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     }
 
+    void printDependencies(List<Dependency> dependencies, List<Dependency> finalDependencies, int level) {
+        dependencies.each { Dependency dependency ->
+            String output = ('|    ' * (level - 1)) + '+--- '
+            output += "${dependency.name}@"
+
+            if (dependency.versionExpression.contains(' ')) {
+                output += "(${dependency.versionExpression})"
+            }
+            else {
+                output += dependency.versionExpression
+            }
+
+            Dependency installedDependency = finalDependencies.find { it.name == dependency.name }
+
+            if (dependency.version != installedDependency.version) {
+                output += " -> ${installedDependency.version.fullVersion} (*)"
+            }
+            else if (dependency.version.fullVersion != dependency.versionExpression) {
+                output += " -> ${dependency.version.fullVersion}"
+            }
+
+            println output
+            if (dependency.children) {
+                printDependencies(dependency.children, finalDependencies, level + 1)
+            }
+        }
+    }
+
     void installDependencies(List<DeclaredDependency> rootDependencies, Project project) {
+        List<Dependency> dependencies = getFinalDependencies(rootDependencies, project)
+
         withExistingPool(RegistryBase.pool) {
-            List<Dependency> loadedDependencies = rootDependencies
-                    .collectParallel { DeclaredDependency dependency ->
-                        project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
-                        dependency.registry.loadDependency(dependency as DeclaredDependency, null)
-                    }
-
-
-            Dependency.flattenList(loadedDependencies).eachParallel { Dependency dependency ->
+            dependencies.eachParallel { Dependency dependency ->
                 DeclaredDependency rootDependency = rootDependencies.find { it.name == dependency.name }
                 Registry registry = dependency.registry
 
@@ -95,6 +129,20 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+
+    List<Dependency> getFinalDependencies(List<DeclaredDependency> rootDependencies, Project project) {
+        Dependency.flattenList(loadDependencies(rootDependencies, project)).unique(false) { it.name }
+    }
+
+    List<Dependency> loadDependencies(List<DeclaredDependency> rootDependencies, Project project) {
+       withExistingPool(RegistryBase.pool) {
+            rootDependencies
+                    .collectParallel { DeclaredDependency dependency ->
+                project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
+                dependency.registry.loadDependency(dependency as DeclaredDependency, null)
+            }
+        } as List<Dependency>
     }
 
     void setDefaults(Project project) {
