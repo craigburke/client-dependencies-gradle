@@ -32,14 +32,13 @@ class ClientDependenciesExtensionSpec extends Specification {
         defaultCopyResults.includes == extension.fileExtensions.collect { "dist/**/*.${it}" }
     }
 
-
     def "default excludes are used by default"() {
         expect:
         defaultCopyResults.excludes == extension.copyExcludes
     }
 
     @Unroll
-    def "include is generated correctly for fileExtensions: #fileExtensions and copyIncludes: #copyIncludes and releaseFolder: #releaseFolder"() {
+    def "include is generated correctly extensions: #fileExtensions, includes: #copyIncludes folders: #releaseFolder"() {
         setup:
         extension.fileExtensions = fileExtensions
         extension.copyIncludes = copyIncludes

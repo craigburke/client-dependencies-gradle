@@ -1,5 +1,9 @@
 package com.craigburke.gradle.client.registry
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import static com.github.tomakehurst.wiremock.client.WireMock.get
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
@@ -11,8 +15,6 @@ import spock.lang.Subject
 import spock.lang.Unroll
 
 import java.security.MessageDigest
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*
 
 abstract class AbstractRegistrySpec extends Specification {
 
@@ -60,9 +62,9 @@ abstract class AbstractRegistrySpec extends Specification {
     }
 
     String getChecksum(byte[] data) {
-        MessageDigest.getInstance("SHA1")
+        MessageDigest.getInstance('SHA1')
                 .digest(data)
-                .collect { byte part -> String.format("%02x", part) }
+                .collect { byte part -> String.format('%02x', part) }
                 .join('')
     }
 
@@ -105,11 +107,10 @@ abstract class AbstractRegistrySpec extends Specification {
         'foobar' | '1.0.0' | ['foo@1.0.0', 'bar@1.0.0', 'baz@1.0.0']
     }
 
-
     @Unroll
     def "can load #name@#version with exclusions"() {
         given:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclusions)
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclude)
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -125,10 +126,10 @@ abstract class AbstractRegistrySpec extends Specification {
         childDependencies.collect { "${it.name}@${it.version}" as String } == children
 
         where:
-        name     | version | exclusions | children
-        'foo'    | '1.0.0' | ['bar']    | ['baz@1.0.0']
-        'foo'    | '1.0.0' | ['baz']    | ['bar@1.0.0']
-        'foobar' | '1.0.0' | ['foo']    | []
+        name     | version | exclude | children
+        'foo'    | '1.0.0' | ['bar'] | ['baz@1.0.0']
+        'foo'    | '1.0.0' | ['baz'] | ['bar@1.0.0']
+        'foobar' | '1.0.0' | ['foo'] | []
     }
 
     @Unroll
@@ -157,8 +158,8 @@ abstract class AbstractRegistrySpec extends Specification {
 
     def "can load module directly from git repo"() {
         given:
-        String gitRepoUrl = "file://${resource(resourceFolder).path}/foo-git.git"
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: gitRepoUrl)
+        String url = "file://${resource(resourceFolder).path}/foo-git.git"
+        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: url)
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -167,7 +168,7 @@ abstract class AbstractRegistrySpec extends Specification {
         dependency.name == 'foo-git'
 
         and:
-        dependency.children.collect { it.name } == ['bar', 'baz']
+        dependency.children*.name == ['bar', 'baz']
 
         and:
         dependency.version.fullVersion == '1.0.0'

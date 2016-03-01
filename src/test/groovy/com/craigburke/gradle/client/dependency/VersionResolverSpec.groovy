@@ -5,8 +5,8 @@ import spock.lang.Unroll
 
 class VersionResolverSpec extends Specification {
 
-    @Unroll("expression #expression resolves correctly")
-    def "simple expressions can be resolved"() {
+    @Unroll
+    def "Simple expression #expression resolves correctly"() {
         given:
         Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)
@@ -56,8 +56,8 @@ class VersionResolverSpec extends Specification {
         versions = ['1.0.0', '1.1.3', '1.2.0', '1.2.1', '1.2.2', '2.0.0']
     }
 
-    @Unroll("#expression resolves correctly")
-    def "caret range expressions can be resolved"() {
+    @Unroll
+    def "caret range expressions #expression resolves correctly"() {
         given:
         Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)
@@ -86,8 +86,8 @@ class VersionResolverSpec extends Specification {
                     '2.0.0']
     }
 
-    @Unroll("#expression resolves correctly")
-    def "combined expressions can be resolved"() {
+    @Unroll
+    def "combined expressions #expression resolves correctly"() {
         given:
         Version version = result ? Version.parse(result) : null
         List<Version> versionList = Version.toList(versions)

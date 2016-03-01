@@ -27,6 +27,8 @@ import jsr166y.ForkJoinPool
 @CompileStatic
 class RegistryBase {
 
+    static final String DEFAULT_PATH_SEPARATOR = '/'
+
     String url
     String cachePath
     String installPath
@@ -42,7 +44,7 @@ class RegistryBase {
     }
 
     static String formatPath(String path) {
-        path.replace('\\', '/').replace('//', '/')
+        path.replace('\\', DEFAULT_PATH_SEPARATOR).replace('//', DEFAULT_PATH_SEPARATOR)
     }
 
     String getMainFolderPath(String dependencyName) {

@@ -20,7 +20,7 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         File source = registry.getSourceFolder(dependency)
 
         then:
-        source.name == "source"
+        source.name == 'source'
 
         and:
         new File("${source.absolutePath}/${name}.js").exists()
@@ -30,6 +30,5 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         'foo' | '1.0.0'
         'bar' | '1.0.0'
     }
-
 
 }

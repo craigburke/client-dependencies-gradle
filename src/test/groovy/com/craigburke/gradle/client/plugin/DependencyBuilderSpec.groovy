@@ -73,5 +73,4 @@ class DependencyBuilderSpec extends Specification {
         dependencies.collect { "${it.name}@${it.versionExpression}" }.sort()
     }
 
-
 }

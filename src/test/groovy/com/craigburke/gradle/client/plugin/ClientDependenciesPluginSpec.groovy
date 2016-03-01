@@ -1,11 +1,14 @@
 package com.craigburke.gradle.client.plugin
 
+import static ClientDependenciesPlugin.CLEAN_TASK
+import static ClientDependenciesPlugin.INSTALL_TASK
+import static ClientDependenciesPlugin.REFRESH_TASK
+import static ClientDependenciesPlugin.REPORT_TASK
+
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import spock.lang.Specification
 import spock.lang.Unroll
-
-import static ClientDependenciesPlugin.*
 
 class ClientDependenciesPluginSpec extends Specification {
 
@@ -23,8 +26,7 @@ class ClientDependenciesPluginSpec extends Specification {
         project.tasks[taskName]
 
         where:
-        taskName << [CLEAN_TASK, INSTALL_TASK, REFRESH_TASK]
+        taskName << [CLEAN_TASK, INSTALL_TASK, REFRESH_TASK, REPORT_TASK]
     }
-
 
 }

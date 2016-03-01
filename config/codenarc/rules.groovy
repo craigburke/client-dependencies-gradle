@@ -85,7 +85,7 @@ ruleset {
     IfStatementCouldBeTernary
     InvertedIfElse
     LongLiteralWithLowerCaseL
-    'NoDef' excludeRegex: 'methodMissing'
+    'NoDef' enabled: false
     NoTabCharacter
     ParameterReassignment
     TernaryCouldBeElvis
@@ -94,7 +94,7 @@ ruleset {
 
     // rulesets/design.xml
     AbstractClassWithPublicConstructor
-    AbstractClassWithoutAbstractMethod
+    'AbstractClassWithoutAbstractMethod' doNotApplyToFilesMatching: '.*AbstractRegistrySpec.groovy'
     AssignmentToStaticFieldFromInstanceMethod
     BooleanMethodReturnsNull
     BuilderMethodWithSideEffects
@@ -117,10 +117,10 @@ ruleset {
     ToStringReturnsNull
 
     // rulesets/dry.xml
-    DuplicateListLiteral
-    DuplicateMapLiteral
-    DuplicateNumberLiteral
-    DuplicateStringLiteral
+    'DuplicateListLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
+    'DuplicateMapLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
+    'DuplicateNumberLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
+    'DuplicateStringLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
 
     // rulesets/enhanced.xml
     CloneWithoutCloneable
@@ -156,7 +156,7 @@ ruleset {
     BracesForIfElse
     BracesForMethod
     BracesForTryCatchFinally
-    ClassJavadoc
+    'ClassJavadoc' doNotApplyToFilesMatching: '.*Spec.groovy'
     ClosureStatementOnOpeningLineOfMultipleLineClosure
     ConsecutiveBlankLines
     FileEndsWithoutNewline
@@ -294,11 +294,11 @@ ruleset {
     ClassNameSameAsFilename
     ClassNameSameAsSuperclass
     ConfusingMethodName
-    FactoryMethodName
+    'FactoryMethodName' doNotApplyToFilesMatching: '.*Spec.groovy'
     FieldName
     InterfaceName
     InterfaceNameSameAsSuperInterface
-    MethodName
+    'MethodName' doNotApplyToFilesMatching: '.*Spec.groovy'
     ObjectOverrideMisspelledMethodName
     PackageName
     PackageNameMatchesFilePath
