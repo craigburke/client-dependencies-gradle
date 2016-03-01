@@ -2,6 +2,7 @@ plugins {
     id 'groovy'
     id 'maven-publish'
     id 'idea'
+    id 'codenarc'
     id 'com.gradle.plugin-publish' version '0.9.3'
 }
 
@@ -26,6 +27,11 @@ dependencies {
         exclude  module: 'groovy-all'
     }
     testCompile 'com.github.tomakehurst:wiremock:1.58:standalone'
+}
+
+codenarc {
+    toolVersion = '0.25.1'
+    configFile = file("${rootProject.projectDir}/config/codenarc/rules.groovy")
 }
 
 publishing {

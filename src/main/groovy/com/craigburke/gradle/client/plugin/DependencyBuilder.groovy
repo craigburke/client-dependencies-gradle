@@ -18,6 +18,12 @@ package com.craigburke.gradle.client.plugin
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.registry.Registry
 
+/**
+ *
+ * Builds list of simple dependencies from the plugin DSL
+ *
+ * @author Craig Burke
+ */
 class DependencyBuilder {
 
     Registry registry

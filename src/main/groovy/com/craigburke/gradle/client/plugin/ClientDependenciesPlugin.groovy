@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.plugin
 
+import static groovyx.gpars.GParsPool.withExistingPool
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.registry.BowerRegistry
@@ -23,9 +25,15 @@ import com.craigburke.gradle.client.registry.Registry
 import com.craigburke.gradle.client.registry.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.logging.Logger
 
-import static groovyx.gpars.GParsPool.withExistingPool
-
+/**
+ *
+ * Main client dependencies plugin class
+ *
+ * @author Craig Burke
+ */
 class ClientDependenciesPlugin implements Plugin<Project> {
 
     static final String TASK_GROUP = 'Client Dependencies'
@@ -65,8 +73,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 List<Dependency> allDependencies = loadDependencies(config.rootDependencies, project)
                 List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
 
-                println ""
-                printDependencies(allDependencies, finalDependencies, 1)
+                project.logger.quiet '\n'
+                printDependencies(allDependencies, finalDependencies, 1, project.logger)
             }
         }
 
@@ -80,7 +88,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     }
 
-    void printDependencies(List<Dependency> dependencies, List<Dependency> finalDependencies, int level) {
+    void printDependencies(List<Dependency> dependencies, List<Dependency> finalDependencies, int level, Logger log) {
         dependencies.each { Dependency dependency ->
             String output = ('|    ' * (level - 1)) + '+--- '
             output += "${dependency.name}@"
@@ -101,9 +109,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 output += " -> ${dependency.version.fullVersion}"
             }
 
-            println output
+            log.quiet "${output}\n"
             if (dependency.children) {
-                printDependencies(dependency.children, finalDependencies, level + 1)
+                printDependencies(dependency.children, finalDependencies, level + 1, log)
             }
         }
     }
@@ -118,7 +126,10 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                     .findAll { it.name == dependency.name && !it.version.compatibleWith(dependency.version) }
 
             if (conflicts) {
-                println "Version conflict with module ${dependency.name}. Declared versions: ${dependency.versionExpression}, ${conflicts*.versionExpression.join(', ')}"
+                project.logger.quiet """\
+                    Version conflict with module ${dependency.name}.
+                    Declared versions: ${dependency.versionExpression}, ${conflicts*.versionExpression.join(', ')}
+                """
             }
         }
 
@@ -154,8 +165,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     void setDefaults(Project project) {
         if (config.installDir == null) {
-            boolean grailsPluginApplied = project.extensions.findByName('grails')
-            config.installDir = project.file(grailsPluginApplied ? 'grails-app/assets/vendor' : 'src/assets/vendor').absolutePath
+            boolean usesGrails = project.extensions.findByName('grails')
+            config.installDir = project.file(usesGrails ? 'grails-app/assets/vendor' : 'src/assets/vendor').absolutePath
         }
 
         if (config.cacheDir == null) {
@@ -170,13 +181,13 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     static void setTaskDependencies(Project project) {
         INSTALL_DEPENDENT_TASKS.each { String taskName ->
-            def task = project.tasks.findByName(taskName)
+            Task task = project.tasks.findByName(taskName)
             if (task) {
                 task.dependsOn INSTALL_TASK
             }
         }
         CLEAN_DEPENDENT_TASKS.each { String taskName ->
-            def task = project.tasks.findByName(taskName)
+            Task task = project.tasks.findByName(taskName)
             if (task) {
                 task.dependsOn CLEAN_TASK
             }

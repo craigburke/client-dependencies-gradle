@@ -18,6 +18,10 @@ package com.craigburke.gradle.client.dependency
 import com.craigburke.gradle.client.registry.Registry
 import groovy.transform.CompileStatic
 
+/**
+ * Simple base dependency
+ * @author Craig Burke
+ */
 @CompileStatic
 class DeclaredDependency {
 

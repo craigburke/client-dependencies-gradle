@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.registry
 
+import static groovyx.gpars.GParsPool.withExistingPool
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
@@ -23,8 +25,12 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 
-import static groovyx.gpars.GParsPool.withExistingPool
-
+/**
+ *
+ * Registry to resolves NPM Dependencies
+ *
+ * @author Craig Burke
+ */
 class NpmRegistry extends RegistryBase implements Registry {
 
     NpmRegistry(String url = 'https://registry.npmjs.org') {
@@ -59,7 +65,10 @@ class NpmRegistry extends RegistryBase implements Registry {
 
     Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, versionExpression: declaredDependency.versionExpression, parent: parent, registry: this)
+        Dependency dependency = new Dependency(name: dependencyName,
+                versionExpression: declaredDependency.versionExpression,
+                parent: parent,
+                registry: this)
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
@@ -69,7 +78,8 @@ class NpmRegistry extends RegistryBase implements Registry {
         }
 
         if (!dependency.version) {
-            throw new Exception("Couldn't resolve ${dependencyName}@${declaredDependency.versionExpression}")
+            String exceptionMessage = "Couldn't resolve ${dependencyName}@${declaredDependency.versionExpression}"
+            throw new DependencyResolveException(exceptionMessage)
         }
 
         dependency.downloadUrl = declaredDependency.url ?: getDownloadUrlFromNpm(dependency)
@@ -94,19 +104,24 @@ class NpmRegistry extends RegistryBase implements Registry {
         }
     }
 
-    private List<Dependency> loadChildDependencies(Dependency dependency, List<String> excludes) {
+    private List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclude) {
         withExistingPool(pool) {
             getDependencies(dependency)
-                    .findAll { String name, String childVersion -> !excludes.contains(name)}
-                    .collectParallel { String name, String childVersion ->
+                    .findAll { String name, String childVersion -> !exclude.contains(name) }
+                    .collectParallel { String name, String versionExpression ->
+                        if (dependency.ancestorsAndSelf*.name.contains(name)) {
+                            String exceptionMessage = "Circular dependency created by dependency ${name}@${versionExpression}"
+                            throw new CircularDependencyException(exceptionMessage)
+                        }
 
-                if (dependency.ancestorsAndSelf*.name.contains(name)) {
-                    throw new CircularDependencyException("Circular dependency created by dependency ${name}@${childVersion}")
-                }
+                        DeclaredDependency child = new DeclaredDependency(
+                                name: name,
+                                versionExpression: versionExpression,
+                                exclude: exclude
+                        )
 
-                DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: childVersion, exclude: excludes)
-                loadDependency(childDependency, dependency)
-            } ?: []
+                        loadDependency(child, dependency)
+                    } ?: []
         } as List<Dependency>
     }
 
@@ -134,12 +149,12 @@ class NpmRegistry extends RegistryBase implements Registry {
 
             AntBuilder builder = new AntBuilder()
             builder.project.buildListeners.first().setMessageOutputLevel(0)
-            builder.untar(src: downloadFile.absolutePath, dest: sourceFolder.absolutePath, compression:'gzip', overwrite:true) {
+            builder.untar(src: downloadFile.absolutePath, dest: sourceFolder.absolutePath, compression: 'gzip', overwrite: true) {
                 patternset {
                     include(name: 'package/**')
                 }
                 mapper {
-                    globmapper(from: 'package/*', to:'*')
+                    globmapper(from: 'package/*', to: '*')
                 }
             }
 

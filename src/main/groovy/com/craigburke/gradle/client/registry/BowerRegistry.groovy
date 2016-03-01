@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.registry
 
+import static groovyx.gpars.GParsPool.withExistingPool
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
@@ -24,8 +26,12 @@ import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.ajoberstar.grgit.operation.ResetOp
 
-import static groovyx.gpars.GParsPool.withExistingPool
-
+/**
+ *
+ * Registry to resolves Bower Dependencies
+ *
+ * @author Craig Burke
+ */
 class BowerRegistry extends RegistryBase implements Registry {
 
     BowerRegistry(String url = 'https://bower.herokuapp.com') {
@@ -54,17 +60,18 @@ class BowerRegistry extends RegistryBase implements Registry {
         checkoutVersion(dependency.name, dependency.version.fullVersion)
         File bowerConfigFile = new File("${getRepoPath(dependency.name)}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
-        withExistingPool(pool) {
+        withExistingPool(RegistryBase.pool) {
             bowerConfigJson.dependencies
-                    .findAll { String name, String versionExpression -> !exclusions.contains(name) }
-                    .collectParallel { String name, String versionExpression ->
-                        if (dependency.ancestorsAndSelf*.name.contains(name)) {
-                            throw new CircularDependencyException("Circular dependency created by dependency ${name}@${versionExpression}")
-                        }
+                .findAll { String name, String versionExpression -> !exclusions.contains(name) }
+                .collectParallel { String name, String versionExpression ->
+                    if (dependency.ancestorsAndSelf*.name.contains(name)) {
+                        String message = "Circular dependency created by dependency ${name}@${versionExpression}"
+                        throw new CircularDependencyException(message)
+                    }
 
-                        DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: versionExpression)
-                        loadDependency(childDependency, dependency)
-                    } ?: []
+                    DeclaredDependency childDependency = new DeclaredDependency(name: name, versionExpression: versionExpression)
+                    loadDependency(childDependency, dependency)
+                } ?: []
         } as List<Dependency>
     }
 
@@ -101,14 +108,14 @@ class BowerRegistry extends RegistryBase implements Registry {
     }
 
     void checkoutVersion(String dependencyName, String version) {
-        def repo = getRepository(dependencyName)
+        Grgit repo = getRepository(dependencyName)
         String commit = repo.tag.list().find { it.name == version }.commit.id
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
     List<Version> getVersionList(DeclaredDependency declaredDependency) {
         downloadRepository(declaredDependency)
-        def repo = getRepository(declaredDependency.name)
+        Grgit repo = getRepository(declaredDependency.name)
         repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
@@ -119,8 +126,10 @@ class BowerRegistry extends RegistryBase implements Registry {
 
     Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
         downloadRepository(declaredDependency)
-        String dependencyName = declaredDependency.name
-        Dependency dependency = new Dependency(name: dependencyName, registry: this, versionExpression: declaredDependency.versionExpression, parent: parent)
+        String name = declaredDependency.name
+
+        Dependency dependency = new Dependency(name: name, registry: this, parent: parent,
+                versionExpression: declaredDependency.versionExpression)
 
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
         dependency.downloadUrl = declaredDependency.url ? declaredDependency.url : getDependencyJson(declaredDependency.name).url

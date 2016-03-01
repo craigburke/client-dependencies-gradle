@@ -17,6 +17,10 @@ package com.craigburke.gradle.client.dependency
 
 import groovy.transform.CompileStatic
 
+/**
+ * Dependency object
+ * @author Craig Burke
+ */
 @CompileStatic
 class Dependency extends DeclaredDependency {
 
@@ -35,8 +39,8 @@ class Dependency extends DeclaredDependency {
     static List<Dependency> flattenList(List<Dependency> dependencies) {
         List<Dependency> children = dependencies
                 .findAll { it.children }
-                .collect { flattenList(it.children) }.flatten() as List<Dependency>
-        
+                .collectMany { flattenList(it.children) } as List<Dependency>
+
         dependencies + children
     }
 

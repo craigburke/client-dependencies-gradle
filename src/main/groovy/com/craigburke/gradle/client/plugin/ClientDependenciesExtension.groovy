@@ -21,6 +21,12 @@ import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
 import org.gradle.api.Project
 
+/**
+ *
+ * Extension for client dependencies
+ *
+ * @author Craig Burke
+ */
 class ClientDependenciesExtension {
 
     int threadPoolSize = 15
@@ -32,7 +38,8 @@ class ClientDependenciesExtension {
     List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
     List<String> releaseFolders = ['dist', 'release']
     List<String> copyIncludes = []
-    List<String> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js', 'index.js', 'gulpfile.js', 'source/**']
+    List<String> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
+                                 'index.js', 'gulpfile.js', 'source/**']
 
     Closure defaultCopy
 
@@ -67,10 +74,10 @@ class ClientDependenciesExtension {
 
         String pathPrefix = sourceFolder
                 .listFiles()
-                .find { it.directory && releaseFolders.contains(it.name)}?.name ?: ''
+                .find { it.directory && releaseFolders.contains(it.name) }?.name ?: ''
 
         List<String> includes = fileExtensions
-                .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}"} + copyIncludes
+                .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}" } + copyIncludes
 
         List<String> excludes = copyExcludes
 

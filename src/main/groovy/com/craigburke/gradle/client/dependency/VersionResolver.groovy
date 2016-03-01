@@ -19,6 +19,10 @@ import groovy.transform.CompileStatic
 
 import java.util.regex.Pattern
 
+/**
+ * Resolves expression as a Version
+ * @author Craig Burke
+ */
 @CompileStatic
 class VersionResolver {
 
@@ -37,8 +41,7 @@ class VersionResolver {
 
         if (expression?.trim() in ['latest', '*', '']) {
             sortedVersions.first()
-        }
-        else {
+        } else {
             sortedVersions.find { matches(it, expression) }
         }
     }
@@ -57,8 +60,7 @@ class VersionResolver {
 
             if (matchedVersion.fuzzy) {
                 results += (version >= matchedVersion.floor && version < matchedVersion.ceiling)
-            }
-            else {
+            } else {
                 results += version == matchedVersion
             }
         }
@@ -75,7 +77,7 @@ class VersionResolver {
             Version matchedVersion = Version.parse(versionExpression)
 
             if (!matchedVersion.fuzzy) {
-                results += version >matchedVersion
+                results += version > matchedVersion
             }
         }
 
@@ -99,7 +101,8 @@ class VersionResolver {
             Version rangeBottom = Version.parse(expression1)
             Version rangeTop = Version.parse(expression2)
 
-            results += (version >= rangeBottom.floor && (rangeTop.fuzzy ? (version < rangeTop.ceiling) : (version <= rangeTop)))
+            results += (version >= rangeBottom.floor &&
+                    (rangeTop.fuzzy ? (version < rangeTop.ceiling) : (version <= rangeTop)))
         }
 
         expression.find(CARET_RANGE) { String match, String versionExpression ->
@@ -126,11 +129,12 @@ class VersionResolver {
             rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor + 1, patch: 0)
         }
         else {
-            rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor, patch: matchedVersion.patch + 1)
+            rangeTop = new Version(major: matchedVersion.major,
+                    minor: matchedVersion.minor,
+                    patch: matchedVersion.patch + 1)
         }
 
         (version >= rangeBottom && version < rangeTop)
     }
-
 
 }

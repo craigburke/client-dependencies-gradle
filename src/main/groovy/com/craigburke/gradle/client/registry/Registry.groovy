@@ -20,6 +20,12 @@ import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import groovy.transform.CompileStatic
 
+/**
+ *
+ * Registry interface
+ *
+ * @author Craig Burke
+ */
 @CompileStatic
 interface Registry {
     File getSourceFolder(Dependency dependency)

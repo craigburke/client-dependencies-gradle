@@ -19,6 +19,10 @@ import groovy.transform.CompileStatic
 
 import java.util.regex.Pattern
 
+/**
+ * Semantic version
+ * @author Craig Burke
+ */
 @CompileStatic
 class Version implements Comparable<Version> {
 

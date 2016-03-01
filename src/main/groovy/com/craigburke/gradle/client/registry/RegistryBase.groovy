@@ -18,6 +18,12 @@ package com.craigburke.gradle.client.registry
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 
+/**
+ *
+ * Base Registry class
+ *
+ * @author Craig Burke
+ */
 @CompileStatic
 class RegistryBase {
 
