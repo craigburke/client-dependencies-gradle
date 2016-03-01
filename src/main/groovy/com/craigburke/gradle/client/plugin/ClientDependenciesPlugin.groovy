@@ -73,7 +73,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 List<Dependency> allDependencies = loadDependencies(config.rootDependencies, project)
                 List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
 
-                project.logger.quiet '\n'
+                project.logger.quiet ''
                 printDependencies(allDependencies, finalDependencies, 1, project.logger)
             }
         }
@@ -109,7 +109,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 output += " -> ${dependency.version.fullVersion}"
             }
 
-            log.quiet "${output}\n"
+            log.quiet "${output}"
             if (dependency.children) {
                 printDependencies(dependency.children, finalDependencies, level + 1, log)
             }
