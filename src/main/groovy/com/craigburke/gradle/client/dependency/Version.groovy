@@ -33,8 +33,8 @@ class Version implements Comparable<Version> {
     String tag = ''
 
     static final List<String> XRANGE_VALUES = ['x', 'X', '*']
-    static final Pattern PATTERN_SIMPLE = ~/(?:\d+|x|X|\*)\.?(?:\d+|x|X|\*)?\.?(?:\d+|x|x|X|\*)?(?:\-[^+]*)?(?:\+.*)?/
-    static final Pattern PATTERN_GROUPED = ~/^(\d+|x|X|\*)?\.?(\d+|x|X|\*)?\.?(\d+|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
+    static final Pattern PATTERN_SIMPLE = ~/v?(?:\d+|x|X|\*)\.?(?:\d+|x|X|\*)?\.?(?:\d+|x|x|X|\*)?(?:\-[^+]*)?(?:\+.*)?/
+    static final Pattern PATTERN_GROUPED = ~/^v?(\d+|x|X|\*)?\.?(\d+|x|X|\*)?\.?(\d+|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
 
     static Version parse(String expression) {
         Version version = new Version()

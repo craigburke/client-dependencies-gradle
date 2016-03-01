@@ -136,6 +136,17 @@ class VersionSpec extends Specification {
     }
 
     @Unroll
+    def "leading v is ignored in expression #expression"() {
+        expect:
+        Version.parse(expression).fullVersion == result
+
+        where:
+        expression | result
+        'v1.0.0'   | '1.0.0'
+        '1.0.0'    | '1.0.0'
+    }
+
+    @Unroll
     def "Version #v1 #messageVerb #v2"() {
         setup:
         Version version1 = Version.parse(v1)

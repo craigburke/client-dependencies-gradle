@@ -109,7 +109,8 @@ class BowerRegistry extends RegistryBase implements Registry {
 
     void checkoutVersion(String dependencyName, String version) {
         Grgit repo = getRepository(dependencyName)
-        String commit = repo.tag.list().find { it.name == version }.commit.id
+
+        String commit = repo.tag.list().find { (it.name - 'v') == version }.commit.id
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
@@ -132,7 +133,9 @@ class BowerRegistry extends RegistryBase implements Registry {
                 versionExpression: declaredDependency.versionExpression)
 
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(declaredDependency))
+
         dependency.downloadUrl = declaredDependency.url ? declaredDependency.url : getDependencyJson(declaredDependency.name).url
+        checkoutVersion(declaredDependency.name, dependency.version.fullVersion)
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
