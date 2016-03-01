@@ -3,7 +3,7 @@
 = Client Dependencies Gradle Plugin
 
 The Gradle plugin allows you to declare client side dependencies in *build.gradle* from bower, npm or git and
-with a much clearer dependencies resolution model.
+with a much clearer dependencies resolution model. This plugin queries the registries directly so it doesn't require or install node, npm or bower.
 
 == Getting Started
 
