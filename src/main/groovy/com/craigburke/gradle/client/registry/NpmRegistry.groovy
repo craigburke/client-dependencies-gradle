@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.registry
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
+import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
@@ -24,6 +25,7 @@ import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  *
@@ -33,8 +35,11 @@ import org.ajoberstar.grgit.Grgit
  */
 class NpmRegistry extends RegistryBase implements Registry {
 
-    NpmRegistry(String url = 'https://registry.npmjs.org') {
-        super(url)
+    static final String DEFAULT_URL = 'https://registry.npmjs.org'
+    private final Map<String, Object> dependencyLocks = [:] as ConcurrentHashMap
+
+    NpmRegistry(String url, Logger log) {
+        super(url, log)
     }
 
     private String getSourceFolderPath(Dependency dependency) {
@@ -42,21 +47,26 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     private getVersionListFromNpm(String dependencyName) {
-        File mainConfigFile = new File("${getMainFolderPath(dependencyName)}/main.json")
+        dependencyLocks.putIfAbsent(dependencyName, new Object())
+        Object lock = dependencyLocks[dependencyName]
 
-        def versionListJson
+        synchronized (lock) {
+            File mainConfigFile = new File("${getMainFolderPath(dependencyName)}/main.json")
 
-        if (mainConfigFile.exists()) {
-            versionListJson = new JsonSlurper().parse(mainConfigFile).versions
-        } else {
-            URL url = new URL("${this.url}/${dependencyName}")
-            def json = new JsonSlurper().parse(url)
+            def versionListJson
 
-            mainConfigFile.parentFile.mkdirs()
-            mainConfigFile.text = JsonOutput.toJson(json).toString()
-            versionListJson = json.versions
+            if (mainConfigFile.exists()) {
+                versionListJson = new JsonSlurper().parse(mainConfigFile).versions
+            } else {
+                URL url = new URL("${this.url}/${dependencyName}")
+                def json = new JsonSlurper().parse(url)
+
+                mainConfigFile.parentFile.mkdirs()
+                mainConfigFile.text = JsonOutput.toJson(json).toString()
+                versionListJson = json.versions
+            }
+            versionListJson
         }
-        versionListJson
     }
 
     private String getDownloadUrlFromNpm(Dependency dependency) {
@@ -64,6 +74,8 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent) {
+        log.info "Loading dependency: ${declaredDependency}"
+
         String dependencyName = declaredDependency.name
         Dependency dependency = new Dependency(name: dependencyName,
                 versionExpression: declaredDependency.versionExpression,
@@ -131,37 +143,46 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     void downloadDependency(Dependency dependency) {
-        File sourceFolder = new File("${getSourceFolderPath(dependency)}/")
+        log.info "Downloading dependency: ${dependency}"
 
-        if (sourceFolder.exists()) {
-            return
-        }
+        dependencyLocks.putIfAbsent(dependency.toString(), new Object())
+        Object lock = dependencyLocks[dependency.toString()]
 
-        sourceFolder.mkdirs()
+        synchronized(lock) {
+            File sourceFolder = new File("${getSourceFolderPath(dependency)}/")
 
-        if (dependency.downloadUrl.endsWith('tgz')) {
-            File downloadFile = new File("${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package.tgz")
-            downloadFile.parentFile.mkdirs()
-
-            downloadFile.withOutputStream { out ->
-                out << new URL(dependency.downloadUrl).openStream()
+            if (sourceFolder.exists()) {
+                return
             }
 
-            AntBuilder builder = new AntBuilder()
-            builder.project.buildListeners.first().setMessageOutputLevel(0)
-            builder.untar(src: downloadFile.absolutePath, dest: sourceFolder.absolutePath, compression: 'gzip', overwrite: true) {
-                patternset {
-                    include(name: 'package/**')
-                }
-                mapper {
-                    globmapper(from: 'package/*', to: '*')
-                }
-            }
+            sourceFolder.mkdirs()
 
-            downloadFile.delete()
-        }
-        else {
-            Grgit.clone(dir: sourceFolder.absolutePath, uri: dependency.downloadUrl, refToCheckout: 'master')
+            if (dependency.downloadUrl.endsWith('tgz')) {
+                String fileName = "${getMainFolderPath(dependency.name)}/${dependency.version.fullVersion}/package.tgz"
+                File downloadFile = new File(fileName)
+                downloadFile.parentFile.mkdirs()
+
+                downloadFile.withOutputStream { out ->
+                    out << new URL(dependency.downloadUrl).openStream()
+                }
+
+                AntBuilder builder = new AntBuilder()
+                builder.project.buildListeners.first().setMessageOutputLevel(0)
+                builder.untar(src: downloadFile.absolutePath,  dest: sourceFolder.absolutePath,
+                        compression: 'gzip', overwrite: true) {
+                    patternset {
+                        include(name: 'package/**')
+                    }
+                    mapper {
+                        globmapper(from: 'package/*', to: '*')
+                    }
+                }
+
+                downloadFile.delete()
+            }
+            else {
+                Grgit.clone(dir: sourceFolder.absolutePath, uri: dependency.downloadUrl, refToCheckout: 'master')
+            }
         }
     }
 

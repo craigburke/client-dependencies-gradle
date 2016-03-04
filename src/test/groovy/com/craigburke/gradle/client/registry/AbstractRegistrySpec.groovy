@@ -13,7 +13,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
-
+import org.gradle.api.logging.Logging
 import java.security.MessageDigest
 
 abstract class AbstractRegistrySpec extends Specification {
@@ -37,7 +37,7 @@ abstract class AbstractRegistrySpec extends Specification {
 
     void init(Class<Registry> clazz, String resourceFolder) {
         RegistryBase.threadPoolSize = 15
-        registry = clazz.newInstance(["http://www.example.com/${resourceFolder}"] as Object[])
+        registry = clazz.newInstance(["http://www.example.com/${resourceFolder}", Logging.getLogger(clazz)] as Object[])
         registry.cachePath = cacheFolder.root.absolutePath
         registry.installPath = installFolder.root.absolutePath
         this.resourceFolder = resourceFolder

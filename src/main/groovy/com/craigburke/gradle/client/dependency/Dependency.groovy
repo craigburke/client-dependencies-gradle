@@ -57,4 +57,8 @@ class Dependency extends DeclaredDependency {
         }
     }
 
+    String toString() {
+        "${name}@${version?.fullVersion}"
+    }
+
 }

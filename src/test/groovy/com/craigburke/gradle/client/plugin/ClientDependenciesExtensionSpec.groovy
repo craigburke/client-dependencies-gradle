@@ -3,6 +3,8 @@ package com.craigburke.gradle.client.plugin
 import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
+import org.gradle.api.Project
+import org.gradle.api.logging.Logging
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -15,7 +17,8 @@ class ClientDependenciesExtensionSpec extends Specification {
     @Rule TemporaryFolder sourceFolder = new TemporaryFolder()
 
     def setup() {
-        extension = new ClientDependenciesExtension(null)
+        Project project = [getLogger: { Logging.getLogger('foo') } ] as Project
+        extension = new ClientDependenciesExtension(project)
     }
 
     def "include with default file extensions are used by default"() {

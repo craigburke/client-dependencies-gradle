@@ -123,9 +123,9 @@ ruleset {
     'DuplicateStringLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
 
     // rulesets/enhanced.xml
-    CloneWithoutCloneable
-    JUnitAssertEqualsConstantActualValue
-    UnsafeImplementationAsMap
+    //CloneWithoutCloneable
+    //JUnitAssertEqualsConstantActualValue
+    //UnsafeImplementationAsMap
 
     // rulesets/exceptions.xml
     CatchArrayIndexOutOfBoundsException

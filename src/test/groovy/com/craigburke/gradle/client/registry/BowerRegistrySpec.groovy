@@ -33,7 +33,10 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         File source = registry.getSourceFolder(dependency)
 
         then:
-        source.name == 'source'
+        source.name == version
+
+        and:
+        source.parentFile.name == 'source'
 
         and:
         Grgit.open(dir: source.absolutePath).head().id == commitHash

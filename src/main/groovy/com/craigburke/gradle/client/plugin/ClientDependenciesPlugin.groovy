@@ -49,7 +49,10 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         config = project.extensions.create('clientDependencies', ClientDependenciesExtension, project)
-        config.registryMap = [npm: new NpmRegistry(), bower: new BowerRegistry()]
+        config.registryMap = [
+                npm: new NpmRegistry(NpmRegistry.DEFAULT_URL, project.logger),
+                bower: new BowerRegistry(BowerRegistry.DEFAULT_URL, project.logger)
+        ]
 
         project.task(CLEAN_TASK, group: TASK_GROUP) {
             doLast {
@@ -117,7 +120,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     }
 
     void installDependencies(List<DeclaredDependency> rootDependencies, Project project) {
-        List<Dependency> allDependencies = loadDependencies(rootDependencies, project)
+        List<Dependency> allDependencies = loadDependencies(rootDependencies)
         List<Dependency> allDependenciesFlattened = Dependency.flattenList(allDependencies)
         List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
 
@@ -153,11 +156,10 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         }
     }
 
-    List<Dependency> loadDependencies(List<DeclaredDependency> rootDependencies, Project project) {
+    List<Dependency> loadDependencies(List<DeclaredDependency> rootDependencies) {
        withExistingPool(RegistryBase.pool) {
             rootDependencies
                     .collectParallel { DeclaredDependency dependency ->
-                project.logger.info "Loading: ${dependency.name}@${dependency.versionExpression}"
                 dependency.registry.loadDependency(dependency as DeclaredDependency, null)
             }
         } as List<Dependency>

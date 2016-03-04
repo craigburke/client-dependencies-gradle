@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.registry
 
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
+import org.gradle.api.logging.Logger
 
 /**
  *
@@ -34,9 +35,11 @@ class RegistryBase {
     String installPath
 
     static ForkJoinPool pool
+    protected Logger log
 
-    RegistryBase(String url) {
+    RegistryBase(String url, Logger log) {
         this.url = url
+        this.log = log
     }
 
     static void setThreadPoolSize(int poolSize) {

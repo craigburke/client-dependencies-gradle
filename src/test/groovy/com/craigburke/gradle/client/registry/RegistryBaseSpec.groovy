@@ -1,5 +1,7 @@
 package com.craigburke.gradle.client.registry
 
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -9,7 +11,9 @@ class RegistryBaseSpec extends Specification {
     @Shared RegistryBase registryBase
 
     def setup() {
-        registryBase = new RegistryBase()
+        String url = 'http://www.example.com'
+        Logger log = Logging.getLogger(RegistryBase)
+        registryBase = new RegistryBase(url, log)
     }
 
     @Unroll

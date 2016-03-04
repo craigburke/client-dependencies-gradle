@@ -20,6 +20,7 @@ import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
 import org.gradle.api.Project
+import org.gradle.api.logging.Logger
 
 /**
  *
@@ -63,7 +64,8 @@ class ClientDependenciesExtension {
 
     void registry(Map props) {
         String url = props.url as String
-        Registry registry = (props.type == 'bower' ? new BowerRegistry(url) : new NpmRegistry(url))
+        Logger log = project.logger
+        Registry registry = (props.type == 'bower' ? new BowerRegistry(url, log) : new NpmRegistry(url, log))
         registryMap[props.name as String] = registry
     }
 

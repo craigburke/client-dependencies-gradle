@@ -41,4 +41,9 @@ class DeclaredDependency {
     void setExclude(List<String> exclude) {
         this.exclude = exclude
     }
+
+    String toString() {
+        "${name}@${versionExpression}"
+    }
+
 }
