@@ -4,8 +4,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import static com.github.tomakehurst.wiremock.client.WireMock.get
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
+import com.craigburke.gradle.client.registry.core.CircularDependencyException
+import com.craigburke.gradle.client.registry.core.Registry
+import com.craigburke.gradle.client.registry.core.RegistryBase
+
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import com.github.tomakehurst.wiremock.WireMockServer
 import org.junit.Rule
@@ -33,6 +36,10 @@ abstract class AbstractRegistrySpec extends Specification {
 
     URL resource(String path) {
         AbstractRegistrySpec.classLoader.getResource("__files/${path}")
+    }
+
+    protected File getSourceFolder() {
+        new File("${installFolder.newFolder().absolutePath}/source/")
     }
 
     void init(Class<Registry> clazz, String resourceFolder) {
@@ -71,7 +78,11 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "get version list for #name"() {
         setup:
-        DeclaredDependency dependency = new DeclaredDependency(name: name, versionExpression: '1.0.0')
+        Dependency dependency = new Dependency(
+                name: name,
+                sourceFolder: sourceFolder,
+                registry: registry,
+                versionExpression: '1.0.0')
 
         expect:
         registry.getVersionList(dependency).sort() == Version.toList(versions)
@@ -85,7 +96,7 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version and child dependencies"() {
         given:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version)
+        Dependency declaredDependency = new Dependency(name: name, versionExpression: version)
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -110,7 +121,10 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version with exclusions"() {
         given:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, exclude: exclude)
+        Dependency declaredDependency = new Dependency(name: name,
+                sourceFolder: sourceFolder,
+                versionExpression: version,
+                exclude: exclude)
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -135,7 +149,12 @@ abstract class AbstractRegistrySpec extends Specification {
     @Unroll
     def "can load #name@#version without transitive dependencies"() {
         given:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: name, versionExpression: version, transitive: false)
+        Dependency declaredDependency = new Dependency(
+                name: name,
+                versionExpression: version,
+                sourceFolder: sourceFolder,
+                transitive: false
+        )
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -159,7 +178,7 @@ abstract class AbstractRegistrySpec extends Specification {
     def "can load module directly from git repo"() {
         given:
         String url = "file://${resource(resourceFolder).path}/foo-git.git"
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo-git', versionExpression: '1.0.0', url: url)
+        Dependency declaredDependency = new Dependency(name: 'foo-git', versionExpression: '1.0.0', url: url)
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -176,7 +195,7 @@ abstract class AbstractRegistrySpec extends Specification {
 
     def "parent dependencies are assigned correctly"() {
         setup:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'foo', versionExpression: '1.0.0')
+        Dependency declaredDependency = new Dependency(name: 'foo', versionExpression: '1.0.0')
 
         when:
         Dependency dependency = registry.loadDependency(declaredDependency, null)
@@ -190,7 +209,7 @@ abstract class AbstractRegistrySpec extends Specification {
 
     def "circular dependencies are detected"() {
         setup:
-        DeclaredDependency declaredDependency = new DeclaredDependency(name: 'circular1', versionExpression: '1.0.0')
+        Dependency declaredDependency = new Dependency(name: 'circular1', versionExpression: '1.0.0')
 
         when:
         registry.loadDependency(declaredDependency, null)

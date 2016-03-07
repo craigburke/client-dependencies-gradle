@@ -1,7 +1,9 @@
 package com.craigburke.gradle.client.registry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.DeclaredDependency
+import com.craigburke.gradle.client.registry.bower.BowerRegistry
+import com.craigburke.gradle.client.registry.bower.GitResolver
+import com.craigburke.gradle.client.registry.bower.GithubResolver
 import org.ajoberstar.grgit.Grgit
 import spock.lang.Unroll
 
@@ -26,25 +28,36 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
     @Unroll
     def "can get source for #name@#version"() {
         given:
-        DeclaredDependency simpleDependency = new DeclaredDependency(name: name, versionExpression: version)
-        Dependency dependency = registry.loadDependency(simpleDependency, null)
+        Dependency simpleDependency = new Dependency(name: name,
+                sourceFolder: sourceFolder,
+                versionExpression: version)
 
         when:
-        File source = registry.getSourceFolder(dependency)
+        Dependency dependency = registry.loadDependency(simpleDependency, null)
+        File source = dependency.sourceFolder
 
         then:
-        source.name == version
-
-        and:
-        source.parentFile.name == 'source'
-
-        and:
         Grgit.open(dir: source.absolutePath).head().id == commitHash
 
         where:
         name  | version | commitHash
         'foo' | '1.0.0' | '563d901652d46ba84a3257f9c35997adbd350e6e'
         'bar' | '1.0.0' | 'd24b2c55280b9f048c6af770d9a57195b6e70ecb'
+    }
+
+    @Unroll
+    def "correct resolver is used for dependency with url #url"() {
+        given:
+        Dependency dependency = new Dependency(name: 'foo',
+                registry: registry, url: url)
+
+        expect:
+        registry.getResolver(dependency).getClass() == resolverClass
+
+        where:
+        url                                  | resolverClass
+        'http://www.example.com/foo/bar.git' | GitResolver
+        'http://www.github.com/foo/bar.git'  | GithubResolver
     }
 
 }

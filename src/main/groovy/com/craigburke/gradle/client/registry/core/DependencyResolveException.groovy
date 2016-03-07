@@ -1,4 +1,4 @@
-package com.craigburke.gradle.client.registry
+package com.craigburke.gradle.client.registry.core
 
 import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors

@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.craigburke.gradle.client.registry
+package com.craigburke.gradle.client.registry.core
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.DeclaredDependency
 import com.craigburke.gradle.client.dependency.Version
 import groovy.transform.CompileStatic
 
@@ -28,14 +27,15 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 interface Registry {
-    File getSourceFolder(Dependency dependency)
-    List<Version> getVersionList(DeclaredDependency declaredDependency)
-    Dependency loadDependency(DeclaredDependency declaredDependency, Dependency parent)
+    List<Version> getVersionList(Dependency dependency)
+    Dependency loadDependency(Dependency dependency, Dependency parent)
 
     void setInstallPath(String installPath)
     String getInstallPath()
 
     void setCachePath(String cachePath)
+
+    Resolver getResolver(Dependency dependency)
 
     String getUrl()
 }

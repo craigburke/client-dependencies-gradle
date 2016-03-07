@@ -13,37 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.craigburke.gradle.client.dependency
+package com.craigburke.gradle.client.registry.core
 
-import com.craigburke.gradle.client.registry.Registry
 import groovy.transform.CompileStatic
+import groovy.transform.InheritConstructors
 
 /**
- * Simple base dependency
+ *
+ * Exception for a circular dependency
+ *
  * @author Craig Burke
  */
+@InheritConstructors
 @CompileStatic
-class DeclaredDependency {
-
-    Registry registry
-    String name
-    String versionExpression
-    String url
-
-    List<String> exclude = []
-    boolean transitive = true
-    Closure copyConfig
-
-    void setExclude(String exclude) {
-        this.exclude = [exclude]
-    }
-
-    void setExclude(List<String> exclude) {
-        this.exclude = exclude
-    }
-
-    String toString() {
-        "${name}@${versionExpression}"
-    }
-
+class CircularDependencyException extends RuntimeException {
 }

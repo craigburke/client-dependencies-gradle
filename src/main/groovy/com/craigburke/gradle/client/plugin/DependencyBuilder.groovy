@@ -15,8 +15,8 @@
  */
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.dependency.DeclaredDependency
-import com.craigburke.gradle.client.registry.Registry
+import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.registry.core.Registry
 
 /**
  *
@@ -27,7 +27,7 @@ import com.craigburke.gradle.client.registry.Registry
 class DependencyBuilder {
 
     Registry registry
-    List<DeclaredDependency> rootDependencies = []
+    List<Dependency> rootDependencies = []
 
     DependencyBuilder(Registry registry) {
         this.registry = registry
@@ -44,7 +44,7 @@ class DependencyBuilder {
             props += additionalProps
         }
 
-        DeclaredDependency dependency = new DeclaredDependency(props)
+        Dependency dependency = new Dependency(props)
 
         if (args && args.last() instanceof Closure) {
             dependency.copyConfig = args.last()

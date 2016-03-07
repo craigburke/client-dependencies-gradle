@@ -3,6 +3,9 @@ package com.craigburke.gradle.client.plugin
 import com.craigburke.gradle.client.registry.BowerRegistry
 import com.craigburke.gradle.client.registry.NpmRegistry
 import com.craigburke.gradle.client.registry.Registry
+import com.craigburke.gradle.client.registry.bower.BowerRegistry
+import com.craigburke.gradle.client.registry.core.Registry
+import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import org.gradle.api.Project
 import org.gradle.api.logging.Logging
 import org.junit.Rule

@@ -18,11 +18,10 @@ package com.craigburke.gradle.client.plugin
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.DeclaredDependency
-import com.craigburke.gradle.client.registry.BowerRegistry
-import com.craigburke.gradle.client.registry.NpmRegistry
-import com.craigburke.gradle.client.registry.Registry
-import com.craigburke.gradle.client.registry.RegistryBase
+import com.craigburke.gradle.client.registry.bower.BowerRegistry
+import com.craigburke.gradle.client.registry.npm.NpmRegistry
+import com.craigburke.gradle.client.registry.core.Registry
+import com.craigburke.gradle.client.registry.core.RegistryBase
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -119,7 +118,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         }
     }
 
-    void installDependencies(List<DeclaredDependency> rootDependencies, Project project) {
+    void installDependencies(List<Dependency> rootDependencies, Project project) {
         List<Dependency> allDependencies = loadDependencies(rootDependencies)
         List<Dependency> allDependenciesFlattened = Dependency.flattenList(allDependencies)
         List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
@@ -138,17 +137,16 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         withExistingPool(RegistryBase.pool) {
             finalDependencies.eachParallel { Dependency dependency ->
-                DeclaredDependency rootDependency = rootDependencies.find { it.name == dependency.name }
-                Registry registry = dependency.registry
-
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
-                File sourceFolder = registry.getSourceFolder(dependency)
-                Closure copyConfig = rootDependency?.copyConfig ?: config.getDefaultCopyConfig(sourceFolder)
+
+                Registry registry = dependency.registry
+                Dependency rootDependency = rootDependencies.find { it.name == dependency.name }
+                Closure copyConfig = rootDependency?.copyConfig ?: config.getDefaultCopyConfig(dependency.sourceFolder)
 
                 project.copy {
                     includeEmptyDirs = false
                     into "${registry.installPath}/${dependency.name}"
-                    from("${sourceFolder}") {
+                    from("${dependency.sourceFolder}") {
                         with copyConfig
                     }
                 }
@@ -156,11 +154,11 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         }
     }
 
-    List<Dependency> loadDependencies(List<DeclaredDependency> rootDependencies) {
+    List<Dependency> loadDependencies(List<Dependency> rootDependencies) {
        withExistingPool(RegistryBase.pool) {
             rootDependencies
-                    .collectParallel { DeclaredDependency dependency ->
-                dependency.registry.loadDependency(dependency as DeclaredDependency, null)
+                    .collectParallel { Dependency dependency ->
+                dependency.registry.loadDependency(dependency as Dependency, null)
             }
         } as List<Dependency>
     }

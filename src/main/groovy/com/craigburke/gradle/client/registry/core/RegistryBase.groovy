@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.craigburke.gradle.client.registry
+package com.craigburke.gradle.client.registry.core
 
+import com.craigburke.gradle.client.dependency.Dependency
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 import org.gradle.api.logging.Logger
@@ -36,6 +37,7 @@ class RegistryBase {
 
     static ForkJoinPool pool
     protected Logger log
+    protected List<Resolver> resolvers
 
     RegistryBase(String url, Logger log) {
         this.url = url
@@ -52,6 +54,10 @@ class RegistryBase {
 
     String getMainFolderPath(String dependencyName) {
         formatPath("${cachePath}/${dependencyName}")
+    }
+
+    Resolver getResolver(Dependency dependency) {
+        resolvers.find { it.canResolve(dependency) }
     }
 
 }

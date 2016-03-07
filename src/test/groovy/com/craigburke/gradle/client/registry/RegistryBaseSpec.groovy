@@ -1,5 +1,6 @@
 package com.craigburke.gradle.client.registry
 
+import com.craigburke.gradle.client.registry.core.RegistryBase
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import spock.lang.Shared

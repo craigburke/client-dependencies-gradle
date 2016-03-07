@@ -15,21 +15,45 @@
  */
 package com.craigburke.gradle.client.dependency
 
+import com.craigburke.gradle.client.registry.core.Registry
+import groovy.transform.AutoClone
 import groovy.transform.CompileStatic
 
 /**
- * Dependency object
+ * dependency
  * @author Craig Burke
  */
 @CompileStatic
-class Dependency extends DeclaredDependency {
+@AutoClone
+class Dependency {
+
+    Registry registry
+    String name
+    String versionExpression
+    String url
 
     Version version
-    String downloadUrl
     Dependency parent
 
     List<Dependency> children = []
     List<String> exclude = []
+
+    File sourceFolder
+
+    boolean transitive = true
+    Closure copyConfig
+
+    void setExclude(String exclude) {
+        this.exclude = [exclude]
+    }
+
+    void setExclude(List<String> exclude) {
+        this.exclude = exclude
+    }
+
+    String toString() {
+        "${name}@${version?.fullVersion ?: versionExpression}"
+    }
 
     void setChildren(List<Dependency> children) {
         children*.parent = this
@@ -55,10 +79,6 @@ class Dependency extends DeclaredDependency {
         else {
             [dependency]
         }
-    }
-
-    String toString() {
-        "${name}@${version?.fullVersion}"
     }
 
 }

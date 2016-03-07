@@ -15,10 +15,10 @@
  */
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.dependency.DeclaredDependency
-import com.craigburke.gradle.client.registry.BowerRegistry
-import com.craigburke.gradle.client.registry.NpmRegistry
-import com.craigburke.gradle.client.registry.Registry
+import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.registry.bower.BowerRegistry
+import com.craigburke.gradle.client.registry.npm.NpmRegistry
+import com.craigburke.gradle.client.registry.core.Registry
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 
@@ -49,7 +49,7 @@ class ClientDependenciesExtension {
     }
 
     Map<String, Registry> registryMap = [:]
-    List<DeclaredDependency> rootDependencies = []
+    List<Dependency> rootDependencies = []
 
     def methodMissing(String registryName, args) {
        if (args && args.last() instanceof Closure) {
