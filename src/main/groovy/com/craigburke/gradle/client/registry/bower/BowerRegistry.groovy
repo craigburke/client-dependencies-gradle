@@ -22,7 +22,6 @@ import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.RegistryBase
 import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonSlurper
 
@@ -37,8 +36,7 @@ class BowerRegistry extends RegistryBase implements Registry {
     static final String DEFAULT_URL = 'https://bower.herokuapp.com'
 
     BowerRegistry(String url, Logger log) {
-        super(url, log)
-        resolvers = [new GithubResolver(log), new GitResolver(log)]
+        super(url, log, [new GithubResolver(log), new GitResolver(log)])
     }
 
     private String getGitUrl(String dependencyName) {
@@ -53,6 +51,7 @@ class BowerRegistry extends RegistryBase implements Registry {
             bowerConfigJson.dependencies
                     .findAll { String name, String versionExpression -> !exclusions.contains(name) }
                     .collectParallel { String name, String versionExpression ->
+
                 if (dependency.ancestorsAndSelf*.name.contains(name)) {
                     String message = "Circular dependency created by dependency ${name}@${versionExpression}"
                     throw new CircularDependencyException(message)
@@ -62,10 +61,6 @@ class BowerRegistry extends RegistryBase implements Registry {
                 loadDependency(childDependency, dependency)
             } ?: []
         } as List<Dependency>
-    }
-
-    List<Version> getVersionList(Dependency dependency) {
-        getResolver(dependency).getVersionList(dependency)
     }
 
     Dependency loadDependency(Dependency declaredDependency, Dependency parent) {

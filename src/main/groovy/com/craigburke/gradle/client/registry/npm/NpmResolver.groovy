@@ -31,7 +31,7 @@ class NpmResolver extends ResolverBase implements Resolver {
         new JsonSlurper().parse(url).versions
     }
 
-    private String getDownloadUrlFromNpm(Dependency dependency) {
+    private static String getDownloadUrlFromNpm(Dependency dependency) {
         getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist?.tarball
     }
 
@@ -41,7 +41,7 @@ class NpmResolver extends ResolverBase implements Resolver {
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency) {
+        withLock(dependency.name) {
             File sourceFolder = dependency.sourceFolder
 
             if (sourceFolder.exists()) {

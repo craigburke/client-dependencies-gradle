@@ -32,7 +32,7 @@ class GitResolver extends ResolverBase implements Resolver {
         new JsonSlurper().parse(url)
     }
 
-    protected Grgit getRepository(Dependency dependency) {
+    private Grgit getRepository(Dependency dependency) {
         File sourceFolder = dependency.sourceFolder
 
         if (sourceFolder.exists()) {
@@ -45,14 +45,14 @@ class GitResolver extends ResolverBase implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        withLock(dependency) {
+        withLock(dependency.name) {
             Grgit repo = getRepository(dependency)
             repo.tag.list().collect { Version.parse(it.name as String) }
         } as List<Version>
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency) {
+        withLock(dependency.key) {
             Grgit repo = getRepository(dependency)
             String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
             repo.reset(commit: commit, mode: ResetOp.Mode.HARD)

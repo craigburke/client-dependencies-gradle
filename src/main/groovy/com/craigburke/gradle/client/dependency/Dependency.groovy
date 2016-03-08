@@ -51,10 +51,6 @@ class Dependency {
         this.exclude = exclude
     }
 
-    String toString() {
-        "${name}@${version?.fullVersion ?: versionExpression}"
-    }
-
     void setChildren(List<Dependency> children) {
         children*.parent = this
         this.children = children
@@ -81,4 +77,11 @@ class Dependency {
         }
     }
 
+    String getKey() {
+        "${name}@${version?.fullVersion ?: versionExpression}"
+    }
+
+    String toString() {
+        key
+    }
 }

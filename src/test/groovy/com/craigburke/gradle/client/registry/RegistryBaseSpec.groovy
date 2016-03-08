@@ -14,7 +14,7 @@ class RegistryBaseSpec extends Specification {
     def setup() {
         String url = 'http://www.example.com'
         Logger log = Logging.getLogger(RegistryBase)
-        registryBase = new RegistryBase(url, log)
+        registryBase = new RegistryBase(url, log, [])
     }
 
     @Unroll

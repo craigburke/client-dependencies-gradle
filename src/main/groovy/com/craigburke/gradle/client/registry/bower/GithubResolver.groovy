@@ -5,8 +5,6 @@ import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
 import com.craigburke.gradle.client.registry.core.ResolverBase
 import groovy.json.JsonSlurper
-
-import java.nio.file.Files
 import java.util.regex.Pattern
 import org.gradle.api.logging.Logger
 
@@ -49,7 +47,7 @@ class GithubResolver extends ResolverBase implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        withLock(dependency) {
+        withLock(dependency.name) {
             GithubInfo info = getInfo(dependency.url)
 
             URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
@@ -58,7 +56,7 @@ class GithubResolver extends ResolverBase implements Resolver {
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency) {
+        withLock(dependency.key) {
             if (dependency.sourceFolder.exists()) {
                 return
             }

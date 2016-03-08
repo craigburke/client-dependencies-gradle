@@ -39,8 +39,7 @@ class NpmRegistry extends RegistryBase implements Registry {
     static final String DEFAULT_URL = 'https://registry.npmjs.org'
 
     NpmRegistry(String url, Logger log) {
-        super(url, log)
-        resolvers = [new NpmResolver(log)]
+        super(url, log, [new NpmResolver(log)])
     }
 
     Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
@@ -103,10 +102,6 @@ class NpmRegistry extends RegistryBase implements Registry {
                         loadDependency(child, dependency)
                     } ?: []
         } as List<Dependency>
-    }
-
-    List<Version> getVersionList(Dependency dependency) {
-        getResolver(dependency).getVersionList(dependency)
     }
 
 }

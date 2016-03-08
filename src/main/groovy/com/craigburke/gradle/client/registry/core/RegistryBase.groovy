@@ -16,6 +16,7 @@
 package com.craigburke.gradle.client.registry.core
 
 import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.dependency.Version
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 import org.gradle.api.logging.Logger
@@ -39,9 +40,10 @@ class RegistryBase {
     protected Logger log
     protected List<Resolver> resolvers
 
-    RegistryBase(String url, Logger log) {
+    RegistryBase(String url, Logger log, List<Resolver> resolvers) {
         this.url = url
         this.log = log
+        this.resolvers = resolvers
     }
 
     static void setThreadPoolSize(int poolSize) {
@@ -54,6 +56,10 @@ class RegistryBase {
 
     String getMainFolderPath(String dependencyName) {
         formatPath("${cachePath}/${dependencyName}")
+    }
+
+    List<Version> getVersionList(Dependency dependency) {
+        getResolver(dependency).getVersionList(dependency)
     }
 
     Resolver getResolver(Dependency dependency) {
