@@ -39,7 +39,7 @@ You can specify dependencies from different sources (npm, bower or git) and cont
 [source,gradle,subs='attributes']
 ----
 plugins {
-    id 'com.craigburke.client-dependnencies' version '{version}'
+    id 'com.craigburke.client-dependencies' version '{version}'
 }
 
 clientDependencies {
