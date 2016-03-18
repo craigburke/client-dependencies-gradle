@@ -72,7 +72,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.task(REPORT_TASK, group: TASK_GROUP) {
             doLast {
-                List<Dependency> allDependencies = loadDependencies(config.rootDependencies, project)
+                List<Dependency> allDependencies = loadDependencies(config.rootDependencies)
                 List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
 
                 project.logger.quiet ''
