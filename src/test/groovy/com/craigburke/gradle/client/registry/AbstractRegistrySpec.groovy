@@ -57,7 +57,7 @@ abstract class AbstractRegistrySpec extends Specification {
         System.properties['http.proxyPort'] = PROXY_PORT as String
     }
 
-    void setMockResponses(Map<String, Object> mockedResponses) {
+    void mockResponses(Map<String, Object> mockedResponses) {
         mockedResponses.each { String url, content ->
             def response = aResponse().withStatus(200).withBody(content)
             httpMock.stubFor(get(urlEqualTo(url)).willReturn(response))

@@ -15,14 +15,14 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         init(BowerRegistry, 'bower')
         String gitUrl = "file://${resource('bower').path}"
 
-        mockResponses = [
+        mockResponses([
                 '/bower/packages/foo'      : resource('bower/packages/foo').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
                 '/bower/packages/bar'      : resource('bower/packages/bar').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
                 '/bower/packages/baz'      : resource('bower/packages/baz').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
                 '/bower/packages/foobar'   : resource('bower/packages/foobar').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
                 '/bower/packages/circular1': resource('bower/packages/circular1').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
                 '/bower/packages/circular2': resource('bower/packages/circular2').text.replace(GIT_URL_PLACEHOLDER, gitUrl)
-        ]
+        ])
     }
 
     @Unroll

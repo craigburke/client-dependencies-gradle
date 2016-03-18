@@ -1,11 +1,13 @@
 package com.craigburke.gradle.client.registry.npm
 
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.getShaHash
 import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
+import com.craigburke.gradle.client.registry.core.DownloadVerifyException
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.logging.Logger
@@ -41,24 +43,35 @@ class NpmResolver implements Resolver {
                 return
             }
             sourceFolder.mkdirs()
-            String downloadUrl = dependency.url ?: getDownloadUrlFromNpm(dependency)
+            DownloadInfo download = getDownloadInfo(dependency)
 
-            if (downloadUrl.endsWith('tgz')) {
-                log.info "Downloading ${dependency} from ${downloadUrl}"
+            if (download.url.endsWith('tgz')) {
+                log.info "Downloading ${dependency} from ${download.url}"
 
                 String fileName = "${sourceFolder.absolutePath}/package.tgz"
                 File downloadFile = new File(fileName)
 
                 downloadFile.withOutputStream { out ->
-                    out << new URL(downloadUrl).openStream()
+                    out << new URL(download.url).openStream()
+                }
+
+                if (download.checksum) {
+                    verifyFileChecksum(downloadFile, download.checksum)
                 }
 
                 extractTarball(downloadFile, sourceFolder)
                 downloadFile.delete()
             } else {
-                log.info "Downloading ${dependency} from ${downloadUrl}"
-                Grgit.clone(dir: sourceFolder.absolutePath, uri: dependency.url, refToCheckout: 'master')
+                log.info "Downloading ${dependency} from ${download.url}"
+                Grgit.clone(dir: sourceFolder.absolutePath, uri: download.url, refToCheckout: 'master')
             }
+        }
+    }
+
+    private verifyFileChecksum(File downloadFile, String checksum) {
+        log.info "Verifying checksum for file ${downloadFile.absolutePath} [${checksum}]"
+        if (getShaHash(downloadFile.bytes) != checksum) {
+            throw new DownloadVerifyException("${downloadFile.absolutePath} doesn't match checksum ${checksum}")
         }
     }
 
@@ -67,8 +80,14 @@ class NpmResolver implements Resolver {
         new JsonSlurper().parse(url).versions
     }
 
-    private static String getDownloadUrlFromNpm(Dependency dependency) {
-        getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist?.tarball
+    private static DownloadInfo getDownloadInfo(Dependency dependency) {
+        if (dependency.url) {
+            new DownloadInfo(url: dependency.url, checksum: null)
+        }
+        else {
+            def json = getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist
+            new DownloadInfo(url: json?.tarball, checksum: json?.shasum)
+        }
     }
 
 }

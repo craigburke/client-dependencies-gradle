@@ -25,7 +25,19 @@ class ResolverUtil {
     }
 
     static String getMD5Hash(String input) {
-        MessageDigest.getInstance('MD5').digest(input.bytes).encodeHex().toString()
+        getMD5Hash(input.bytes)
+    }
+
+    static String getMD5Hash(byte[] input) {
+        MessageDigest.getInstance('MD5').digest(input).encodeHex().toString()
+    }
+
+    static getShaHash(String input) {
+        getShaHash(input.bytes)
+    }
+
+    static getShaHash(byte[] input) {
+        MessageDigest.getInstance('SHA1').digest(input).encodeHex().toString()
     }
 
 }
