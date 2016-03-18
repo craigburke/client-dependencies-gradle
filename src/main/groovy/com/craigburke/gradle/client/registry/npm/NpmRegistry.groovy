@@ -64,7 +64,7 @@ class NpmRegistry extends RegistryBase implements Registry {
             throw new DependencyResolveException(exceptionMessage)
         }
 
-        boolean downloadedFromCache = (checkGlobalCache && downloadDependencyFromCache(dependency))
+        boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
 
         if (!downloadedFromCache) {
             getResolver(dependency).downloadDependency(dependency)

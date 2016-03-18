@@ -35,7 +35,7 @@ class ClientDependenciesExtension {
     Project project
     String installDir
     String cacheDir
-    boolean checkGlobalCache = true
+    boolean useGlobalCache = true
 
     List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
     List<String> releaseFolders = ['dist', 'release']

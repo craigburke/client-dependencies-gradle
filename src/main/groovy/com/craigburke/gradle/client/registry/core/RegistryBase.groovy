@@ -35,7 +35,7 @@ class RegistryBase {
     String url
     String cachePath
     String installPath
-    boolean checkGlobalCache
+    boolean useGlobalCache
 
     static ForkJoinPool pool
     protected Logger log
