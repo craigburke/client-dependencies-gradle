@@ -1,0 +1,17 @@
+{
+  "name": "peer",
+  "versions": {
+    "1.0.0": {
+      "name": "peer",
+      "dependencies": {
+        "foo": "1.0.0"
+      },
+      "peerDependencies": {
+        "bar": "1.0.0"
+      },
+      "dist": {
+        "tarball": "http://www.example.com/npm/peer-1.0.0.tgz"
+      }
+    }
+  }
+}

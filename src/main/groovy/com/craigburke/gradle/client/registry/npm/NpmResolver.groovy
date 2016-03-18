@@ -26,22 +26,13 @@ class NpmResolver extends ResolverBase implements Resolver {
         (dependency != null)
     }
 
-    private static getVersionListFromNpm(Dependency dependency) {
-        URL url = new URL("${dependency.registry.url}/${dependency.name}")
-        new JsonSlurper().parse(url).versions
-    }
-
-    private static String getDownloadUrlFromNpm(Dependency dependency) {
-        getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist?.tarball
-    }
-
     List<Version> getVersionList(Dependency dependency) {
         def versionListJson = getVersionListFromNpm(dependency)
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency.name) {
+        withLock(dependency.key) {
             File sourceFolder = dependency.sourceFolder
             if (sourceFolder.exists()) {
                 return
@@ -76,6 +67,15 @@ class NpmResolver extends ResolverBase implements Resolver {
                 Grgit.clone(dir: sourceFolder.absolutePath, uri: dependency.url, refToCheckout: 'master')
             }
         }
+    }
+
+    private static getVersionListFromNpm(Dependency dependency) {
+        URL url = new URL("${dependency.registry.url}/${dependency.name}")
+        new JsonSlurper().parse(url).versions
+    }
+
+    private static String getDownloadUrlFromNpm(Dependency dependency) {
+        getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist?.tarball
     }
 
     private void extractTarball(File sourceFile, File destination) {

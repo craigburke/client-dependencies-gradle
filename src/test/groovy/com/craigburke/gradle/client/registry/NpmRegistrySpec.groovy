@@ -28,4 +28,16 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         'bar' | '1.0.0'
     }
 
+    def "peer dependencies are included"() {
+        given:
+        Dependency simpleDependency = new Dependency(name: 'peer', sourceFolder: sourceFolder, versionExpression: '1.0.0')
+        Dependency dependency = registry.loadDependency(simpleDependency, null)
+
+        when:
+        Dependency loadedDependency = registry.loadDependency(dependency, null)
+
+        then:
+        loadedDependency.children*.toString().sort() == ['bar@1.0.0', 'foo@1.0.0']
+    }
+
 }

@@ -76,7 +76,7 @@ class NpmRegistry extends RegistryBase implements Registry {
 
         if (packageJson.exists()) {
             def json = new JsonSlurper().parse(packageJson)
-            json.dependencies
+            (json.dependencies ?: [:]) + (json.peerDependencies ?: [:])
         }
         else {
             [:]

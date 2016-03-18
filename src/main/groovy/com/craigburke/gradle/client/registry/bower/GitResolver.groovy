@@ -27,6 +27,21 @@ class GitResolver extends ResolverBase implements Resolver {
         (dependency != null)
     }
 
+    List<Version> getVersionList(Dependency dependency) {
+        withLock(dependency.name) {
+            Grgit repo = getRepository(dependency)
+            repo.tag.list().collect { Version.parse(it.name as String) }
+        } as List<Version>
+    }
+
+    void downloadDependency(Dependency dependency) {
+        withLock(dependency.key) {
+            Grgit repo = getRepository(dependency)
+            String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
+            repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
+        }
+    }
+
     private getDependencyJson(Dependency dependency) {
         URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
         new JsonSlurper().parse(url)
@@ -41,21 +56,6 @@ class GitResolver extends ResolverBase implements Resolver {
         else {
             String gitUrl = dependency.url ?: getDependencyJson(dependency).url
             Grgit.clone(dir: sourceFolder, uri: gitUrl)
-        }
-    }
-
-    List<Version> getVersionList(Dependency dependency) {
-        withLock(dependency.name) {
-            Grgit repo = getRepository(dependency)
-            repo.tag.list().collect { Version.parse(it.name as String) }
-        } as List<Version>
-    }
-
-    void downloadDependency(Dependency dependency) {
-        withLock(dependency.key) {
-            Grgit repo = getRepository(dependency)
-            String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
-            repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
         }
     }
 }
