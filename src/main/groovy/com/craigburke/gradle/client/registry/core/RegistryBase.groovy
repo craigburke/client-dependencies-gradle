@@ -40,10 +40,10 @@ class RegistryBase {
     protected Logger log
     protected List<Resolver> resolvers
 
-    RegistryBase(String url, Logger log, List<Resolver> resolvers) {
+    RegistryBase(String url, Logger log, List<Class<Resolver>> resolvers) {
         this.url = url
         this.log = log
-        this.resolvers = resolvers
+        this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }
     }
 
     static void setThreadPoolSize(int poolSize) {

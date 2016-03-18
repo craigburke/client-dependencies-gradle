@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.registry.bower
 
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.getMD5Hash
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
@@ -36,7 +38,7 @@ class BowerRegistry extends RegistryBase implements Registry {
     static final String DEFAULT_URL = 'https://bower.herokuapp.com'
 
     BowerRegistry(String url, Logger log) {
-        super(url, log, [new GithubResolver(log), new GitResolver(log)])
+        super(url, log, [GithubResolver, GitResolver])
     }
 
     private String getGitUrl(String dependencyName) {
@@ -73,13 +75,37 @@ class BowerRegistry extends RegistryBase implements Registry {
         dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
 
-        getResolver(dependency).downloadDependency(dependency)
+        if (!downloadDependencyFromCache(dependency)) {
+            getResolver(dependency).downloadDependency(dependency)
+        }
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
         }
 
         dependency
+    }
+
+    boolean downloadDependencyFromCache(Dependency dependency) {
+        withLock(dependency.key) {
+            String bowerCachePath = "${System.getProperty('user.home')}/.cache/bower/packages"
+            String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
+            File cacheFolder = new File(cachePath)
+
+            if (cacheFolder.exists()) {
+                log.info "Loading ${dependency} from ${cachePath}"
+                AntBuilder builder = new AntBuilder()
+                builder.project.buildListeners.first().setMessageOutputLevel(0)
+                builder.copy(todir: dependency.sourceFolder.absolutePath) {
+                    fileset(dir: cacheFolder.absolutePath)
+                }
+                true
+            }
+            else {
+                false
+            }
+        }
+
     }
 
 }

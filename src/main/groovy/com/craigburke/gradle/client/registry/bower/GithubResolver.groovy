@@ -1,10 +1,12 @@
 package com.craigburke.gradle.client.registry.bower
 
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
-import com.craigburke.gradle.client.registry.core.ResolverBase
 import groovy.json.JsonSlurper
+
 import java.util.regex.Pattern
 import org.gradle.api.logging.Logger
 
@@ -14,7 +16,7 @@ import org.gradle.api.logging.Logger
  *
  * @author Craig Burke
  */
-class GithubResolver extends ResolverBase implements Resolver {
+class GithubResolver implements Resolver {
 
     private final Logger log
 

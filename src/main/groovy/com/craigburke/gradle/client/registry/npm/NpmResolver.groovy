@@ -1,9 +1,10 @@
 package com.craigburke.gradle.client.registry.npm
 
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
-import com.craigburke.gradle.client.registry.core.ResolverBase
 import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.logging.Logger
@@ -14,7 +15,7 @@ import org.gradle.api.logging.Logger
  *
  * @author Craig Burke
  */
-class NpmResolver extends ResolverBase implements Resolver {
+class NpmResolver implements Resolver {
 
     private final Logger log
 

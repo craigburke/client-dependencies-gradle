@@ -2,17 +2,18 @@ package com.craigburke.gradle.client.registry.core
 
 import groovy.transform.CompileStatic
 
+import java.security.MessageDigest
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 /**
  *
- * Base class for all resolvers
+ * Util class for all resolvers
  *
  * @author Craig Burke
  */
 @CompileStatic
-class ResolverBase {
+class ResolverUtil {
     private static final ConcurrentMap<String, Object> DEPENDENCY_LOCKS = [:] as ConcurrentHashMap
 
     static withLock(String key, Closure closure) {
@@ -21,6 +22,10 @@ class ResolverBase {
         synchronized(lock) {
             closure()
         }
+    }
+
+    static String getMD5Hash(String input) {
+        MessageDigest.getInstance('MD5').digest(input.bytes).encodeHex().toString()
     }
 
 }
