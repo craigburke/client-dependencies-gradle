@@ -75,7 +75,7 @@ class BowerRegistry extends RegistryBase implements Registry {
         dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
         dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
 
-        if (!downloadDependencyFromCache(dependency)) {
+        if (!checkGlobalCache || downloadDependencyFromCache(dependency)) {
             getResolver(dependency).downloadDependency(dependency)
         }
 
@@ -105,7 +105,6 @@ class BowerRegistry extends RegistryBase implements Registry {
                 false
             }
         }
-
     }
 
 }

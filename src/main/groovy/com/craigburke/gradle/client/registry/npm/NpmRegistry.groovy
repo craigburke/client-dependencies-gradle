@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.registry.npm
 
+import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
@@ -62,7 +64,9 @@ class NpmRegistry extends RegistryBase implements Registry {
             throw new DependencyResolveException(exceptionMessage)
         }
 
-        getResolver(dependency).downloadDependency(dependency)
+        if (!checkGlobalCache || downloadDependencyFromCache(dependency)) {
+            getResolver(dependency).downloadDependency(dependency)
+        }
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
@@ -104,4 +108,20 @@ class NpmRegistry extends RegistryBase implements Registry {
         } as List<Dependency>
     }
 
+    boolean downloadDependencyFromCache(Dependency dependency) {
+        withLock(dependency.key) {
+            String npmCachePath = "${System.getProperty('user.home')}/.npm"
+            String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
+            File cacheFile = new File(cacheFilePath)
+
+            if (cacheFile.exists()) {
+                log.info "Loading ${dependency} from ${cacheFilePath}"
+                extractTarball(cacheFile, dependency.sourceFolder)
+                true
+            }
+            else {
+                false
+            }
+        }
+    }
 }

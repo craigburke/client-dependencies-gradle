@@ -34,6 +34,10 @@ interface Registry {
     String getInstallPath()
 
     void setCachePath(String cachePath)
+    String getCachePath()
+
+    void setCheckGlobalCache(boolean checkGlobal)
+    boolean getCheckGlobalCache()
 
     Resolver getResolver(Dependency dependency)
 

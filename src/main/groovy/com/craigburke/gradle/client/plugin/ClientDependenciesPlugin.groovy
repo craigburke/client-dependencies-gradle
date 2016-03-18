@@ -176,6 +176,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         config.registryMap.each { String key, Registry registry ->
             registry.cachePath = project.file(config.cacheDir).absolutePath
             registry.installPath = project.file(config.installDir).absolutePath
+            registry.checkGlobalCache = config.checkGlobalCache
         }
     }
 

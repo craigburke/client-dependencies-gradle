@@ -1,6 +1,7 @@
 package com.craigburke.gradle.client.registry.npm
 
 import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
@@ -35,22 +36,14 @@ class NpmResolver implements Resolver {
     void downloadDependency(Dependency dependency) {
         withLock(dependency.key) {
             File sourceFolder = dependency.sourceFolder
+
             if (sourceFolder.exists()) {
                 return
             }
             sourceFolder.mkdirs()
-
             String downloadUrl = dependency.url ?: getDownloadUrlFromNpm(dependency)
 
-            String npmCachePath = "${System.getProperty('user.home')}/.npm"
-            String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
-            File cacheFile = new File(cacheFilePath)
-
-            if (cacheFile.exists()) {
-                log.info "Loading ${dependency} from ${cacheFilePath}"
-                extractTarball(cacheFile, sourceFolder)
-            }
-            else if (downloadUrl.endsWith('tgz')) {
+            if (downloadUrl.endsWith('tgz')) {
                 log.info "Downloading ${dependency} from ${downloadUrl}"
 
                 String fileName = "${sourceFolder.absolutePath}/package.tgz"
@@ -62,8 +55,7 @@ class NpmResolver implements Resolver {
 
                 extractTarball(downloadFile, sourceFolder)
                 downloadFile.delete()
-            }
-            else {
+            } else {
                 log.info "Downloading ${dependency} from ${downloadUrl}"
                 Grgit.clone(dir: sourceFolder.absolutePath, uri: dependency.url, refToCheckout: 'master')
             }
@@ -77,20 +69,6 @@ class NpmResolver implements Resolver {
 
     private static String getDownloadUrlFromNpm(Dependency dependency) {
         getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist?.tarball
-    }
-
-    private void extractTarball(File sourceFile, File destination) {
-        AntBuilder builder = new AntBuilder()
-        builder.project.buildListeners.first().setMessageOutputLevel(0)
-        builder.untar(src: sourceFile.absolutePath,  dest: destination.absolutePath,
-                compression: 'gzip', overwrite: true) {
-            patternset {
-                include(name: 'package/**')
-            }
-            mapper {
-                globmapper(from: 'package/*', to: '*')
-            }
-        }
     }
 
 }
