@@ -177,6 +177,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             registry.cachePath = project.file(config.cacheDir).absolutePath
             registry.installPath = project.file(config.installDir).absolutePath
             registry.useGlobalCache = config.useGlobalCache
+            registry.checkDownloads = config.checkDownloads
         }
     }
 

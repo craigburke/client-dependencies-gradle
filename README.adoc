@@ -1,4 +1,4 @@
-:version: 0.3.1
+:version: 0.4.0
 
 = Client Dependencies Gradle Plugin
 
@@ -123,3 +123,24 @@ clientDependencies {
     registry name: 'bowerLocal', type:'bower', url:'http://www.example.com/bower/'
 }
 ----
+
+== Additional Properties
+
+What follows are additional configuration options. With the possible exception of `installDir` you typically won't
+need to set any of these options.
+
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    installDir = 'src/assets/vendor' // <1>
+    cacheDir = 'build/client-cache/' // <2>
+    useGlobalCache = true // <3>
+    checkDownloads = true // <4>
+    threadPoolSize = 10 // <5>
+}
+----
+<1> Location that dependencies are installed to
+<2> Location of the local project cache
+<3> Whether the global caches for bower and npm are searched when resolving dependencies
+<4> Whether downloads are checked and verified
+<5> Size of thread pool used when downloading and installing dependencies

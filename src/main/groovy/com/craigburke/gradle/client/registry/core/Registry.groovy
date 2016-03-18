@@ -39,6 +39,9 @@ interface Registry {
     void setUseGlobalCache(boolean useGlobalCache)
     boolean getUseGlobalCache()
 
+    void setCheckDownloads(boolean checkDownloads)
+    boolean getCheckDownloads()
+
     Resolver getResolver(Dependency dependency)
 
     String getUrl()

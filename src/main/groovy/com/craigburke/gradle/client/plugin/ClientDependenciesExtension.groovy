@@ -30,12 +30,13 @@ import org.gradle.api.logging.Logger
  */
 class ClientDependenciesExtension {
 
-    int threadPoolSize = 15
-
     Project project
+
+    int threadPoolSize = 15
     String installDir
     String cacheDir
     boolean useGlobalCache = true
+    boolean checkDownloads = true
 
     List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
     List<String> releaseFolders = ['dist', 'release']
