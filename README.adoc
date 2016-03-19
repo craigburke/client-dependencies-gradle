@@ -119,8 +119,8 @@ By default npm and bower are installed but you can register additional registrie
 [source,gradle,subs='attributes']
 ----
 clientDependencies {
-    registry name: 'npmLocal', type:'npm', url:'http://www.example.com/npm/'
-    registry name: 'bowerLocal', type:'bower', url:'http://www.example.com/bower/'
+    registry 'npmLocal', type:'npm', url:'http://www.example.com/npm/'
+    registry 'bowerLocal', type:'bower', url:'http://www.example.com/bower/'
 }
 ----
 

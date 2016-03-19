@@ -18,6 +18,7 @@ package com.craigburke.gradle.client.plugin
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.dependency.Dependency
+import com.craigburke.gradle.client.dependency.VersionResolver
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
@@ -125,13 +126,14 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         finalDependencies.each { Dependency dependency ->
             List<Dependency> conflicts = allDependenciesFlattened
-                    .findAll { it.name == dependency.name && !it.version.compatibleWith(dependency.version) }
+                    .findAll { it.name == dependency.name && it.version != dependency.version }
+                    .findAll { !it.version.compatibleWith(dependency.version) }
+                    .findAll { !VersionResolver.matches(dependency.version, it.versionExpression) }
 
             if (conflicts) {
-                project.logger.quiet """\
-                    Version conflict with module ${dependency.name}.
-                    Declared versions: ${dependency.versionExpression}, ${conflicts*.versionExpression.join(', ')}
-                """
+                project.logger.quiet """
+                    |Version conflicts found with ${dependency} [${conflicts*.versionExpression.join(', ')}]
+                """.stripMargin()
             }
         }
 
