@@ -50,14 +50,17 @@ clientDependencies {
     npm {
         'bootstrap'('3.3.6', exclude:'jquery') // <2>
         'restangular'('1.5.0', transitive: false) // <3>
-        'animate.css'('1.0.0', url: 'https://github.com/daneden/animate.css.git')
+        'angular-animate('1.5.0', into: 'angular/modules') // <4>
+        'animate.css'('1.0.0', url: 'https://github.com/daneden/animate.css.git') // <5>
     }
 }
 ----
 <1> Installs jquery from bower and into the location (`src/assets/vendor/jquery`) using the default copy settings
 <2> Installs bootstrap from npm and excludes the dependency `jquery`
-<4> Installs restangular from npm but doesn't include any child dependencies
-<4> Use the url property to use a git repo as a dependency source
+<3> Installs restangular from npm but doesn't include any child dependencies
+<4> Changing the destination path using the `into` property. This is relative ot the install path meaning this would install to the
+location `src/assets/vendor/angular/modules.`
+<5> Use the url property to use a git repo as a dependency source
 
 == The copy task
 
