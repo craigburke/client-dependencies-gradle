@@ -169,5 +169,22 @@ class VersionSpec extends Specification {
         messageVerb = result ? 'is compatible with' : 'is not compatible with'
     }
 
+    @Unroll
+    def "Version #result is detectable despite extra characters in '#expression'"() {
+        expect:
+        Version.parse(expression).toString() == result
+
+        where:
+        expression     | result
+        '1.2.3'        | '1.2.3'
+        ' 1.2.3 '      | '1.2.3'
+        ' 1.2.3-4 '    | '1.2.3-4'
+        ' 1.2.3-pre '  | '1.2.3-pre'
+        '  =v1.2.3   ' | '1.2.3'
+        'v1.2.3'       | '1.2.3'
+        ' v1.2.3 '     | '1.2.3'
+        '\t1.2.3'      | '1.2.3'
+    }
+
 }
 

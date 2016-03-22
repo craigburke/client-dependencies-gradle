@@ -26,7 +26,7 @@ import java.util.regex.Pattern
 @CompileStatic
 class VersionResolver {
 
-    private static final String VERSION_GROUP = /v?(${Version.PATTERN_SIMPLE})/
+    private static final String VERSION_GROUP = /v?(${Version.PATTERN})/
 
     private static final Pattern EQUALS = ~/^=?\s*$VERSION_GROUP$/
     private static final Pattern LESS_THAN = ~/<\s*$VERSION_GROUP/
