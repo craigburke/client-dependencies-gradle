@@ -76,8 +76,9 @@ class NpmResolver implements Resolver {
     }
 
     private static getVersionListFromNpm(Dependency dependency) {
-        String name = dependency.name.startsWith('@') ? dependency.name[1..-1] : dependency.name
-        String encodedName = URLEncoder.encode(name, 'UTF-8')
+        boolean isScoped = dependency.name.startsWith('@')
+        String name = isScoped ? dependency.name[1..-1] : dependency.name
+        String encodedName = "${isScoped ? '@' : ''}${URLEncoder.encode(name, 'UTF-8')}"
         URL url = new URL("${dependency.registry.url}/${encodedName}")
         new JsonSlurper().parse(url).versions
     }
