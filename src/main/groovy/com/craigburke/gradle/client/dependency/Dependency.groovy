@@ -31,6 +31,7 @@ class Dependency {
     String name
     String versionExpression
     String url
+    String into
 
     Version version
     Dependency parent
@@ -79,6 +80,14 @@ class Dependency {
 
     String getKey() {
         "${name}@${version?.fullVersion ?: versionExpression}"
+    }
+
+    String getRelativePath() {
+        into ?: formatFolderName(name)
+    }
+
+    private String formatFolderName(String name) {
+        name.replaceAll('@', '').replaceAll(/[\s+|\/]/, '-')
     }
 
     String toString() {

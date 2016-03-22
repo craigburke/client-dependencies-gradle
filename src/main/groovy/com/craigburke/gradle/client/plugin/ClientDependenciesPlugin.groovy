@@ -147,7 +147,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
                 project.copy {
                     includeEmptyDirs = false
-                    into "${registry.installPath}/${dependency.name}"
+                    into "${registry.installPath}/${dependency.relativePath}"
                     from("${dependency.sourceFolder}") {
                         with copyConfig
                     }
