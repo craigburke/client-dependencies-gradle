@@ -76,7 +76,9 @@ class NpmResolver implements Resolver {
     }
 
     private static getVersionListFromNpm(Dependency dependency) {
-        URL url = new URL("${dependency.registry.url}/${dependency.name}")
+        String name = dependency.name.startsWith('@') ? dependency.name[1..-1] : dependency.name
+        String encodedName = URLEncoder.encode(name, 'UTF-8')
+        URL url = new URL("${dependency.registry.url}/${encodedName}")
         new JsonSlurper().parse(url).versions
     }
 
