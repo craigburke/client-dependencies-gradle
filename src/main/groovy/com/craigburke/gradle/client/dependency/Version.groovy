@@ -33,8 +33,8 @@ class Version implements Comparable<Version> {
     String tag = ''
 
     static final List<String> XRANGE_VALUES = ['x', 'X', '*']
-    static final Pattern PATTERN = ~/v?(?:\d+|x|X|\*)\.?(?:\d+|x|X|\*)?\.?(?:\d+|x|x|X|\*)?(?:\-[^+]*)?(?:\+.*)?/
-    static final Pattern PATTERN_GROUPED = ~/v?(\d+|x|X|\*)?\.?(\d+|x|X|\*)?\.?(\d+|x|x|X|\*)?(\-[^+]*)?(\+.*)?$/
+    static final Pattern PATTERN = ~/v?(?:\d+|x|X|\*)\.?(?:\d+|x|X|\*)?\.?(?:\d+|x|x|X|\*)?(?:\-[^+\s]*)?(?:\+\S*)?/
+    static final Pattern PATTERN_GROUPED = ~/v?(\d+|x|X|\*)\.?(\d+|x|X|\*)?\.?(\d+|x|x|X|\*)?(\-[^+\s]*)?(\+\S*)?/
 
     static Version parse(String expression) {
         Version version = new Version()
@@ -72,11 +72,38 @@ class Version implements Comparable<Version> {
         value = (patch <=> other.patch)
         if (value) { return value }
 
-        if (tag || other.tag) {
-            value = (tag <=> other.tag)
+        if (tag && other.tag) {
+            value = compareTags(tag, other.tag)
+        }
+        else if (tag || other.tag) {
+            value = tag ? -1 : 1
         }
 
         value
+    }
+
+    private int compareTags(String tag1, String tag2) {
+        int result = 0
+
+        String[] parts1 = tag1.tokenize('.')
+        String[] parts2 = tag2.tokenize('.')
+
+        parts1.eachWithIndex { String part, int index ->
+            if (!result) {
+                String otherPart = parts2.size() > index ? parts2[index] : null
+
+                if (part != otherPart) {
+                    if (part.isNumber() && otherPart?.isNumber()) {
+                        result = Integer.valueOf(part) <=> Integer.valueOf(otherPart)
+                    }
+                    else {
+                        result = part <=> otherPart
+                    }
+                }
+            }
+        }
+
+        result
     }
 
     Version getCeiling() {

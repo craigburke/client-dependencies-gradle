@@ -48,9 +48,9 @@ clientDependencies {
     }
 
     npm {
-        'bootstrap'('3.3.6', exclude:'jquery') // <2>
+        'bootstrap'('3.3.6', exclude: 'jquery') // <2>
         'restangular'('1.5.0', transitive: false) // <3>
-        'angular-animate('1.5.0', into: 'angular/modules') // <4>
+        'angular-animate'('1.5.0', into: 'angular/modules') // <4>
         'animate.css'('1.0.0', url: 'https://github.com/daneden/animate.css.git') // <5>
     }
 }

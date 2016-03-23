@@ -26,15 +26,16 @@ import java.util.regex.Pattern
 @CompileStatic
 class VersionResolver {
 
-    private static final String VERSION_GROUP = /v?(${Version.PATTERN})/
+    private static final String VERSION_GROUP = /(${Version.PATTERN})/
 
-    private static final Pattern EQUALS = ~/^=?\s*$VERSION_GROUP$/
+    private static final Pattern EQUALS = ~/^\s*?=?\s*?$VERSION_GROUP$/
     private static final Pattern LESS_THAN = ~/<\s*$VERSION_GROUP/
-    private static final Pattern GREATER_THAN = ~/(?:>)\s*$VERSION_GROUP/
+    private static final Pattern GREATER_THAN = ~/\S*?>\s*$VERSION_GROUP/
     private static final Pattern LESS_THAN_EQUAL = ~/(?:<=)\s*$VERSION_GROUP/
     private static final Pattern GREATER_THAN_EQUAL = ~/(?:>=)\s*$VERSION_GROUP/
     private static final Pattern CARET_RANGE = ~/^(?:\^)\s*$VERSION_GROUP$/
     private static final Pattern HYPHEN_RANGE = ~/^$VERSION_GROUP\s*\-\s*$VERSION_GROUP$/
+    private static final Pattern TILDE_RANGE = ~/~>?\s*$VERSION_GROUP/
 
     static Version resolve(String expression, List<Version> versions) {
         List<Version> sortedVersions = versions.toSorted { v1, v2 -> v2 <=> v1 }
@@ -47,8 +48,13 @@ class VersionResolver {
     }
 
     static boolean matches(Version version, String expression) {
-        expression.tokenize('||')*.trim().any { String simpleExpression ->
-            matchesExpression(version, simpleExpression)
+        String[] expressions = expression.tokenize('||')*.trim()
+        if (expressions.every { it in ['', '*', 'x'] }) {
+            true
+        } else {
+            expressions.any { String simpleExpression ->
+                matchesExpression(version, simpleExpression)
+            }
         }
     }
 
@@ -67,34 +73,24 @@ class VersionResolver {
 
         expression.find(LESS_THAN) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-
-            if (!matchedVersion.fuzzy) {
-                results += version < matchedVersion
-            }
+            results += version < matchedVersion.floor
         }
 
         expression.find(GREATER_THAN) { String match, String versionExpression ->
-            Version matchedVersion = Version.parse(versionExpression)
-
-            if (!matchedVersion.fuzzy) {
-                results += version > matchedVersion
+            if (!match.contains('~')) {
+                Version matchedVersion = Version.parse(versionExpression)
+                results += version > matchedVersion.ceiling
             }
         }
 
         expression.find(LESS_THAN_EQUAL) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-
-            if (!matchedVersion.fuzzy) {
-                results += version <= matchedVersion
-            }
+            results += version <= matchedVersion.ceiling
         }
 
         expression.find(GREATER_THAN_EQUAL) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-
-            if (!matchedVersion.fuzzy) {
-                results += version >= matchedVersion
-            }
+            results += version >= matchedVersion.floor
         }
 
         expression.find(HYPHEN_RANGE) { String match, String expression1, String expression2 ->
@@ -109,11 +105,15 @@ class VersionResolver {
             results += matchesCaretRange(version, versionExpression)
         }
 
-        if (version.tag && !expression.matches(EQUALS)) {
-            false
+        expression.find(TILDE_RANGE) { String match, String versionExpression ->
+            results += matchesTildeRange(version, versionExpression)
+        }
+
+        if (results) {
+            results.every { it }
         }
         else {
-            results.every { it }
+            false
         }
     }
 
@@ -124,11 +124,9 @@ class VersionResolver {
 
         if (matchedVersion.major) {
             rangeTop = new Version(major: matchedVersion.major + 1, minor: 0, patch: 0)
-        }
-        else if (matchedVersion.minor) {
+        } else if (matchedVersion.minor) {
             rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor + 1, patch: 0)
-        }
-        else {
+        } else {
             rangeTop = new Version(major: matchedVersion.major,
                     minor: matchedVersion.minor,
                     patch: matchedVersion.patch + 1)
@@ -137,4 +135,22 @@ class VersionResolver {
         (version >= rangeBottom && version < rangeTop)
     }
 
+    private static boolean matchesTildeRange(Version version, String rangeExpression) {
+        Version matchedVersion = Version.parse(rangeExpression)
+        Version rangeBottom = matchedVersion.floor
+        Version rangeTop
+
+        if (matchedVersion.patch != null) {
+            rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor + 1, patch: matchedVersion.patch)
+        } else if (matchedVersion.minor != null) {
+            rangeTop = new Version(major: matchedVersion.major, minor: matchedVersion.minor + 1, patch: 0)
+        } else {
+            rangeTop = new Version(major: matchedVersion.major + 1,
+                    minor: 0,
+                    patch: 0)
+        }
+
+        (version >= rangeBottom && version < rangeTop)
+
+    }
 }
