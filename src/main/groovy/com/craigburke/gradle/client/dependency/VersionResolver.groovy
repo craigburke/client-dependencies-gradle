@@ -33,14 +33,16 @@ class VersionResolver {
     private static final Pattern GREATER_THAN = ~/\S*?>\s*$VERSION_GROUP/
     private static final Pattern LESS_THAN_EQUAL = ~/(?:<=)\s*$VERSION_GROUP/
     private static final Pattern GREATER_THAN_EQUAL = ~/(?:>=)\s*$VERSION_GROUP/
-    private static final Pattern CARET_RANGE = ~/^(?:\^)\s*$VERSION_GROUP$/
+    private static final Pattern CARET_RANGE = ~/^(?:\^)\s*$VERSION_GROUP\s*/
     private static final Pattern HYPHEN_RANGE = ~/^$VERSION_GROUP\s*\-\s*$VERSION_GROUP$/
     private static final Pattern TILDE_RANGE = ~/~>?\s*$VERSION_GROUP/
+
+    private static final List<String> ALL_VERSIONS = ['*', '', 'x']
 
     static Version resolve(String expression, List<Version> versions) {
         List<Version> sortedVersions = versions.toSorted { v1, v2 -> v2 <=> v1 }
 
-        if (expression?.trim() in ['latest', '*', '']) {
+        if (expression?.trim() in ['latest'] + ALL_VERSIONS) {
             sortedVersions.first()
         } else {
             sortedVersions.find { matches(it, expression) }
@@ -49,7 +51,7 @@ class VersionResolver {
 
     static boolean matches(Version version, String expression) {
         String[] expressions = expression.tokenize('||')*.trim()
-        if (expressions.every { it in ['', '*', 'x'] }) {
+        if (expressions.every { it in ALL_VERSIONS }) {
             true
         } else {
             expressions.any { String simpleExpression ->
@@ -118,8 +120,13 @@ class VersionResolver {
             Version rangeBottom = Version.parse(expression1)
             Version rangeTop = Version.parse(expression2)
 
-            results += (version >= rangeBottom.floor &&
-                    (rangeTop.fuzzy ? (version < rangeTop.ceiling) : (version <= rangeTop)))
+            if (version.tag && !rangeTop.tag && !rangeBottom.tag) {
+                results += false
+            }
+            else {
+                results += (version >= rangeBottom.floor &&
+                        (rangeTop.fuzzy ? (version < rangeTop.ceiling) : (version <= rangeTop)))
+            }
         }
 
         expression.find(CARET_RANGE) { String match, String versionExpression ->
@@ -140,6 +147,10 @@ class VersionResolver {
 
     private static boolean matchesCaretRange(Version version, String rangeExpression) {
         Version matchedVersion = Version.parse(rangeExpression)
+        if (version.tag && !matchedVersion.tag) {
+            return false
+        }
+
         Version rangeBottom = matchedVersion.floor
         Version rangeTop
 

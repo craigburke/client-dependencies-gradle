@@ -120,7 +120,7 @@ ruleset {
     'DuplicateListLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
     'DuplicateMapLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
     'DuplicateNumberLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
-    'DuplicateStringLiteral' doNotApplyToFilesMatching: '.*Spec.groovy'
+    'DuplicateStringLiteral' enabled: false
 
     // rulesets/enhanced.xml
     //CloneWithoutCloneable

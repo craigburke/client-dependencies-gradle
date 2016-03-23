@@ -280,7 +280,5 @@ class VersionSpec extends Specification {
         '  v1.2.3+build'   | '1.2.3+otherbuild'
     }
 
-
-
 }
 

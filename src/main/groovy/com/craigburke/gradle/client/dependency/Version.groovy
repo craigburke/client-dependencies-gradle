@@ -92,7 +92,10 @@ class Version implements Comparable<Version> {
             if (!result) {
                 String otherPart = parts2.size() > index ? parts2[index] : null
 
-                if (part != otherPart) {
+                if (!otherPart) {
+                    result = 1
+                }
+                else if (part != otherPart) {
                     if (part.isNumber() && otherPart?.isNumber()) {
                         result = Integer.valueOf(part) <=> Integer.valueOf(otherPart)
                     }
@@ -130,6 +133,7 @@ class Version implements Comparable<Version> {
         }
 
         ceiling.patch = patch ?: 0
+        ceiling.tag = tag ?: null
 
         ceiling
     }
@@ -139,7 +143,7 @@ class Version implements Comparable<Version> {
         floor.major = major ?: 0
         floor.minor = minor ?: 0
         floor.patch = patch ?: 0
-
+        floor.tag = tag ?: null
         floor
     }
 
