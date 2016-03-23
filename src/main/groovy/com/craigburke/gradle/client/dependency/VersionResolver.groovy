@@ -73,24 +73,45 @@ class VersionResolver {
 
         expression.find(LESS_THAN) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-            results += version < matchedVersion.floor
+            if (version.tag && !matchedVersion.tag) {
+                results += false
+            }
+            else {
+                results += version < matchedVersion.floor
+            }
         }
 
         expression.find(GREATER_THAN) { String match, String versionExpression ->
             if (!match.contains('~')) {
                 Version matchedVersion = Version.parse(versionExpression)
-                results += version > matchedVersion.ceiling
+                if (version.tag && !matchedVersion.tag) {
+                    results += false
+                }
+                else {
+                    results += version > matchedVersion.ceiling
+                }
             }
         }
 
         expression.find(LESS_THAN_EQUAL) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-            results += version <= matchedVersion.ceiling
+
+            if (version.tag && !matchedVersion.tag) {
+                results += false
+            }
+            else {
+                results += version <= matchedVersion.ceiling
+            }
         }
 
         expression.find(GREATER_THAN_EQUAL) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
-            results += version >= matchedVersion.floor
+            if (version.tag && !matchedVersion.tag) {
+                results += false
+            }
+            else {
+                results += version >= matchedVersion.floor
+            }
         }
 
         expression.find(HYPHEN_RANGE) { String match, String expression1, String expression2 ->

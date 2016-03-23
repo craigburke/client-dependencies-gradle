@@ -122,7 +122,8 @@ class VersionResolverSpec extends Specification {
         expression      | result
         '=1.0.0'        | null
         '=1.0.0-alpha'  | '1.0.0-alpha'
-        '> 1.0.0-alpha' | '2.0.1'
+        '> 1.0.0-alpha' | '2.0.2-alpha'
+        '> 1.0.0'       | '2.0.1'
         '> 1.3.1'       | '2.0.1'
 
         versions = ['1.0.0-alpha', '1.1.0-alpha', '1.2.0',
