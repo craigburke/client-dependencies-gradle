@@ -26,15 +26,6 @@ class ClientDependenciesExtensionSpec extends Specification {
         defaultCopyResults.includes == extension.fileExtensions.collect { "**/*.${it}" }
     }
 
-    def "source folder containing a release folder changes the default includes"() {
-        setup:
-        extension.releaseFolders = ['dist']
-        new File("${sourceFolder.root.absolutePath}/dist").mkdir()
-
-        expect:
-        defaultCopyResults.includes == extension.fileExtensions.collect { "dist/**/*.${it}" }
-    }
-
     def "default excludes are used by default"() {
         expect:
         defaultCopyResults.excludes == extension.copyExcludes
@@ -61,12 +52,6 @@ class ClientDependenciesExtensionSpec extends Specification {
         ['foo']        | ['/bar/**']                   | null | ['**/*.foo', '/bar/**']
         ['foo', 'bar'] | ['/bar/**']                   | null | ['**/*.foo', '**/*.bar', '/bar/**']
         ['foo', 'bar'] | ['/bar/**', 'baz/**/*foobar'] | null | ['**/*.foo', '**/*.bar', '/bar/**', 'baz/**/*foobar']
-
-        ['foo']        | []                            | 'dist' | ['dist/**/*.foo']
-        []             | ['/foo/**']                   | 'dist' | ['/foo/**']
-        ['foo']        | ['/bar/**']                   | 'dist' | ['dist/**/*.foo', '/bar/**']
-        ['foo', 'bar'] | ['/bar/**']                   | 'dist' | ['dist/**/*.foo', 'dist/**/*.bar', '/bar/**']
-        ['foo', 'bar'] | ['/bar/**', 'baz/**/*foobar'] | 'dist' | ['dist/**/*.foo', 'dist/**/*.bar', '/bar/**', 'baz/**/*foobar']
     }
 
     @Unroll
@@ -91,7 +76,7 @@ class ClientDependenciesExtensionSpec extends Specification {
         extension.defaultCopy = myDefaultCopy
 
         expect:
-        extension.getDefaultCopyConfig(sourceFolder.root) == myDefaultCopy
+        extension.defaultCopyConfig == myDefaultCopy
 
         where:
         myDefaultCopy = {
@@ -124,9 +109,11 @@ class ClientDependenciesExtensionSpec extends Specification {
         Map result = [includes: [], excludes: []]
         Expando delegate = new Expando()
 
-        delegate.metaClass.getProperty = { String name ->
-            extension[name]
-        }
+        delegate.metaClass.getCopyIncludes = { extension.copyIncludes }
+        delegate.metaClass.getCopyExcludes = { extension.copyExcludes }
+        delegate.metaClass.fileExtensions = { extension.fileExtensions }
+        delegate.metaClass.getDefaultCopy = { extension.defaultCopy }
+
         delegate.include = {
             result.includes.addAll(it)
         }

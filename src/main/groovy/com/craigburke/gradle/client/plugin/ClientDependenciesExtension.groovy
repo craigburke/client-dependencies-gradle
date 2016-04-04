@@ -78,9 +78,11 @@ class ClientDependenciesExtension {
             return defaultCopy
         }
 
+        List<String> includes = fileExtensions.collect { "**/*.${it}" } + copyIncludes
+
         return {
             exclude copyExcludes
-            include copyIncludes
+            include includes
         }
     }
 }
