@@ -1,8 +1,5 @@
 package com.craigburke.gradle.client.plugin
 
-import com.craigburke.gradle.client.registry.BowerRegistry
-import com.craigburke.gradle.client.registry.NpmRegistry
-import com.craigburke.gradle.client.registry.Registry
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
@@ -20,7 +17,7 @@ class ClientDependenciesExtensionSpec extends Specification {
     @Rule TemporaryFolder sourceFolder = new TemporaryFolder()
 
     def setup() {
-        Project project = [getLogger: { Logging.getLogger('foo') } ] as Project
+        Project project = [ getLogger: { Logging.getLogger('foo') } ] as Project
         extension = new ClientDependenciesExtension(project)
     }
 
@@ -123,19 +120,22 @@ class ClientDependenciesExtensionSpec extends Specification {
     }
 
     Map getDefaultCopyResults() {
-        Closure closure = extension.getDefaultCopyConfig(sourceFolder.root)
+        Closure closure = extension.defaultCopyConfig
         Map result = [includes: [], excludes: []]
         Expando delegate = new Expando()
+
+        delegate.metaClass.getProperty = { String name ->
+            extension[name]
+        }
         delegate.include = {
             result.includes.addAll(it)
         }
-
         delegate.exclude = {
             result.excludes.addAll(it)
         }
         delegate.eachFile = { }
 
-        Closure clonedClosure = closure.clone().rehydrate(delegate, delegate, delegate)
+        Closure clonedClosure = closure.rehydrate(delegate, delegate, delegate)
         clonedClosure.call()
         result
     }

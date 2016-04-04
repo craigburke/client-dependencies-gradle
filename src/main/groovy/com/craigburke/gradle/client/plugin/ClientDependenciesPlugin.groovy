@@ -143,18 +143,27 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
                 Registry registry = dependency.registry
                 Dependency rootDependency = rootDependencies.find { it.name == dependency.name }
-                Closure copyConfig = rootDependency?.copyConfig ?: config.getDefaultCopyConfig(dependency.sourceFolder)
+                Closure copyConfig = rootDependency?.copyConfig ?: config.defaultCopy
+
+                String releaseFolder = dependency.from ?: getReleaseFolder(dependency.sourceFolder, config.releaseFolders)
+                String fromPath = releaseFolder ? "${dependency.sourceFolder}/${releaseFolder}" : dependency.sourceFolder.absolutePath
 
                 project.copy {
                     includeEmptyDirs = false
                     into "${registry.installPath}/${dependency.relativePath}"
-                    from("${dependency.sourceFolder}") {
+                    from(fromPath) {
                         with copyConfig
                     }
                 }
             }
         }
     }
+
+    String getReleaseFolder(File sourceFolder, List<String> releaseFolders) {
+        sourceFolder.listFiles()
+                .find { it.directory && releaseFolders.contains(it.name) }?.name ?: ''
+    }
+
 
     List<Dependency> loadDependencies(List<Dependency> rootDependencies) {
        withExistingPool(RegistryBase.pool) {

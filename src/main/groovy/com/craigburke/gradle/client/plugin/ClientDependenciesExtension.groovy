@@ -33,8 +33,10 @@ class ClientDependenciesExtension {
     Project project
 
     int threadPoolSize = 15
+
     String installDir
     String cacheDir
+
     boolean useGlobalCache = true
     boolean checkDownloads = true
 
@@ -71,26 +73,14 @@ class ClientDependenciesExtension {
         registryMap[props.name as String] = registry
     }
 
-    Closure getDefaultCopyConfig(File sourceFolder) {
+    Closure getDefaultCopyConfig() {
         if (defaultCopy) {
             return defaultCopy
         }
 
-        String pathPrefix = sourceFolder
-                .listFiles()
-                .find { it.directory && releaseFolders.contains(it.name) }?.name ?: ''
-
-        List<String> includes = fileExtensions
-                .collect { "${pathPrefix ? pathPrefix + '/' : ''}**/*.${it}" } + copyIncludes
-
-        List<String> excludes = copyExcludes
-
         return {
-            exclude excludes
-            include includes
-            if (pathPrefix) {
-                eachFile { it.path -= "${pathPrefix}/" }
-            }
+            exclude copyExcludes
+            include copyIncludes
         }
     }
 }

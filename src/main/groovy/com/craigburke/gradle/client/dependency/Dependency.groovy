@@ -31,6 +31,7 @@ class Dependency {
     String name
     String versionExpression
     String url
+    String from
     String into
 
     Version version
