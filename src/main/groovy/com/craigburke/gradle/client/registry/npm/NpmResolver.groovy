@@ -75,7 +75,7 @@ class NpmResolver implements Resolver {
         }
     }
 
-    private static getVersionListFromNpm(Dependency dependency) {
+    static getVersionListFromNpm(Dependency dependency) {
         boolean isScoped = dependency.name.startsWith('@')
         String name = isScoped ? dependency.name[1..-1] : dependency.name
         String encodedName = "${isScoped ? '@' : ''}${URLEncoder.encode(name, 'UTF-8')}"
@@ -83,14 +83,16 @@ class NpmResolver implements Resolver {
         new JsonSlurper().parse(url).versions
     }
 
-    private static DownloadInfo getDownloadInfo(Dependency dependency) {
-        if (dependency.url) {
-            new DownloadInfo(url: dependency.url, checksum: null)
-        }
-        else {
+    static DownloadInfo getDownloadInfo(Dependency dependency) {
+
+        if (!dependency.url || dependency.url.startsWith(dependency.registry.url)) {
             def json = getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist
             new DownloadInfo(url: json?.tarball, checksum: json?.shasum)
         }
+        else {
+            new DownloadInfo(url: dependency.url, checksum: null)
+        }
+
     }
 
 }

@@ -41,12 +41,7 @@ class BowerRegistry extends RegistryBase implements Registry {
         super(url, log, [GithubResolver, GitResolver])
     }
 
-    private String getGitUrl(String dependencyName) {
-        URL dependencyUrl = new URL("${url}/packages/${dependencyName}")
-        new JsonSlurper().parse(dependencyUrl).url
-    }
-
-    private List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
+    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
         File bowerConfigFile = new File("${dependency.sourceFolder.absolutePath}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
         withExistingPool(RegistryBase.pool) {
@@ -65,27 +60,13 @@ class BowerRegistry extends RegistryBase implements Registry {
         } as List<Dependency>
     }
 
-    Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
-        log.info "Loading dependency: ${declaredDependency}"
-
-        Dependency dependency = declaredDependency.clone()
-        dependency.registry = this
-        dependency.parent = parent
-        dependency.url = dependency.url ?: getGitUrl(dependency.name)
-        dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
-        dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
-
-        boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
-
-        if (!downloadedFromCache) {
-            getResolver(dependency).downloadDependency(dependency)
+    String getDependencyUrl(Dependency dependency) {
+        if (dependency.url) {
+            return dependency.url
         }
 
-        if (declaredDependency.transitive) {
-            dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
-        }
-
-        dependency
+        URL dependencyUrl = new URL("${url}/packages/${dependency.name}")
+        new JsonSlurper().parse(dependencyUrl).url
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {

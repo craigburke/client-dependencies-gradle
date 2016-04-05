@@ -44,39 +44,6 @@ class NpmRegistry extends RegistryBase implements Registry {
         super(url, log, [NpmResolver])
     }
 
-    Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
-        log.info "Loading dependency: ${declaredDependency}"
-
-        Dependency dependency = declaredDependency.clone()
-        dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
-        dependency.parent = parent
-        dependency.registry = this
-
-        if (declaredDependency.url) {
-            dependency.version = Version.parse(declaredDependency.versionExpression)
-        }
-        else {
-            dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
-        }
-
-        if (!dependency.version) {
-            String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
-            throw new DependencyResolveException(exceptionMessage)
-        }
-
-        boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
-
-        if (!downloadedFromCache) {
-            getResolver(dependency).downloadDependency(dependency)
-        }
-
-        if (declaredDependency.transitive) {
-            dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
-        }
-
-        dependency
-    }
-
     private Map<String, String> getDependencies(Dependency dependency) {
         File packageJson = new File("${dependency.sourceFolder.absolutePath}/package.json")
 
@@ -89,7 +56,7 @@ class NpmRegistry extends RegistryBase implements Registry {
         }
     }
 
-    private List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclude) {
+    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclude) {
         withExistingPool(RegistryBase.pool) {
             getDependencies(dependency)
                     .findAll { String name, String childVersion -> !exclude.contains(name) }
@@ -108,6 +75,10 @@ class NpmRegistry extends RegistryBase implements Registry {
                         loadDependency(child, dependency)
                     } ?: []
         } as List<Dependency>
+    }
+    
+    String getDependencyUrl(Dependency dependency) {
+        NpmResolver.getDownloadInfo(dependency)?.url ?: ''
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {

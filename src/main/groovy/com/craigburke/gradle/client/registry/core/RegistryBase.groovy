@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.registry.core
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
+import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 import org.gradle.api.logging.Logger
@@ -28,7 +29,7 @@ import org.gradle.api.logging.Logger
  * @author Craig Burke
  */
 @CompileStatic
-class RegistryBase {
+abstract class RegistryBase implements Registry {
 
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
@@ -68,4 +69,42 @@ class RegistryBase {
         resolvers.find { it.canResolve(dependency) }
     }
 
+    Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
+        log.info "Loading dependency: ${declaredDependency}"
+
+        Dependency dependency = declaredDependency.clone()
+        dependency.registry = this
+        dependency.parent = parent
+        dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
+
+        if (declaredDependency.url) {
+            dependency.version = Version.parse(declaredDependency.versionExpression)
+        }
+        else {
+            dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
+        }
+
+        dependency.url = getDependencyUrl(dependency)
+
+        if (!dependency.version) {
+            String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
+            throw new DependencyResolveException(exceptionMessage)
+        }
+
+        boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
+
+        if (!downloadedFromCache) {
+            getResolver(dependency).downloadDependency(dependency)
+        }
+
+        if (declaredDependency.transitive) {
+            dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
+        }
+
+        dependency
+    }
+
+    abstract String getDependencyUrl(Dependency dependency)
+    abstract boolean downloadDependencyFromCache(Dependency dependency)
+    abstract List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions)
 }
