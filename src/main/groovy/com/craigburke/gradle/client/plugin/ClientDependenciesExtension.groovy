@@ -73,7 +73,7 @@ class ClientDependenciesExtension {
         registryMap[props.name as String] = registry
     }
 
-    Closure getDefaultCopyConfig() {
+    Closure getCopyConfig() {
         if (defaultCopy) {
             return defaultCopy
         }

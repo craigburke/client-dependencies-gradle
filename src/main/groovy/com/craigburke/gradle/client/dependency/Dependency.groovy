@@ -83,12 +83,22 @@ class Dependency {
         "${name}@${version?.fullVersion ?: versionExpression}"
     }
 
-    String getRelativePath() {
+    String getDestinationPath() {
         into ?: formatFolderName(name)
     }
 
     private String formatFolderName(String name) {
         name.replaceAll('@', '').replaceAll(/[\s+|\/]/, '-')
+    }
+
+    String getReleaseFolder(List<String> releaseFolders) {
+        if (from) {
+            return from
+        }
+
+        File[] sourceFolders = sourceFolder?.listFiles()?.findAll { File file -> file.directory }
+        List<String> folderNames = sourceFolders?.collect { File file -> file.name }
+        releaseFolders?.find { folderNames.contains(it) } ?: ''
     }
 
     String toString() {

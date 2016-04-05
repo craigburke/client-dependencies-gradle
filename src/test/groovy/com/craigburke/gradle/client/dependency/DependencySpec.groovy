@@ -1,5 +1,6 @@
 package com.craigburke.gradle.client.dependency
 
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,16 +28,37 @@ class DependencySpec extends Specification {
         Dependency dependency = new Dependency(name: name, into: into)
 
         expect:
-        dependency.relativePath == relativePath
+        dependency.destinationPath == destinationPath
 
         where:
-        name       | into       | relativePath
+        name       | into       | destinationPath
         'foo'      | null       | 'foo'
         'foo bar'  | null       | 'foo-bar'
         '@foo/bar' | null       | 'foo-bar'
         'foo'      | 'foo2'     | 'foo2'
         'foo bar'  | 'foo-bar2' | 'foo-bar2'
         '@foo/bar' | 'foo-bar2' | 'foo-bar2'
+    }
+
+    @Unroll
+    def "from property is correct resolves to #releaseFolder"() {
+        setup:
+        TemporaryFolder temporaryFolder = new TemporaryFolder()
+        temporaryFolder.create()
+        subfolders.each { temporaryFolder.newFolder(it as String) }
+        Dependency dependency = new Dependency(name: 'foo', from: from, sourceFolder: temporaryFolder.root)
+
+        expect:
+        dependency.getReleaseFolder(releaseFolders) == releaseFolder
+
+        where:
+        subfolders     | releaseFolders | from  | releaseFolder
+        []             | []             | null  | ''
+        ['foo']        | []             | null  | ''
+        ['foo']        | ['foo']        | null  | 'foo'
+        []             | []             | 'bar' | 'bar'
+        ['foo']        | ['foo']        | 'bar' | 'bar'
+        ['foo', 'bar'] | ['foo', 'bar'] | null  | 'foo'
     }
 
 }

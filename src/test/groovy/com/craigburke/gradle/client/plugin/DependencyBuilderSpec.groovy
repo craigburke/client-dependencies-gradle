@@ -46,7 +46,7 @@ class DependencyBuilderSpec extends Specification {
         }
     }
 
-    def "build can add a dependency with a git url"() {
+    def "builder can add a dependency with a git url"() {
         setup:
         dependencies.delegate = builder
 

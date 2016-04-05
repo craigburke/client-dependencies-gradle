@@ -76,7 +76,7 @@ class ClientDependenciesExtensionSpec extends Specification {
         extension.defaultCopy = myDefaultCopy
 
         expect:
-        extension.defaultCopyConfig == myDefaultCopy
+        extension.copyConfig == myDefaultCopy
 
         where:
         myDefaultCopy = {
@@ -105,7 +105,7 @@ class ClientDependenciesExtensionSpec extends Specification {
     }
 
     Map getDefaultCopyResults() {
-        Closure closure = extension.defaultCopyConfig
+        Closure closure = extension.copyConfig
         Map result = [includes: [], excludes: []]
         Expando delegate = new Expando()
 
