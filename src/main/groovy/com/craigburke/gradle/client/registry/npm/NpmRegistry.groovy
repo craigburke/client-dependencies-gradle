@@ -20,14 +20,11 @@ import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
-import com.craigburke.gradle.client.registry.core.DependencyResolveException
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.RegistryBase
 
 import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.Version
-import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonSlurper
 
 /**
@@ -76,7 +73,7 @@ class NpmRegistry extends RegistryBase implements Registry {
                     } ?: []
         } as List<Dependency>
     }
-    
+
     String getDependencyUrl(Dependency dependency) {
         NpmResolver.getDownloadInfo(dependency)?.url ?: ''
     }

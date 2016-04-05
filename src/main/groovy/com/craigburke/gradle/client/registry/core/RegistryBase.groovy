@@ -43,7 +43,7 @@ abstract class RegistryBase implements Registry {
     protected Logger log
     protected List<Resolver> resolvers
 
-    RegistryBase(String url, Logger log, List<Class<Resolver>> resolvers) {
+    protected RegistryBase(String url, Logger log, List<Class<Resolver>> resolvers) {
         this.url = url
         this.log = log
         this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }

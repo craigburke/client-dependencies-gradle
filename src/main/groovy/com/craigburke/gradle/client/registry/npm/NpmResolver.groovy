@@ -84,7 +84,6 @@ class NpmResolver implements Resolver {
     }
 
     static DownloadInfo getDownloadInfo(Dependency dependency) {
-
         if (!dependency.url || dependency.url.startsWith(dependency.registry.url)) {
             def json = getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist
             new DownloadInfo(url: json?.tarball, checksum: json?.shasum)

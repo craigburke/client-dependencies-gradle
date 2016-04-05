@@ -97,7 +97,7 @@ class Dependency {
         }
 
         File[] sourceFolders = sourceFolder?.listFiles()?.findAll { File file -> file.directory }
-        List<String> folderNames = sourceFolders?.collect { File file -> file.name }
+        List<String> folderNames = sourceFolders*.name
         releaseFolders?.find { folderNames.contains(it) } ?: ''
     }
 

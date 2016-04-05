@@ -24,7 +24,6 @@ import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.RegistryBase
 import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonSlurper
 
 /**
