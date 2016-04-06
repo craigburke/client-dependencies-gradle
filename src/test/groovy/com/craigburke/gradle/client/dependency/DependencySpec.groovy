@@ -61,4 +61,20 @@ class DependencySpec extends Specification {
         ['foo', 'bar'] | ['foo', 'bar'] | null  | 'foo'
     }
 
+    @Unroll
+    def "url property set to #url returns #expectedUrl"() {
+        setup:
+        Dependency dependency = new Dependency(name: 'foo', url: url)
+
+        expect:
+        dependency.url == expectedUrl
+
+        where:
+        url                             | expectedUrl
+        'https://github.com/foo/bar'    | 'https://github.com/foo/bar'
+        'http://example.com/foobar.git' | 'http://example.com/foobar.git'
+        'foo/bar'                       | 'https://github.com/foo/bar'
+        'file:///foo/bar'               | 'file:///foo/bar'
+    }
+
 }

@@ -19,6 +19,8 @@ import com.craigburke.gradle.client.registry.core.Registry
 import groovy.transform.AutoClone
 import groovy.transform.CompileStatic
 
+import java.util.regex.Pattern
+
 /**
  * dependency
  * @author Craig Burke
@@ -26,6 +28,9 @@ import groovy.transform.CompileStatic
 @CompileStatic
 @AutoClone
 class Dependency {
+
+    static final String GITHUB_URL_PREFIX = 'https://github.com'
+    static final Pattern GITHUB_PROJECT_PATTERN = ~/^[^\/]*\/[^\/]*$/
 
     Registry registry
     String name
@@ -76,6 +81,15 @@ class Dependency {
         }
         else {
             [dependency]
+        }
+    }
+
+    String getUrl() {
+        if (url ==~ GITHUB_PROJECT_PATTERN) {
+            "${GITHUB_URL_PREFIX}/${url}"
+        }
+        else {
+            url
         }
     }
 
