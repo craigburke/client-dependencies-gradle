@@ -22,7 +22,7 @@ import com.craigburke.gradle.client.dependency.VersionResolver
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
-import com.craigburke.gradle.client.registry.core.RegistryBase
+import com.craigburke.gradle.client.registry.core.AbstractRegistry
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -81,7 +81,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.task(REFRESH_TASK, group: TASK_GROUP, dependsOn: [CLEAN_TASK, INSTALL_TASK])
 
         project.afterEvaluate {
-            RegistryBase.threadPoolSize = config.threadPoolSize
+            AbstractRegistry.threadPoolSize = config.threadPoolSize
             setDefaults(project)
             setTaskDependencies(project)
         }
@@ -134,7 +134,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             }
         }
 
-        withExistingPool(RegistryBase.pool) {
+        withExistingPool(AbstractRegistry.pool) {
             finalDependencies.eachParallel { Dependency dependency ->
                 project.logger.info "Installing: ${dependency.name}@${dependency.version?.fullVersion}"
 
@@ -155,7 +155,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     }
 
     List<Dependency> loadDependencies(List<Dependency> rootDependencies) {
-       withExistingPool(RegistryBase.pool) {
+       withExistingPool(AbstractRegistry.pool) {
             rootDependencies
                     .collectParallel { Dependency dependency ->
                 dependency.registry.loadDependency(dependency as Dependency, null)

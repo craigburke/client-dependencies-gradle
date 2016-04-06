@@ -6,7 +6,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
 import com.craigburke.gradle.client.registry.core.Registry
-import com.craigburke.gradle.client.registry.core.RegistryBase
+import com.craigburke.gradle.client.registry.core.AbstractRegistry
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
@@ -43,7 +43,7 @@ abstract class AbstractRegistrySpec extends Specification {
     }
 
     void init(Class<Registry> clazz, String resourceFolder) {
-        RegistryBase.threadPoolSize = 15
+        AbstractRegistry.threadPoolSize = 15
         registry = clazz.newInstance(["http://www.example.com/${resourceFolder}", Logging.getLogger(clazz)] as Object[])
         registry.cachePath = cacheFolder.root.absolutePath
         registry.installPath = installFolder.root.absolutePath

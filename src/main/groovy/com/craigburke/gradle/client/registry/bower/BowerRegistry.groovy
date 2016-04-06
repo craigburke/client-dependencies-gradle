@@ -15,13 +15,13 @@
  */
 package com.craigburke.gradle.client.registry.bower
 
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.getMD5Hash
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.getMD5Hash
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
 import com.craigburke.gradle.client.registry.core.Registry
-import com.craigburke.gradle.client.registry.core.RegistryBase
+import com.craigburke.gradle.client.registry.core.AbstractRegistry
 import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
 import groovy.json.JsonSlurper
@@ -32,7 +32,7 @@ import groovy.json.JsonSlurper
  *
  * @author Craig Burke
  */
-class BowerRegistry extends RegistryBase implements Registry {
+class BowerRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://bower.herokuapp.com'
 
@@ -43,7 +43,7 @@ class BowerRegistry extends RegistryBase implements Registry {
     List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
         File bowerConfigFile = new File("${dependency.sourceFolder.absolutePath}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
-        withExistingPool(RegistryBase.pool) {
+        withExistingPool(AbstractRegistry.pool) {
             bowerConfigJson.dependencies
                     .findAll { String name, String versionExpression -> !exclusions.contains(name) }
                     .collectParallel { String name, String versionExpression ->
@@ -63,9 +63,7 @@ class BowerRegistry extends RegistryBase implements Registry {
         if (dependency.url) {
             return dependency.url
         }
-
-        URL dependencyUrl = new URL("${url}/packages/${dependency.name}")
-        new JsonSlurper().parse(dependencyUrl).url
+        getInfo(dependency)?.url
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {
@@ -87,6 +85,19 @@ class BowerRegistry extends RegistryBase implements Registry {
                 false
             }
         }
+    }
+
+    Map getInfo(Dependency dependency) {
+        URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
+        new JsonSlurper().parse(url) as Map
+    }
+
+    Map loadInfoFromGlobalCache(Dependency dependency) {
+        null
+    }
+
+    Map loadInfoFromRegistry(Dependency dependency) {
+        null
     }
 
 }

@@ -45,4 +45,6 @@ interface Registry {
     Resolver getResolver(Dependency dependency)
 
     String getUrl()
+
+    Map getInfo(Dependency dependency)
 }

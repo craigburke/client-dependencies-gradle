@@ -15,21 +15,25 @@
  */
 package com.craigburke.gradle.client.registry.core
 
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
+
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 import org.gradle.api.logging.Logger
 
 /**
  *
- * Base Registry class
+ * Abstract Registry class
  *
  * @author Craig Burke
  */
 @CompileStatic
-abstract class RegistryBase implements Registry {
+abstract class AbstractRegistry implements Registry {
 
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
@@ -43,7 +47,7 @@ abstract class RegistryBase implements Registry {
     protected Logger log
     protected List<Resolver> resolvers
 
-    protected RegistryBase(String url, Logger log, List<Class<Resolver>> resolvers) {
+    protected AbstractRegistry(String url, Logger log, List<Class<Resolver>> resolvers) {
         this.url = url
         this.log = log
         this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }
@@ -107,4 +111,41 @@ abstract class RegistryBase implements Registry {
     abstract String getDependencyUrl(Dependency dependency)
     abstract boolean downloadDependencyFromCache(Dependency dependency)
     abstract List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions)
+
+    static File getInfoFile(Dependency dependency) {
+        new File("${dependency.sourceFolder.parentFile.absolutePath}/info.json")
+    }
+
+    Map getInfo(Dependency dependency) {
+        withLock(dependency.name) {
+            def info = loadInfoFromLocalCache(dependency)
+            boolean loadedFromLocalCache = info as boolean
+
+            if (!loadedFromLocalCache && dependency.registry.useGlobalCache) {
+                info = loadInfoFromGlobalCache(dependency)
+            }
+            info = info ?: loadInfoFromRegistry(dependency)
+
+            if (!loadedFromLocalCache && info) {
+                File infoFile = getInfoFile(dependency)
+                infoFile.parentFile.mkdirs()
+                infoFile.text = new JsonBuilder(info).toPrettyString()
+            }
+
+            info ?: [:]
+        } as Map
+    }
+
+    Map loadInfoFromLocalCache(Dependency dependency) {
+        File infoFile = getInfoFile(dependency)
+        if (infoFile.exists() && !infoFile.directory) {
+            new JsonSlurper().parse(infoFile) as Map
+        }
+        else {
+            null
+        }
+    }
+
+    abstract Map loadInfoFromGlobalCache(Dependency dependency)
+    abstract Map loadInfoFromRegistry(Dependency dependency)
 }

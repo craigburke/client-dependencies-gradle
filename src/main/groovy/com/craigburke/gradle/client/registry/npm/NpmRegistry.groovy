@@ -15,13 +15,13 @@
  */
 package com.craigburke.gradle.client.registry.npm
 
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
 import com.craigburke.gradle.client.registry.core.Registry
-import com.craigburke.gradle.client.registry.core.RegistryBase
+import com.craigburke.gradle.client.registry.core.AbstractRegistry
 
 import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
@@ -33,7 +33,7 @@ import groovy.json.JsonSlurper
  *
  * @author Craig Burke
  */
-class NpmRegistry extends RegistryBase implements Registry {
+class NpmRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://registry.npmjs.org'
 
@@ -54,7 +54,7 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclude) {
-        withExistingPool(RegistryBase.pool) {
+        withExistingPool(AbstractRegistry.pool) {
             getDependencies(dependency)
                     .findAll { String name, String childVersion -> !exclude.contains(name) }
                     .collectParallel { String name, String versionExpression ->
@@ -75,7 +75,7 @@ class NpmRegistry extends RegistryBase implements Registry {
     }
 
     String getDependencyUrl(Dependency dependency) {
-        NpmResolver.getDownloadInfo(dependency)?.url ?: ''
+        dependency.url ?: getInfo(dependency)?.url
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {
@@ -92,6 +92,27 @@ class NpmRegistry extends RegistryBase implements Registry {
             else {
                 false
             }
+        }
+    }
+
+    Map loadInfoFromRegistry(Dependency dependency) {
+        log.info "Loading info for ${dependency} from ${dependency.registry.url}"
+        boolean isScoped = dependency.name.startsWith('@')
+        String name = isScoped ? dependency.name[1..-1] : dependency.name
+        String encodedName = "${isScoped ? '@' : ''}${URLEncoder.encode(name, 'UTF-8')}"
+        URL url = new URL("${dependency.registry.url}/${encodedName}")
+        new JsonSlurper().parse(url) as Map
+    }
+
+    Map loadInfoFromGlobalCache(Dependency dependency) {
+        String folderName = dependency.name.replaceAll('@', '_40').replaceAll('/', '_252')
+        File cacheFile = new File("${System.getProperty('user.home')}/.npm/${folderName}/.cache.json")
+        if (cacheFile.exists()) {
+            log.info "Loading info for ${dependency} from ${cacheFile.absolutePath}"
+            new JsonSlurper().parse(cacheFile) as Map
+        }
+        else {
+            null
         }
     }
 }

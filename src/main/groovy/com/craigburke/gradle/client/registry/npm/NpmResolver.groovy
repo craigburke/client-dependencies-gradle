@@ -1,14 +1,13 @@
 package com.craigburke.gradle.client.registry.npm
 
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.getShaHash
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.getShaHash
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
+import com.craigburke.gradle.client.registry.core.Resolver
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
-import com.craigburke.gradle.client.registry.core.Resolver
 import com.craigburke.gradle.client.registry.core.DownloadVerifyException
-import groovy.json.JsonSlurper
 import org.ajoberstar.grgit.Grgit
 import org.gradle.api.logging.Logger
 
@@ -31,7 +30,7 @@ class NpmResolver implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        def versionListJson = getVersionListFromNpm(dependency)
+        def versionListJson = dependency.registry.getInfo(dependency)?.versions
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
@@ -75,17 +74,9 @@ class NpmResolver implements Resolver {
         }
     }
 
-    static getVersionListFromNpm(Dependency dependency) {
-        boolean isScoped = dependency.name.startsWith('@')
-        String name = isScoped ? dependency.name[1..-1] : dependency.name
-        String encodedName = "${isScoped ? '@' : ''}${URLEncoder.encode(name, 'UTF-8')}"
-        URL url = new URL("${dependency.registry.url}/${encodedName}")
-        new JsonSlurper().parse(url).versions
-    }
-
-    static DownloadInfo getDownloadInfo(Dependency dependency) {
+    DownloadInfo getDownloadInfo(Dependency dependency) {
         if (!dependency.url || dependency.url.startsWith(dependency.registry.url)) {
-            def json = getVersionListFromNpm(dependency)[dependency.version.fullVersion]?.dist
+            def json = dependency.registry.getInfo(dependency).versions[dependency.version.fullVersion]?.dist
             new DownloadInfo(url: json?.tarball, checksum: json?.shasum)
         }
         else {

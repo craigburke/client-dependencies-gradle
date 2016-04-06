@@ -1,6 +1,6 @@
 package com.craigburke.gradle.client.registry.bower
 
-import static com.craigburke.gradle.client.registry.core.ResolverUtil.withLock
+import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
@@ -36,7 +36,7 @@ class GithubResolver implements Resolver {
         dependency.url?.matches(GITHUB_URL)
     }
 
-    private GithubInfo getInfo(String url) {
+    GithubInfo getInfo(String url) {
         GithubInfo info
         url.find(GITHUB_URL) { String match, String orgName, String repoName ->
             info = new GithubInfo(orgName: orgName, repoName: repoName)
@@ -44,7 +44,7 @@ class GithubResolver implements Resolver {
         info
     }
 
-    private File getDownloadFile(Dependency dependency) {
+    private static File getDownloadFile(Dependency dependency) {
         new File("${dependency.sourceFolder.parentFile.absolutePath}/${dependency.version.fullVersion}.tar.gz")
     }
 
