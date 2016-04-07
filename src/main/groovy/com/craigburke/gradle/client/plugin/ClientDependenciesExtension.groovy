@@ -34,14 +34,15 @@ class ClientDependenciesExtension {
 
     int threadPoolSize = 15
 
-    String installDir
-    String cacheDir
+    Object installDir
+    Object cacheDir
 
     boolean useGlobalCache = true
     boolean checkDownloads = true
 
     List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
     List<String> releaseFolders = ['dist', 'release']
+
     List<String> copyIncludes = []
     List<String> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
                                  'index.js', 'gulpfile.js', 'source/**']
@@ -50,6 +51,14 @@ class ClientDependenciesExtension {
 
     ClientDependenciesExtension(Project project) {
         this.project = project
+    }
+
+    File getInstallDir() {
+        project.file(installDir)
+    }
+
+    File getCacheDir() {
+        project.file(cacheDir)
     }
 
     Map<String, Registry> registryMap = [:]
