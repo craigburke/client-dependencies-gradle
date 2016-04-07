@@ -63,7 +63,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         if (dependency.url) {
             return dependency.url
         }
-        getInfo(dependency)?.url
+        loadInfo(dependency)?.url
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {
@@ -87,17 +87,22 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         }
     }
 
-    Map getInfo(Dependency dependency) {
-        URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
-        new JsonSlurper().parse(url) as Map
-    }
-
     Map loadInfoFromGlobalCache(Dependency dependency) {
-        null
+        File cacheRoot = new File("${System.getProperty('user.home')}/.cache/bower/registry/bower.herokuapp.com/lookup")
+        File cacheFile = cacheRoot.listFiles()
+                .findAll { File file -> !file.directory }
+                .find { File file -> file.name.startsWith("${dependency.name}_") }
+        if (cacheFile) {
+            new JsonSlurper().parse(cacheFile) as Map
+        }
+        else {
+            null
+        }
     }
 
     Map loadInfoFromRegistry(Dependency dependency) {
-        null
+        URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
+        new JsonSlurper().parse(url) as Map
     }
 
 }

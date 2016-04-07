@@ -46,5 +46,5 @@ interface Registry {
 
     String getUrl()
 
-    Map getInfo(Dependency dependency)
+    Map loadInfo(Dependency dependency)
 }

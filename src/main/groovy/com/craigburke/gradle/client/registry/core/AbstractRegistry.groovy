@@ -42,6 +42,7 @@ abstract class AbstractRegistry implements Registry {
     String installPath
     boolean useGlobalCache
     boolean checkDownloads
+    boolean offline = false
 
     static ForkJoinPool pool
     protected Logger log
@@ -116,20 +117,24 @@ abstract class AbstractRegistry implements Registry {
         new File("${dependency.sourceFolder.parentFile.absolutePath}/info.json")
     }
 
-    Map getInfo(Dependency dependency) {
+    Map loadInfo(Dependency dependency) {
         withLock(dependency.name) {
+
             def info = loadInfoFromLocalCache(dependency)
             boolean loadedFromLocalCache = info as boolean
 
             if (!loadedFromLocalCache && dependency.registry.useGlobalCache) {
                 info = loadInfoFromGlobalCache(dependency)
             }
-            info = info ?: loadInfoFromRegistry(dependency)
 
             if (!loadedFromLocalCache && info) {
                 File infoFile = getInfoFile(dependency)
                 infoFile.parentFile.mkdirs()
                 infoFile.text = new JsonBuilder(info).toPrettyString()
+            }
+
+            if (!info && !offline) {
+                info = loadInfoFromRegistry(dependency)
             }
 
             info ?: [:]

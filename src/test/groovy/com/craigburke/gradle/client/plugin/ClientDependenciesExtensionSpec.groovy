@@ -88,7 +88,7 @@ class ClientDependenciesExtensionSpec extends Specification {
     @Unroll
     def "can register custom registry #name"() {
         when:
-        extension.registry(name: name, type: type, url: url)
+        extension.registry(name, type: type, url: url)
         Registry registry = extension.registryMap[name]
 
         then:

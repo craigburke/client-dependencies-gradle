@@ -84,7 +84,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             AbstractRegistry.threadPoolSize = config.threadPoolSize
             setDefaults(project)
             setTaskDependencies(project)
-            setTaskInputsAndOutputs(project)
         }
 
     }
@@ -180,10 +179,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             registry.useGlobalCache = config.useGlobalCache
             registry.checkDownloads = config.checkDownloads
         }
-    }
-
-    void setTaskInputsAndOutputs(Project project) {
-        
     }
 
     static void setTaskDependencies(Project project) {

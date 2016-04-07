@@ -21,7 +21,6 @@ import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
-import org.gradle.api.tasks.Input
 import org.gradle.util.CollectionUtils
 
 /**
@@ -42,11 +41,11 @@ class ClientDependenciesExtension {
     private Object installDir
     private Object cacheDir
 
-    private List<Object> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
-    private List<Object> releaseFolders = ['dist', 'release']
+    private final List<Object> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
+    private final List<Object> releaseFolders = ['dist', 'release']
 
-    private List<Object> copyIncludes = []
-    private List<Object> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
+    private final List<Object> copyIncludes = []
+    private final List<Object> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
                                  'index.js', 'gulpfile.js', 'source/**']
 
     Closure defaultCopy
@@ -138,11 +137,11 @@ class ClientDependenciesExtension {
        }
     }
 
-    void registry(Map props) {
+    void registry(Map props = [:], String name) {
         String url = props.url as String
         Logger log = project.logger
         Registry registry = (props.type == 'bower' ? new BowerRegistry(url, log) : new NpmRegistry(url, log))
-        registryMap[props.name as String] = registry
+        registryMap[name] = registry
     }
 
     Closure getCopyConfig() {

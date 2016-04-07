@@ -75,7 +75,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
     }
 
     String getDependencyUrl(Dependency dependency) {
-        dependency.url ?: getInfo(dependency)?.url
+        dependency.url ?: loadInfo(dependency)?.url
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {

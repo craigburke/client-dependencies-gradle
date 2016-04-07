@@ -293,7 +293,7 @@ ruleset {
     ClassName
     ClassNameSameAsFilename
     ClassNameSameAsSuperclass
-    ConfusingMethodName
+    'ConfusingMethodName' doNotApplyToClassNames:'ClientDependenciesExtension'
     'FactoryMethodName' doNotApplyToFilesMatching: '.*Spec.groovy'
     FieldName
     InterfaceName

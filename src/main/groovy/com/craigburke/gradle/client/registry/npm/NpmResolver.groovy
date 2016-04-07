@@ -30,7 +30,7 @@ class NpmResolver implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        def versionListJson = dependency.registry.getInfo(dependency)?.versions
+        def versionListJson = dependency.registry.loadInfo(dependency)?.versions
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
@@ -76,7 +76,7 @@ class NpmResolver implements Resolver {
 
     DownloadInfo getDownloadInfo(Dependency dependency) {
         if (!dependency.url || dependency.url.startsWith(dependency.registry.url)) {
-            def json = dependency.registry.getInfo(dependency).versions[dependency.version.fullVersion]?.dist
+            def json = dependency.registry.loadInfo(dependency).versions[dependency.version.fullVersion]?.dist
             new DownloadInfo(url: json?.tarball, checksum: json?.shasum)
         }
         else {

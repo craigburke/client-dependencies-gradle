@@ -49,7 +49,7 @@ class GitResolver implements Resolver {
             Grgit.open(dir: sourceFolder.absolutePath)
         }
         else {
-            String gitUrl = dependency.url ?: dependency.registry.getInfo(dependency).url
+            String gitUrl = dependency.url ?: dependency.registry.loadInfo(dependency).url
             Grgit.clone(dir: sourceFolder, uri: gitUrl)
         }
     }
