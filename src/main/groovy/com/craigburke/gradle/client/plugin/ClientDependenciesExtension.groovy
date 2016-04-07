@@ -21,6 +21,8 @@ import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.api.tasks.Input
+import org.gradle.util.CollectionUtils
 
 /**
  *
@@ -34,17 +36,17 @@ class ClientDependenciesExtension {
 
     int threadPoolSize = 15
 
-    Object installDir
-    Object cacheDir
-
     boolean useGlobalCache = true
     boolean checkDownloads = true
 
-    List<String> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
-    List<String> releaseFolders = ['dist', 'release']
+    private Object installDir
+    private Object cacheDir
 
-    List<String> copyIncludes = []
-    List<String> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
+    private List<Object> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
+    private List<Object> releaseFolders = ['dist', 'release']
+
+    private List<Object> copyIncludes = []
+    private List<Object> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
                                  'index.js', 'gulpfile.js', 'source/**']
 
     Closure defaultCopy
@@ -53,15 +55,73 @@ class ClientDependenciesExtension {
         this.project = project
     }
 
+    void setFileExtensions(Object... extensions) {
+        this.fileExtensions.clear()
+        this.fileExtensions.addAll(extensions)
+    }
+
+    void fileExtensions(Object... extensions) {
+        this.fileExtensions.addAll(extensions)
+    }
+
+    @Input
+    List<String> getFileExtensions() {
+        CollectionUtils.stringize(this.fileExtensions)
+    }
+
+    void setReleaseFolders(Object... extensions) {
+        this.releaseFolders.clear()
+        this.releaseFolders.addAll(extensions)
+    }
+
+    void releaseFolders(Object... extensions) {
+        this.releaseFolders.addAll(extensions)
+    }
+
+    List<String> getCopyIncludes() {
+        CollectionUtils.stringize(this.copyIncludes)
+    }
+
+    void setCopyIncludes(Object... includes) {
+        this.copyIncludes.clear()
+        this.copyIncludes.addAll(includes)
+    }
+
+    void copyIncludes(Object... includes) {
+        this.copyIncludes.addAll(includes)
+    }
+
+    List<String> getCopyExcludes() {
+        CollectionUtils.stringize(this.copyExcludes)
+    }
+
+    void setCopyExcludes(Object... includes) {
+        this.copyExcludes.clear()
+        this.copyExcludes.addAll(includes)
+    }
+
+    void copyExcludes(Object... includes) {
+        this.copyExcludes.addAll(includes)
+    }
+
+    @Input
+    List<String> getReleaseFolders() {
+        CollectionUtils.stringize(this.releaseFolders)
+    }
+
+    @Input
     File getInstallDir() {
         project.file(installDir)
     }
 
+    @Input
     File getCacheDir() {
         project.file(cacheDir)
     }
 
     Map<String, Registry> registryMap = [:]
+
+    @Input
     List<Dependency> rootDependencies = []
 
     def methodMissing(String registryName, args) {
@@ -82,6 +142,7 @@ class ClientDependenciesExtension {
         registryMap[props.name as String] = registry
     }
 
+    @Input
     Closure getCopyConfig() {
         if (defaultCopy) {
             return defaultCopy
