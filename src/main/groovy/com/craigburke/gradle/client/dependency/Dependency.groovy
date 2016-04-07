@@ -16,7 +16,6 @@
 package com.craigburke.gradle.client.dependency
 
 import com.craigburke.gradle.client.registry.core.Registry
-import groovy.transform.AutoClone
 import groovy.transform.CompileStatic
 
 import java.util.regex.Pattern
@@ -26,8 +25,7 @@ import java.util.regex.Pattern
  * @author Craig Burke
  */
 @CompileStatic
-@AutoClone
-class Dependency {
+class Dependency implements Cloneable {
 
     static final String GITHUB_URL_PREFIX = 'https://github.com'
     static final Pattern GITHUB_PROJECT_PATTERN = ~/^[^\/]*\/[^\/]*$/
@@ -50,12 +48,13 @@ class Dependency {
     boolean transitive = true
     Closure copyConfig
 
-    void setExclude(String exclude) {
-        this.exclude = [exclude]
-    }
-
-    void setExclude(List<String> exclude) {
-        this.exclude = exclude
+    void setExclude(Object exclude) {
+        if (exclude instanceof String) {
+            this.exclude = [exclude as String]
+        }
+        else {
+            this.exclude = exclude as List<String>
+        }
     }
 
     void setChildren(List<Dependency> children) {
@@ -68,7 +67,7 @@ class Dependency {
                 .findAll { it.children }
                 .collectMany { flattenList(it.children) } as List<Dependency>
 
-        dependencies + children
+        (dependencies + children) as List<Dependency>
     }
 
     List<Dependency> getAncestorsAndSelf() {
@@ -77,7 +76,7 @@ class Dependency {
 
     private static List<Dependency> collectAncestors(Dependency dependency) {
         if (dependency.parent) {
-            [dependency] + collectAncestors(dependency.parent)
+            ([dependency] + collectAncestors(dependency.parent)) as List<Dependency>
         }
         else {
             [dependency]
@@ -113,6 +112,27 @@ class Dependency {
         File[] sourceFolders = sourceFolder?.listFiles()?.findAll { File file -> file.directory }
         List<String> folderNames = sourceFolders*.name
         releaseFolders?.find { folderNames.contains(it) } ?: ''
+    }
+
+    Object clone() {
+        Dependency result = new Dependency()
+        Dependency source = this
+
+        result.with {
+            name = source.name
+            transitive = source.transitive
+            url = source.@url
+            versionExpression = source.versionExpression
+            from = source.from
+            into = source.into
+            exclude = source.exclude
+            parent = source.parent?.clone() as Dependency
+            copyConfig = source.copyConfig?.clone() as Closure
+            sourceFolder = source.sourceFolder ? new File(source.sourceFolder.absolutePath) : null
+            version = source.version?.clone() as Version
+        }
+
+        result
     }
 
     String toString() {

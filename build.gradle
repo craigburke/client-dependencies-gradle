@@ -1,16 +1,26 @@
-plugins {
-    id 'groovy'
-    id 'maven-publish'
-    id 'idea'
-    id 'codenarc'
-    id 'com.gradle.plugin-publish' version '0.9.3'
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.4"
+    }
 }
+
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+apply plugin: 'idea'
+apply plugin: 'codenarc'
+apply plugin: 'com.gradle.plugin-publish'
 
 ext {
     artifactId = 'client-dependencies'
 }
 
-targetCompatibility = 1.6
+targetCompatibility = 1.7
 
 group = 'com.craigburke.gradle'
 version = '1.0.0-SNAPSHOT'
@@ -20,10 +30,11 @@ repositories {
 }
 
 dependencies {
+    compile localGroovy()
     compile gradleApi()
     compile 'org.codehaus.gpars:gpars:1.2.1'
     compile 'org.ajoberstar:grgit:1.5.0'
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.3') {
         exclude  module: 'groovy-all'
     }
     testCompile 'com.github.tomakehurst:wiremock:1.58:standalone'
@@ -59,5 +70,5 @@ pluginBundle {
 
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.9'
+    gradleVersion = '2.0'
 }

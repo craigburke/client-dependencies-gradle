@@ -20,7 +20,7 @@ class ClientDependenciesPluginSpec extends Specification {
         Project project = ProjectBuilder.builder().build()
 
         when:
-        project.pluginManager.apply(PLUGIN_NAME)
+        project.plugins.apply(PLUGIN_NAME)
 
         then:
         project.tasks[taskName]

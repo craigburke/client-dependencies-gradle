@@ -24,7 +24,7 @@ import java.util.regex.Pattern
  * @author Craig Burke
  */
 @CompileStatic
-class Version implements Comparable<Version> {
+class Version implements Comparable<Version>, Cloneable {
 
     Integer major
     Integer minor
@@ -165,6 +165,10 @@ class Version implements Comparable<Version> {
 
     String toString() {
         fullVersion
+    }
+
+    Version clone() {
+        parse(this.fullVersion)
     }
 
     boolean compatibleWith(Version version) {

@@ -76,7 +76,7 @@ abstract class AbstractRegistry implements Registry {
     Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
         log.info "Loading dependency: ${declaredDependency}"
 
-        Dependency dependency = declaredDependency.clone()
+        Dependency dependency = declaredDependency.clone() as Dependency
         dependency.registry = this
         dependency.parent = parent
         dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
