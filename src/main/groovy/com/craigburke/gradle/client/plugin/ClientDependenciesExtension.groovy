@@ -64,7 +64,6 @@ class ClientDependenciesExtension {
         this.fileExtensions.addAll(extensions)
     }
 
-    @Input
     List<String> getFileExtensions() {
         CollectionUtils.stringize(this.fileExtensions)
     }
@@ -104,24 +103,28 @@ class ClientDependenciesExtension {
         this.copyExcludes.addAll(includes)
     }
 
-    @Input
     List<String> getReleaseFolders() {
         CollectionUtils.stringize(this.releaseFolders)
     }
 
-    @Input
-    File getInstallDir() {
-        project.file(installDir)
+    void setInstallDir(Object installDir) {
+        this.installDir = installDir
     }
 
-    @Input
+    File getInstallDir() {
+        installDir as File ?: project.file(installDir)
+    }
+
+    void setCacheDir(Object cacheDir) {
+        this.cacheDir = cacheDir
+    }
+
     File getCacheDir() {
-        project.file(cacheDir)
+        this.cacheDir as File ?: project.file(this.cacheDir)
     }
 
     Map<String, Registry> registryMap = [:]
 
-    @Input
     List<Dependency> rootDependencies = []
 
     def methodMissing(String registryName, args) {
@@ -142,7 +145,6 @@ class ClientDependenciesExtension {
         registryMap[props.name as String] = registry
     }
 
-    @Input
     Closure getCopyConfig() {
         if (defaultCopy) {
             return defaultCopy
