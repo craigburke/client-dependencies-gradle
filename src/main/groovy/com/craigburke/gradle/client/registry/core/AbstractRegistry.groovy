@@ -38,8 +38,10 @@ abstract class AbstractRegistry implements Registry {
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
     String url
-    String cachePath
-    String installPath
+
+    File cacheDir
+    File installDir
+
     boolean useGlobalCache
     boolean checkDownloads
     boolean offline = false
@@ -63,7 +65,7 @@ abstract class AbstractRegistry implements Registry {
     }
 
     String getMainFolderPath(String dependencyName) {
-        formatPath("${cachePath}/${dependencyName}")
+        formatPath("${cacheDir.absolutePath}/${dependencyName}")
     }
 
     List<Version> getVersionList(Dependency dependency) {
@@ -80,7 +82,7 @@ abstract class AbstractRegistry implements Registry {
         Dependency dependency = declaredDependency.clone() as Dependency
         dependency.registry = this
         dependency.parent = parent
-        dependency.sourceFolder = new File("${cachePath}/${dependency.name}/source/")
+        dependency.sourceFolder = new File("${cacheDir.absolutePath}/${dependency.name}/source/")
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)

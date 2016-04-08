@@ -30,11 +30,11 @@ interface Registry {
     List<Version> getVersionList(Dependency dependency)
     Dependency loadDependency(Dependency dependency, Dependency parent)
 
-    void setInstallPath(String installPath)
-    String getInstallPath()
+    void setInstallDir(File installDir)
+    File getInstallDir()
 
-    void setCachePath(String cachePath)
-    String getCachePath()
+    void setCacheDir(File cacheDir)
+    File getCacheDir()
 
     void setUseGlobalCache(boolean useGlobalCache)
     boolean getUseGlobalCache()

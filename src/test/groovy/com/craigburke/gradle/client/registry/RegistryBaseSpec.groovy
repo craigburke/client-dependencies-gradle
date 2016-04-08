@@ -20,7 +20,7 @@ class RegistryBaseSpec extends Specification {
     @Unroll
     def "main folder path for #dependency matches #result"() {
         setup:
-        registryBase.cachePath = cachePath
+        registryBase.cacheDir = new File(cachePath)
 
         expect:
         registryBase.getMainFolderPath(dependencyName) == result
@@ -30,7 +30,6 @@ class RegistryBaseSpec extends Specification {
         '/foo'     | 'foo'          | '/foo/foo'
         '/foo/bar' | 'foo'          | '/foo/bar/foo'
         '/'        | 'foo'          | '/foo'
-        'C:\\foo'  | 'foo'          | 'C:/foo/foo'
     }
 
 }
