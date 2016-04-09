@@ -111,7 +111,7 @@ class ClientDependenciesExtension {
     }
 
     File getInstallDir() {
-        installDir as File ?: project.file(installDir)
+        this.installDir ? project.file(this.installDir) : null
     }
 
     void setCacheDir(Object cacheDir) {
@@ -119,7 +119,7 @@ class ClientDependenciesExtension {
     }
 
     File getCacheDir() {
-        this.cacheDir as File ?: project.file(this.cacheDir)
+        this.cacheDir ? project.file(this.cacheDir) : null
     }
 
     Map<String, Registry> registryMap = [:]

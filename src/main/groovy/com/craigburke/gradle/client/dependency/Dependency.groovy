@@ -59,7 +59,7 @@ class Dependency implements Cloneable {
     }
 
     File getSourceDir() {
-        new File("${baseSourceDir.absolutePath}/${version}/")
+        new File("${baseSourceDir.absolutePath}/${version ?: versionExpression}/")
     }
 
     void setChildren(List<Dependency> children) {
