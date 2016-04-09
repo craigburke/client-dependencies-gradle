@@ -43,10 +43,11 @@ class Dependency implements Cloneable {
     List<Dependency> children = []
     List<String> exclude = []
 
-    File baseSourceDir
-
     boolean transitive = true
     Closure copyConfig
+
+    Map info = [:]
+    File baseSourceDir
 
     void setExclude(Object exclude) {
         if (exclude instanceof String) {

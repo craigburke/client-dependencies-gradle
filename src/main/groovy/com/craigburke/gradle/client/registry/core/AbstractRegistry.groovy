@@ -79,6 +79,7 @@ abstract class AbstractRegistry implements Registry {
         dependency.registry = this
         dependency.parent = parent
         dependency.baseSourceDir = new File("${cacheDir.absolutePath}/${dependency.name}/")
+        dependency.info = loadInfo(dependency)
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
@@ -118,7 +119,6 @@ abstract class AbstractRegistry implements Registry {
 
     Map loadInfo(Dependency dependency) {
         withLock(dependency.name) {
-
             def info = loadInfoFromLocalCache(dependency)
             boolean loadedFromLocalCache = info as boolean
 
@@ -126,14 +126,14 @@ abstract class AbstractRegistry implements Registry {
                 info = loadInfoFromGlobalCache(dependency)
             }
 
+            if (!info && !dependency.url) {
+                info = loadInfoFromRegistry(dependency)
+            }
+
             if (!loadedFromLocalCache && info) {
                 File infoFile = getInfoFile(dependency)
                 infoFile.parentFile.mkdirs()
                 infoFile.text = new JsonBuilder(info).toPrettyString()
-            }
-
-            if (!info && !offline) {
-                info = loadInfoFromRegistry(dependency)
             }
 
             info ?: [:]
