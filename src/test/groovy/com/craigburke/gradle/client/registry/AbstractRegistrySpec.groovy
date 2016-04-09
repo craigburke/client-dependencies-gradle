@@ -9,7 +9,6 @@ import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.Version
 import com.github.tomakehurst.wiremock.WireMockServer
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -73,24 +72,6 @@ abstract class AbstractRegistrySpec extends Specification {
                 .digest(data)
                 .collect { byte part -> String.format('%02x', part) }
                 .join('')
-    }
-
-    @Unroll
-    def "get version list for #name"() {
-        setup:
-        Dependency dependency = new Dependency(
-                name: name,
-                baseSourceDir: sourceFolder,
-                registry: registry,
-                versionExpression: '1.0.0')
-
-        expect:
-        registry.getVersionList(dependency).sort() == Version.toList(versions)
-
-        where:
-        name  | versions
-        'foo' | ['1.0.0', '1.1.0', '1.1.1', '1.2.0', '2.0.0']
-        'bar' | ['0.0.1', '1.0.0', '2.0.0']
     }
 
     @Unroll

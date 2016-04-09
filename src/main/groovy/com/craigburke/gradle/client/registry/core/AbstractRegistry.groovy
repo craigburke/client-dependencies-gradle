@@ -68,10 +68,6 @@ abstract class AbstractRegistry implements Registry {
         formatPath("${cacheDir.absolutePath}/${dependencyName}")
     }
 
-    List<Version> getVersionList(Dependency dependency) {
-        getResolver(dependency).getVersionList(dependency)
-    }
-
     Resolver getResolver(Dependency dependency) {
         resolvers.find { it.canResolve(dependency) }
     }
@@ -88,7 +84,8 @@ abstract class AbstractRegistry implements Registry {
             dependency.version = Version.parse(declaredDependency.versionExpression)
         }
         else {
-            dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, getVersionList(dependency))
+            List<Version> versionList = getResolver(dependency).getVersionList(dependency)
+            dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, versionList)
         }
 
         dependency.url = getDependencyUrl(dependency)

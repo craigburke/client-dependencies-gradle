@@ -16,7 +16,6 @@
 package com.craigburke.gradle.client.registry.core
 
 import com.craigburke.gradle.client.dependency.Dependency
-import com.craigburke.gradle.client.dependency.Version
 import groovy.transform.CompileStatic
 
 /**
@@ -27,9 +26,6 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 interface Registry {
-    List<Version> getVersionList(Dependency dependency)
-    Dependency loadDependency(Dependency dependency, Dependency parent)
-
     void setInstallDir(File installDir)
     File getInstallDir()
 
@@ -42,9 +38,9 @@ interface Registry {
     void setCheckDownloads(boolean checkDownloads)
     boolean getCheckDownloads()
 
-    Resolver getResolver(Dependency dependency)
-
     String getUrl()
 
+    Dependency loadDependency(Dependency dependency, Dependency parent)
+    Resolver getResolver(Dependency dependency)
     Map loadInfo(Dependency dependency)
 }
