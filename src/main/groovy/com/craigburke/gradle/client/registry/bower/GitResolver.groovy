@@ -43,7 +43,7 @@ class GitResolver implements Resolver {
     }
 
     private Grgit getRepository(Dependency dependency) {
-        File sourceFolder = dependency.sourceFolder
+        File sourceFolder = dependency.sourceDir
 
         if (sourceFolder.exists()) {
             Grgit.open(dir: sourceFolder.absolutePath)

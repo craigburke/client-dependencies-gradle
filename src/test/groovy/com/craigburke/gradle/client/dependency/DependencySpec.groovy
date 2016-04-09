@@ -46,7 +46,7 @@ class DependencySpec extends Specification {
         TemporaryFolder temporaryFolder = new TemporaryFolder()
         temporaryFolder.create()
         subfolders.each { temporaryFolder.newFolder(it as String) }
-        Dependency dependency = new Dependency(name: 'foo', from: from, sourceFolder: temporaryFolder.root)
+        Dependency dependency = new Dependency(name: 'foo', from: from, baseSourceDir: temporaryFolder.root)
 
         expect:
         dependency.getReleaseFolder(releaseFolders) == releaseFolder

@@ -36,7 +36,7 @@ class NpmResolver implements Resolver {
 
     void downloadDependency(Dependency dependency) {
         withLock(dependency.key) {
-            File sourceFolder = dependency.sourceFolder
+            File sourceFolder = dependency.sourceDir
 
             if (sourceFolder.exists()) {
                 return

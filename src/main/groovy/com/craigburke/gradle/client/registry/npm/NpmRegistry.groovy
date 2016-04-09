@@ -42,7 +42,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
     }
 
     private Map<String, String> getDependencies(Dependency dependency) {
-        File packageJson = new File("${dependency.sourceFolder.absolutePath}/package.json")
+        File packageJson = new File("${dependency.sourceDir.absolutePath}/package.json")
 
         if (packageJson.exists()) {
             def json = new JsonSlurper().parse(packageJson)
@@ -86,7 +86,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
 
             if (cacheFile.exists()) {
                 log.info "Loading ${dependency} from ${cacheFilePath}"
-                extractTarball(cacheFile, dependency.sourceFolder)
+                extractTarball(cacheFile, dependency.sourceDir)
                 true
             }
             else {

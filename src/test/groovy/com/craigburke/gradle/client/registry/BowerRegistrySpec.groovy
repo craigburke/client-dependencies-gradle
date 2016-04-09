@@ -29,12 +29,12 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
     def "can get source for #name@#version"() {
         given:
         Dependency simpleDependency = new Dependency(name: name,
-                sourceFolder: sourceFolder,
+                baseSourceDir: sourceFolder,
                 versionExpression: version)
 
         when:
         Dependency dependency = registry.loadDependency(simpleDependency, null)
-        File source = dependency.sourceFolder
+        File source = dependency.sourceDir
 
         then:
         Grgit.open(dir: source.absolutePath).head().id == commitHash

@@ -16,11 +16,11 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
     @Unroll
     def "can get source for #name@#version"() {
         given:
-        Dependency simpleDependency = new Dependency(name: name, sourceFolder: sourceFolder, versionExpression: version)
+        Dependency simpleDependency = new Dependency(name: name, baseSourceDir: sourceFolder, versionExpression: version)
         Dependency dependency = registry.loadDependency(simpleDependency, null)
 
         when:
-        File source = dependency.sourceFolder
+        File source = dependency.sourceDir
 
         then:
         new File("${source.absolutePath}/${name}.js").exists()
@@ -33,7 +33,7 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
 
     def "peer dependencies are included"() {
         given:
-        Dependency simpleDependency = new Dependency(name: 'peer', sourceFolder: sourceFolder, versionExpression: '1.0.0')
+        Dependency simpleDependency = new Dependency(name: 'peer', baseSourceDir: sourceFolder, versionExpression: '1.0.0')
         Dependency dependency = registry.loadDependency(simpleDependency, null)
 
         when:
@@ -48,7 +48,7 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         mockResponses([
                 '/npm/checksum' : resource('npm/checksum').text.replace(CHECKSUM_PLACEHOLDER, 'FOO')
         ])
-        Dependency dependency = new Dependency(name: 'checksum', sourceFolder: sourceFolder, versionExpression: '1.0.0')
+        Dependency dependency = new Dependency(name: 'checksum', baseSourceDir: sourceFolder, versionExpression: '1.0.0')
 
         when:
         registry.loadDependency(dependency, null)
@@ -63,7 +63,7 @@ class NpmRegistrySpec extends AbstractRegistrySpec {
         mockResponses([
                 '/npm/checksum' : resource('npm/checksum').text.replace(CHECKSUM_PLACEHOLDER, checksum)
         ])
-        Dependency dependency = new Dependency(name: 'checksum', sourceFolder: sourceFolder, versionExpression: '1.0.0')
+        Dependency dependency = new Dependency(name: 'checksum', baseSourceDir: sourceFolder, versionExpression: '1.0.0')
 
         when:
         registry.loadDependency(dependency, null)

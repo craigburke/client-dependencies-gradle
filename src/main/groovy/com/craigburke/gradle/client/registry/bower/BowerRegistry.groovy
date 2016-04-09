@@ -41,7 +41,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     }
 
     List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
-        File bowerConfigFile = new File("${dependency.sourceFolder.absolutePath}/bower.json")
+        File bowerConfigFile = new File("${dependency.sourceDir.absolutePath}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
         withExistingPool(AbstractRegistry.pool) {
             bowerConfigJson.dependencies
@@ -76,7 +76,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
                 log.info "Loading ${dependency} from ${cachePath}"
                 AntBuilder builder = new AntBuilder()
                 builder.project.buildListeners.first().setMessageOutputLevel(0)
-                builder.copy(todir: dependency.sourceFolder.absolutePath) {
+                builder.copy(todir: dependency.sourceDir.absolutePath) {
                     fileset(dir: cacheFolder.absolutePath)
                 }
                 true

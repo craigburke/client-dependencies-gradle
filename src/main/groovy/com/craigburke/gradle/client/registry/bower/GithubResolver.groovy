@@ -45,7 +45,7 @@ class GithubResolver implements Resolver {
     }
 
     private static File getDownloadFile(Dependency dependency) {
-        new File("${dependency.sourceFolder.parentFile.absolutePath}/${dependency.version.fullVersion}.tar.gz")
+        new File("${dependency.baseSourceDir.absolutePath}/${dependency.version}.tar.gz")
     }
 
     List<Version> getVersionList(Dependency dependency) {
@@ -59,7 +59,7 @@ class GithubResolver implements Resolver {
 
     void downloadDependency(Dependency dependency) {
         withLock(dependency.key) {
-            if (dependency.sourceFolder.exists()) {
+            if (dependency.baseSourceDir.exists()) {
                 return
             }
 
@@ -76,12 +76,12 @@ class GithubResolver implements Resolver {
             AntBuilder builder = new AntBuilder()
             builder.project.buildListeners.first().setMessageOutputLevel(0)
 
-            builder.untar(src: downloadFile.absolutePath, dest: dependency.sourceFolder.absolutePath,
+            builder.untar(src: downloadFile.absolutePath, dest: dependency.sourceDir.absolutePath,
                     compression: 'gzip', overwrite: true)
 
-            dependency.sourceFolder.listFiles().each { File file ->
+            dependency.sourceDir.listFiles().each { File file ->
                 if (file.directory) {
-                    builder.copy(todir: dependency.sourceFolder.absolutePath) {
+                    builder.copy(todir: dependency.sourceDir.absolutePath) {
                         fileSet(dir: file.absolutePath)
                     }
                     file.deleteDir()

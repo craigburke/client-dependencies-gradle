@@ -145,8 +145,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
                 project.copy {
                     includeEmptyDirs = false
-                    into "${registry.installPath}/${dependency.destinationPath}"
-                    from( "${dependency.sourceFolder.absolutePath}/${releaseFolder}" ) {
+                    into "${registry.installDir.absolutePath}/${dependency.destinationPath}"
+                    from( "${dependency.sourceDir.absolutePath}/${releaseFolder}" ) {
                         with copyConfig
                     }
                 }

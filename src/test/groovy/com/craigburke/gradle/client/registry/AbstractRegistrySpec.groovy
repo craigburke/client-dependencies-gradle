@@ -80,7 +80,7 @@ abstract class AbstractRegistrySpec extends Specification {
         setup:
         Dependency dependency = new Dependency(
                 name: name,
-                sourceFolder: sourceFolder,
+                baseSourceDir: sourceFolder,
                 registry: registry,
                 versionExpression: '1.0.0')
 
@@ -122,7 +122,7 @@ abstract class AbstractRegistrySpec extends Specification {
     def "can load #name@#version with exclusions"() {
         given:
         Dependency declaredDependency = new Dependency(name: name,
-                sourceFolder: sourceFolder,
+                baseSourceDir: sourceFolder,
                 versionExpression: version,
                 exclude: exclude)
 
@@ -152,7 +152,7 @@ abstract class AbstractRegistrySpec extends Specification {
         Dependency declaredDependency = new Dependency(
                 name: name,
                 versionExpression: version,
-                sourceFolder: sourceFolder,
+                baseSourceDir: sourceFolder,
                 transitive: false
         )
 

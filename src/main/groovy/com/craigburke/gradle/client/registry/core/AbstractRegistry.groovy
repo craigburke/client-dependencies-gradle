@@ -82,7 +82,7 @@ abstract class AbstractRegistry implements Registry {
         Dependency dependency = declaredDependency.clone() as Dependency
         dependency.registry = this
         dependency.parent = parent
-        dependency.sourceFolder = new File("${cacheDir.absolutePath}/${dependency.name}/source/")
+        dependency.baseSourceDir = new File("${cacheDir.absolutePath}/${dependency.name}/")
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
@@ -116,7 +116,7 @@ abstract class AbstractRegistry implements Registry {
     abstract List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions)
 
     static File getInfoFile(Dependency dependency) {
-        new File("${dependency.sourceFolder.parentFile.absolutePath}/info.json")
+        new File("${dependency.baseSourceDir.absolutePath}/info.json")
     }
 
     Map loadInfo(Dependency dependency) {

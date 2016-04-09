@@ -43,7 +43,7 @@ class Dependency implements Cloneable {
     List<Dependency> children = []
     List<String> exclude = []
 
-    File sourceFolder
+    File baseSourceDir
 
     boolean transitive = true
     Closure copyConfig
@@ -55,6 +55,10 @@ class Dependency implements Cloneable {
         else {
             this.exclude = exclude as List<String>
         }
+    }
+
+    File getSourceDir() {
+        new File("${baseSourceDir.absolutePath}/${version}/")
     }
 
     void setChildren(List<Dependency> children) {
@@ -109,7 +113,7 @@ class Dependency implements Cloneable {
             return from
         }
 
-        File[] sourceFolders = sourceFolder?.listFiles()?.findAll { File file -> file.directory }
+        File[] sourceFolders = baseSourceDir?.listFiles()?.findAll { File file -> file.directory }
         List<String> folderNames = sourceFolders*.name
         releaseFolders?.find { folderNames.contains(it) } ?: ''
     }
@@ -128,7 +132,7 @@ class Dependency implements Cloneable {
             exclude = source.exclude
             parent = source.parent?.clone() as Dependency
             copyConfig = source.copyConfig?.clone() as Closure
-            sourceFolder = source.sourceFolder ? new File(source.sourceFolder.absolutePath) : null
+            baseSourceDir = source.baseSourceDir ? new File(source.baseSourceDir.absolutePath) : null
             version = source.version?.clone() as Version
         }
 
