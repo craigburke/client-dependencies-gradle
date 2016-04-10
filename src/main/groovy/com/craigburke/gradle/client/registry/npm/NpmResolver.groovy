@@ -42,27 +42,31 @@ class NpmResolver implements Resolver {
                 return
             }
             sourceFolder.mkdirs()
-            DownloadInfo download = getDownloadInfo(dependency)
 
-            if (download.url.endsWith('tgz')) {
-                log.info "Downloading ${dependency} from ${download.url}"
+            String versionKey = dependency.version.fullVersion
+            Map versionsJson = dependency.info.versions
+            Map distJson = versionsJson?.containsKey(versionKey) ? versionsJson[versionKey].dist : [:]
+            String downloadUrl = dependency.url ?: distJson?.tarball
+
+            if (downloadUrl.endsWith('tgz')) {
+                log.info "Downloading ${dependency} from ${downloadUrl}"
 
                 String fileName = "${sourceFolder.absolutePath}/package.tgz"
                 File downloadFile = new File(fileName)
 
                 downloadFile.withOutputStream { out ->
-                    out << new URL(download.url).openStream()
+                    out << new URL(downloadUrl).openStream()
                 }
 
-                if (download.checksum) {
-                    verifyFileChecksum(downloadFile, download.checksum)
+                if (distJson?.shasum) {
+                    verifyFileChecksum(downloadFile, distJson.shasum as String)
                 }
 
                 extractTarball(downloadFile, sourceFolder)
                 downloadFile.delete()
             } else {
-                log.info "Downloading ${dependency} from ${download.url}"
-                Grgit.clone(dir: sourceFolder.absolutePath, uri: download.url, refToCheckout: 'master')
+                log.info "Downloading ${dependency} from ${downloadUrl}"
+                Grgit.clone(dir: sourceFolder.absolutePath, uri: downloadUrl, refToCheckout: 'master')
             }
         }
     }
@@ -72,17 +76,6 @@ class NpmResolver implements Resolver {
         if (getShaHash(downloadFile.bytes) != checksum) {
             throw new DownloadVerifyException("${downloadFile.absolutePath} doesn't match checksum ${checksum}")
         }
-    }
-
-    DownloadInfo getDownloadInfo(Dependency dependency) {
-        if (!dependency.url || dependency.url.startsWith(dependency.registry.url)) {
-            def json = dependency.registry.loadInfo(dependency).versions[dependency.version.fullVersion]?.dist
-            new DownloadInfo(url: json?.tarball, checksum: json?.shasum)
-        }
-        else {
-            new DownloadInfo(url: dependency.url, checksum: null)
-        }
-
     }
 
 }
