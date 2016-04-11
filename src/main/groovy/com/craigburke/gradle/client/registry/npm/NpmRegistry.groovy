@@ -15,7 +15,6 @@
  */
 package com.craigburke.gradle.client.registry.npm
 
-import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 import static groovyx.gpars.GParsPool.withExistingPool
 
@@ -79,20 +78,19 @@ class NpmRegistry extends AbstractRegistry implements Registry {
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {
-        withLock(dependency.key) {
-            String npmCachePath = "${System.getProperty('user.home')}/.npm"
-            String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
-            File cacheFile = new File(cacheFilePath)
+        String npmCachePath = "${System.getProperty('user.home')}/.npm"
+        String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
+        File cacheFile = new File(cacheFilePath)
 
-            if (cacheFile.exists()) {
-                log.info "Loading ${dependency} from ${cacheFilePath}"
-                extractTarball(cacheFile, dependency.sourceDir)
-                true
-            }
-            else {
-                false
-            }
+        if (cacheFile.exists()) {
+            log.info "Loading ${dependency} from ${cacheFilePath}"
+            extractTarball(cacheFile, dependency.sourceDir)
+            true
         }
+        else {
+            false
+        }
+
     }
 
     Map loadInfoFromRegistry(Dependency dependency) {

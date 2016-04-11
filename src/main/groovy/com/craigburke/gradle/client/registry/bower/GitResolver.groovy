@@ -1,7 +1,5 @@
 package com.craigburke.gradle.client.registry.bower
 
-import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
-
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
@@ -28,29 +26,20 @@ class GitResolver implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        withLock(dependency.name) {
-            Grgit repo = getRepository(dependency)
-            repo.tag.list().collect { Version.parse(it.name as String) }
-        } as List<Version>
+        Grgit repo = getRepository(dependency)
+        repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency.key) {
-            Grgit repo = getRepository(dependency)
-            String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
-            repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
-        }
+        Grgit repo = getRepository(dependency)
+        String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
+        repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
     private Grgit getRepository(Dependency dependency) {
         File sourceFolder = dependency.sourceDir
+        String gitUrl = dependency.url ?: dependency.registry.loadInfo(dependency).url
+        Grgit.clone(dir: sourceFolder, uri: gitUrl)
 
-        if (sourceFolder.exists()) {
-            Grgit.open(dir: sourceFolder.absolutePath)
-        }
-        else {
-            String gitUrl = dependency.url ?: dependency.registry.loadInfo(dependency).url
-            Grgit.clone(dir: sourceFolder, uri: gitUrl)
-        }
     }
 }

@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.registry.core
 
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 
+import org.apache.commons.io.FileUtils
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
@@ -96,17 +97,29 @@ abstract class AbstractRegistry implements Registry {
             throw new DependencyResolveException(exceptionMessage)
         }
 
-        boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
-
-        if (!downloadedFromCache) {
-            getResolver(dependency).downloadDependency(dependency)
-        }
+        loadDependencySource(dependency)
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
         }
 
         dependency
+    }
+
+    void loadDependencySource(Dependency dependency) {
+        withLock(dependency.key) {
+            if (dependency.sourceDir.exists()) {
+                FileUtils.cleanDirectory(dependency.sourceDir)
+            }
+
+            dependency.sourceDir.mkdirs()
+
+            boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
+
+            if (!downloadedFromCache) {
+                getResolver(dependency).downloadDependency(dependency)
+            }
+        }
     }
 
     abstract String getDependencyUrl(Dependency dependency)

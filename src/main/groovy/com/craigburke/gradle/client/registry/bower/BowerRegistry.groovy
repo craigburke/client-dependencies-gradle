@@ -16,7 +16,6 @@
 package com.craigburke.gradle.client.registry.bower
 
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.getMD5Hash
-import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.registry.core.CircularDependencyException
@@ -67,23 +66,21 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     }
 
     boolean downloadDependencyFromCache(Dependency dependency) {
-        withLock(dependency.key) {
-            String bowerCachePath = "${System.getProperty('user.home')}/.cache/bower/packages"
-            String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
-            File cacheFolder = new File(cachePath)
+        String bowerCachePath = "${System.getProperty('user.home')}/.cache/bower/packages"
+        String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
+        File cacheFolder = new File(cachePath)
 
-            if (cacheFolder.exists()) {
-                log.info "Loading ${dependency} from ${cachePath}"
-                AntBuilder builder = new AntBuilder()
-                builder.project.buildListeners.first().setMessageOutputLevel(0)
-                builder.copy(todir: dependency.sourceDir.absolutePath) {
-                    fileset(dir: cacheFolder.absolutePath)
-                }
-                true
+        if (cacheFolder.exists()) {
+            log.info "Loading ${dependency} from ${cachePath}"
+            AntBuilder builder = new AntBuilder()
+            builder.project.buildListeners.first().setMessageOutputLevel(0)
+            builder.copy(todir: dependency.sourceDir.absolutePath) {
+                fileset(dir: cacheFolder.absolutePath)
             }
-            else {
-                false
-            }
+            true
+        }
+        else {
+            false
         }
     }
 

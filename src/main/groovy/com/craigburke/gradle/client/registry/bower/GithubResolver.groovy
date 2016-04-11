@@ -1,7 +1,5 @@
 package com.craigburke.gradle.client.registry.bower
 
-import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
-
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.registry.core.Resolver
@@ -49,50 +47,43 @@ class GithubResolver implements Resolver {
     }
 
     List<Version> getVersionList(Dependency dependency) {
-        withLock(dependency.name) {
-            GithubInfo info = getInfo(dependency.url)
+        GithubInfo info = getInfo(dependency.url)
 
-            URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
-            new JsonSlurper().parse(url).collect { Version.parse((it.ref as String) - 'refs/tags/') }
-        } as List<Version>
+        URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
+        new JsonSlurper().parse(url).collect { Version.parse((it.ref as String) - 'refs/tags/') } as List<Version>
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency.key) {
-            if (dependency.baseSourceDir.exists()) {
-                return
-            }
+        GithubInfo info = getInfo(dependency.url)
+        URL url = new URL("https://github.com/${info.orgName}/${info.repoName}/archive/v${dependency.version}.tar.gz")
 
-            GithubInfo info = getInfo(dependency.url)
-            URL url = new URL("https://github.com/${info.orgName}/${info.repoName}/archive/v${dependency.version}.tar.gz")
+        File downloadFile = getDownloadFile(dependency)
+        downloadFile.parentFile.mkdirs()
 
-            File downloadFile = getDownloadFile(dependency)
-            downloadFile.parentFile.mkdirs()
-
-            downloadFile.withOutputStream { out ->
-                out << url.openStream()
-            }
-
-            AntBuilder builder = new AntBuilder()
-            builder.project.buildListeners.first().setMessageOutputLevel(0)
-
-            builder.untar(src: downloadFile.absolutePath, dest: dependency.sourceDir.absolutePath,
-                    compression: 'gzip', overwrite: true)
-
-            dependency.sourceDir.listFiles().each { File file ->
-                if (file.directory) {
-                    builder.copy(todir: dependency.sourceDir.absolutePath) {
-                        fileSet(dir: file.absolutePath)
-                    }
-                    file.deleteDir()
-                }
-                else {
-                    file.delete()
-                }
-            }
-
-            downloadFile.delete()
+        downloadFile.withOutputStream { out ->
+            out << url.openStream()
         }
+
+        AntBuilder builder = new AntBuilder()
+        builder.project.buildListeners.first().setMessageOutputLevel(0)
+
+        builder.untar(src: downloadFile.absolutePath, dest: dependency.sourceDir.absolutePath,
+                compression: 'gzip', overwrite: true)
+
+        dependency.sourceDir.listFiles().each { File file ->
+            if (file.directory) {
+                builder.copy(todir: dependency.sourceDir.absolutePath) {
+                    fileSet(dir: file.absolutePath)
+                }
+                file.deleteDir()
+            }
+            else {
+                file.delete()
+            }
+        }
+
+        downloadFile.delete()
+
     }
 
 }

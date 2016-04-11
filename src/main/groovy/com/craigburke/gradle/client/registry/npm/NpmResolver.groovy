@@ -1,7 +1,6 @@
 package com.craigburke.gradle.client.registry.npm
 
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.getShaHash
-import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
 import com.craigburke.gradle.client.registry.core.Resolver
@@ -35,40 +34,33 @@ class NpmResolver implements Resolver {
     }
 
     void downloadDependency(Dependency dependency) {
-        withLock(dependency.key) {
-            File sourceFolder = dependency.sourceDir
+        File sourceFolder = dependency.sourceDir
+        String versionKey = dependency.version.fullVersion
+        Map versionsJson = dependency.info.versions
+        Map distJson = versionsJson?.containsKey(versionKey) ? versionsJson[versionKey].dist : [:]
+        String downloadUrl = dependency.url ?: distJson?.tarball
 
-            if (sourceFolder.exists()) {
-                return
+        if (downloadUrl.endsWith('tgz')) {
+            log.info "Downloading ${dependency} from ${downloadUrl}"
+
+            String fileName = "${sourceFolder.absolutePath}/package.tgz"
+            File downloadFile = new File(fileName)
+
+            downloadFile.withOutputStream { out ->
+                out << new URL(downloadUrl).openStream()
             }
-            sourceFolder.mkdirs()
 
-            String versionKey = dependency.version.fullVersion
-            Map versionsJson = dependency.info.versions
-            Map distJson = versionsJson?.containsKey(versionKey) ? versionsJson[versionKey].dist : [:]
-            String downloadUrl = dependency.url ?: distJson?.tarball
-
-            if (downloadUrl.endsWith('tgz')) {
-                log.info "Downloading ${dependency} from ${downloadUrl}"
-
-                String fileName = "${sourceFolder.absolutePath}/package.tgz"
-                File downloadFile = new File(fileName)
-
-                downloadFile.withOutputStream { out ->
-                    out << new URL(downloadUrl).openStream()
-                }
-
-                if (distJson?.shasum) {
-                    verifyFileChecksum(downloadFile, distJson.shasum as String)
-                }
-
-                extractTarball(downloadFile, sourceFolder)
-                downloadFile.delete()
-            } else {
-                log.info "Downloading ${dependency} from ${downloadUrl}"
-                Grgit.clone(dir: sourceFolder.absolutePath, uri: downloadUrl, refToCheckout: 'master')
+            if (distJson?.shasum) {
+                verifyFileChecksum(downloadFile, distJson.shasum as String)
             }
+
+            extractTarball(downloadFile, sourceFolder)
+            downloadFile.delete()
+        } else {
+            log.info "Downloading ${dependency} from ${downloadUrl}"
+            Grgit.clone(dir: sourceFolder.absolutePath, uri: downloadUrl, refToCheckout: 'master')
         }
+
     }
 
     private verifyFileChecksum(File downloadFile, String checksum) {
