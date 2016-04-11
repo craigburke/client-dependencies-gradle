@@ -19,7 +19,6 @@ import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import com.craigburke.gradle.client.dependency.SimpleDependency
-import org.apache.commons.io.FileUtils
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
@@ -108,16 +107,14 @@ abstract class AbstractRegistry implements Registry {
 
     void loadSource(Dependency dependency) {
         withLock(dependency.key) {
-            if (dependency.sourceDir.exists()) {
-                FileUtils.cleanDirectory(dependency.sourceDir)
-            }
+            Resolver resolver = getResolver(dependency)
             dependency.sourceDir.mkdirs()
 
-            boolean downloadedFromCache = (useGlobalCache && loadSourceFromGlobalCache(dependency))
-
-            if (!downloadedFromCache) {
-                getResolver(dependency).loadSource(dependency)
+            if (useGlobalCache) {
+                loadSourceFromGlobalCache(dependency)
             }
+
+            resolver.resolve(dependency)
         }
     }
 
@@ -175,7 +172,6 @@ abstract class AbstractRegistry implements Registry {
     }
 
     abstract boolean loadSourceFromGlobalCache(Dependency dependency)
-
     abstract Map loadInfoFromGlobalCache(Dependency dependency)
     abstract Map loadInfoFromRegistry(Dependency dependency)
     abstract List<SimpleDependency> getChildDependencies(Dependency dependency)

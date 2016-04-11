@@ -14,5 +14,5 @@ import groovy.transform.CompileStatic
 interface Resolver {
     boolean canResolve(Dependency dependency)
     List<Version> getVersionList(Dependency dependency)
-    void loadSource(Dependency dependency)
+    void resolve(Dependency dependency)
 }

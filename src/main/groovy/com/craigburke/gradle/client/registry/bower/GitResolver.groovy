@@ -30,16 +30,20 @@ class GitResolver implements Resolver {
         repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
-    void loadSource(Dependency dependency) {
+    void resolve(Dependency dependency) {
         Grgit repo = getRepository(dependency)
         String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
     }
 
     private Grgit getRepository(Dependency dependency) {
-        File sourceFolder = dependency.sourceDir
-        String gitUrl = dependency.url ?: dependency.registry.loadInfo(dependency).url
-        Grgit.clone(dir: sourceFolder, uri: gitUrl)
+        if (dependency.sourceDir.exists() && dependency.sourceDir.listFiles()) {
+            Grgit.open(dir: dependency.sourceDir)
+        }
+        else {
+            String gitUrl = dependency.url ?: dependency.registry.loadInfo(dependency).url
+            Grgit.clone(dir:  dependency.sourceDir, uri: gitUrl)
+        }
 
     }
 }

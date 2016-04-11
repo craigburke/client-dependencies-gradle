@@ -33,7 +33,11 @@ class NpmResolver implements Resolver {
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
-    void loadSource(Dependency dependency) {
+    void resolve(Dependency dependency) {
+        if (dependency.sourceDir.listFiles()) {
+            return
+        }
+
         File sourceFolder = dependency.sourceDir
         String versionKey = dependency.version.fullVersion
         Map versionsJson = dependency.info.versions
@@ -60,7 +64,6 @@ class NpmResolver implements Resolver {
             log.info "Downloading ${dependency} from ${downloadUrl}"
             Grgit.clone(dir: sourceFolder.absolutePath, uri: downloadUrl, refToCheckout: 'master')
         }
-
     }
 
     private verifyFileChecksum(File downloadFile, String checksum) {

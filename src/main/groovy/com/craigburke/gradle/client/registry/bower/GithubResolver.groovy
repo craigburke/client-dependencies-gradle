@@ -52,7 +52,11 @@ class GithubResolver implements Resolver {
         new JsonSlurper().parse(url).collect { Version.parse((it.ref as String) - 'refs/tags/') } as List<Version>
     }
 
-    void loadSource(Dependency dependency) {
+    void resolve(Dependency dependency) {
+        if (dependency.sourceDir.listFiles()) {
+            return
+        }
+
         GithubInfo info = getInfo(dependency.url)
         URL url = new URL("https://github.com/${info.orgName}/${info.repoName}/archive/v${dependency.version}.tar.gz")
 
