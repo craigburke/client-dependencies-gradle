@@ -90,7 +90,7 @@ abstract class AbstractRegistry implements Registry {
             dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, versionList)
         }
 
-        dependency.url = getDependencyUrl(dependency)
+        dependency.url = dependency.url ?: dependency.info.url
 
         if (!dependency.version) {
             String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
@@ -174,7 +174,6 @@ abstract class AbstractRegistry implements Registry {
         } as List<Dependency>
     }
 
-    abstract String getDependencyUrl(Dependency dependency)
     abstract boolean downloadDependencyFromCache(Dependency dependency)
 
     abstract Map loadInfoFromGlobalCache(Dependency dependency)
