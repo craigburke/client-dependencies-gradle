@@ -40,12 +40,11 @@ abstract class AbstractRegistry implements Registry {
 
     String url
 
-    File cacheDir
+    File localCacheDir
     File installDir
 
     boolean useGlobalCache
     boolean checkDownloads
-    boolean offline = false
 
     static ForkJoinPool pool
     protected Logger log
@@ -66,7 +65,7 @@ abstract class AbstractRegistry implements Registry {
     }
 
     String getMainFolderPath(String dependencyName) {
-        formatPath("${cacheDir.absolutePath}/${dependencyName}")
+        formatPath("${localCacheDir.absolutePath}/${dependencyName}")
     }
 
     Resolver getResolver(Dependency dependency) {
@@ -79,7 +78,7 @@ abstract class AbstractRegistry implements Registry {
         Dependency dependency = declaredDependency.clone() as Dependency
         dependency.registry = this
         dependency.parent = parent
-        dependency.baseSourceDir = new File("${cacheDir.absolutePath}/${dependency.name}/")
+        dependency.baseSourceDir = new File("${localCacheDir.absolutePath}/${dependency.name}/")
         dependency.info = loadInfo(dependency)
 
         if (declaredDependency.url) {

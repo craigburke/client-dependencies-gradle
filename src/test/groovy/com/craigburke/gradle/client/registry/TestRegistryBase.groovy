@@ -18,7 +18,6 @@ class TestRegistryBase extends AbstractRegistry {
         super(url, log, resolvers)
     }
 
-    String getDependencyUrl(Dependency dependency) { null }
     boolean loadSourceFromGlobalCache(Dependency dependency) { false }
     List<SimpleDependency> getChildDependencies(Dependency dependency) { null }
     Map loadInfoFromGlobalCache(Dependency dependency) { null }

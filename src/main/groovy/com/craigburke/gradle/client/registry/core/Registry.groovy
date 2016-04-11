@@ -29,8 +29,8 @@ interface Registry {
     void setInstallDir(File installDir)
     File getInstallDir()
 
-    void setCacheDir(File cacheDir)
-    File getCacheDir()
+    void setLocalCacheDir(File cacheDir)
+    File getLocalCacheDir()
 
     void setUseGlobalCache(boolean useGlobalCache)
     boolean getUseGlobalCache()
