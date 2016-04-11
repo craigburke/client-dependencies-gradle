@@ -97,7 +97,7 @@ abstract class AbstractRegistry implements Registry {
             throw new DependencyResolveException(exceptionMessage)
         }
 
-        loadDependencySource(dependency)
+        loadSource(dependency)
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)
@@ -106,17 +106,17 @@ abstract class AbstractRegistry implements Registry {
         dependency
     }
 
-    void loadDependencySource(Dependency dependency) {
+    void loadSource(Dependency dependency) {
         withLock(dependency.key) {
             if (dependency.sourceDir.exists()) {
                 FileUtils.cleanDirectory(dependency.sourceDir)
             }
             dependency.sourceDir.mkdirs()
 
-            boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
+            boolean downloadedFromCache = (useGlobalCache && loadSourceFromGlobalCache(dependency))
 
             if (!downloadedFromCache) {
-                getResolver(dependency).downloadDependency(dependency)
+                getResolver(dependency).loadSource(dependency)
             }
         }
     }
@@ -174,7 +174,7 @@ abstract class AbstractRegistry implements Registry {
         } as List<Dependency>
     }
 
-    abstract boolean downloadDependencyFromCache(Dependency dependency)
+    abstract boolean loadSourceFromGlobalCache(Dependency dependency)
 
     abstract Map loadInfoFromGlobalCache(Dependency dependency)
     abstract Map loadInfoFromRegistry(Dependency dependency)

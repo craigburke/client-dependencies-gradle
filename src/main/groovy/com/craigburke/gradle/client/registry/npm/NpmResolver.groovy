@@ -33,7 +33,7 @@ class NpmResolver implements Resolver {
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
-    void downloadDependency(Dependency dependency) {
+    void loadSource(Dependency dependency) {
         File sourceFolder = dependency.sourceDir
         String versionKey = dependency.version.fullVersion
         Map versionsJson = dependency.info.versions

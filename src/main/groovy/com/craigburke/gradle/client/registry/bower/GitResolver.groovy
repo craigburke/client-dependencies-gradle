@@ -30,7 +30,7 @@ class GitResolver implements Resolver {
         repo.tag.list().collect { Version.parse(it.name as String) }
     }
 
-    void downloadDependency(Dependency dependency) {
+    void loadSource(Dependency dependency) {
         Grgit repo = getRepository(dependency)
         String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
         repo.reset(commit: commit, mode: ResetOp.Mode.HARD)

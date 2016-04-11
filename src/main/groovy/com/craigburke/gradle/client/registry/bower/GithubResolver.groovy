@@ -43,17 +43,16 @@ class GithubResolver implements Resolver {
     }
 
     private static File getDownloadFile(Dependency dependency) {
-        new File("${dependency.baseSourceDir.absolutePath}/${dependency.version}.tar.gz")
+        new File("${dependency.baseSourceDir.absolutePath}/${dependency.key}.tar.gz")
     }
 
     List<Version> getVersionList(Dependency dependency) {
         GithubInfo info = getInfo(dependency.url)
-
         URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
         new JsonSlurper().parse(url).collect { Version.parse((it.ref as String) - 'refs/tags/') } as List<Version>
     }
 
-    void downloadDependency(Dependency dependency) {
+    void loadSource(Dependency dependency) {
         GithubInfo info = getInfo(dependency.url)
         URL url = new URL("https://github.com/${info.orgName}/${info.repoName}/archive/v${dependency.version}.tar.gz")
 
@@ -83,7 +82,6 @@ class GithubResolver implements Resolver {
         }
 
         downloadFile.delete()
-
     }
 
 }

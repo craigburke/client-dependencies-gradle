@@ -54,7 +54,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
 
     }
 
-    boolean downloadDependencyFromCache(Dependency dependency) {
+    boolean loadSourceFromGlobalCache(Dependency dependency) {
         String npmCachePath = "${System.getProperty('user.home')}/.npm"
         String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
         File cacheFile = new File(cacheFilePath)

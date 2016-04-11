@@ -47,7 +47,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         } ?: []
     }
 
-    boolean downloadDependencyFromCache(Dependency dependency) {
+    boolean loadSourceFromGlobalCache(Dependency dependency) {
         String bowerCachePath = "${System.getProperty('user.home')}/.cache/bower/packages"
         String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
         File cacheFolder = new File(cachePath)
