@@ -55,8 +55,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
     }
 
     boolean loadSourceFromGlobalCache(Dependency dependency) {
-        String npmCachePath = "${System.getProperty('user.home')}/.npm"
-        String cacheFilePath = "${npmCachePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
+        String cacheFilePath = "${globalCacheDir.absolutePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
         File cacheFile = new File(cacheFilePath)
 
         if (cacheFile.exists()) {
@@ -67,7 +66,6 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         else {
             false
         }
-
     }
 
     Map loadInfoFromRegistry(Dependency dependency) {
@@ -81,7 +79,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
 
     Map loadInfoFromGlobalCache(Dependency dependency) {
         String folderName = dependency.name.replaceAll('@', '_40').replaceAll('/', '_252')
-        File cacheFile = new File("${System.getProperty('user.home')}/.npm/${folderName}/.cache.json")
+        File cacheFile = new File("${globalCacheDir.absolutePath}/${folderName}/.cache.json")
         if (cacheFile.exists()) {
             log.info "Loading info for ${dependency} from ${cacheFile.absolutePath}"
             new JsonSlurper().parse(cacheFile) as Map

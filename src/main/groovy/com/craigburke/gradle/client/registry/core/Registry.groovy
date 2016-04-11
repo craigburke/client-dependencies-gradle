@@ -32,6 +32,9 @@ interface Registry {
     void setLocalCacheDir(File cacheDir)
     File getLocalCacheDir()
 
+    void setGlobalCacheDir(File cacheDir)
+    File getGlobalCacheDir()
+
     void setUseGlobalCache(boolean useGlobalCache)
     boolean getUseGlobalCache()
 

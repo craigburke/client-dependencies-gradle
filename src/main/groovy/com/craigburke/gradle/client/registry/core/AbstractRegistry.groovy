@@ -41,6 +41,7 @@ abstract class AbstractRegistry implements Registry {
     String url
 
     File localCacheDir
+    File globalCacheDir
     File installDir
 
     boolean useGlobalCache

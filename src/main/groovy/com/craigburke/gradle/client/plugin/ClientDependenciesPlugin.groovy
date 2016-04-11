@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.plugin
 
 import static groovyx.gpars.GParsPool.withExistingPool
 
+import org.gradle.internal.os.OperatingSystem
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.VersionResolver
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
@@ -175,10 +176,25 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         config.registryMap.each { String key, Registry registry ->
             registry.localCacheDir = config.cacheDir
+            registry.globalCacheDir = registry.globalCacheDir ?: getDefaultGlobalCache(registry)
             registry.installDir = config.installDir
             registry.useGlobalCache = config.useGlobalCache
             registry.checkDownloads = config.checkDownloads
         }
+    }
+
+    File getDefaultGlobalCache(Registry registry) {
+        OperatingSystem os = OperatingSystem.current()
+        String userHome = System.getProperty('user.home') as String
+
+        String cachePath
+        if (registry instanceof NpmRegistry) {
+            cachePath = os.windows ? "${userHome}/AppData/npm-cache/" : "${userHome}/.npm/"
+        }
+        else {
+            cachePath = os.windows ? "${userHome}/AppData/Roaming/bower/cache/" : "${userHome}/.cache/bower/"
+        }
+        new File(cachePath)
     }
 
     static void setTaskDependencies(Project project) {

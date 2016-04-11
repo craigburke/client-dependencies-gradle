@@ -48,7 +48,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     }
 
     boolean loadSourceFromGlobalCache(Dependency dependency) {
-        String bowerCachePath = "${System.getProperty('user.home')}/.cache/bower/packages"
+        String bowerCachePath = "${globalCacheDir.absolutePath}/packages"
         String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
         File cacheFolder = new File(cachePath)
 
@@ -67,7 +67,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     }
 
     Map loadInfoFromGlobalCache(Dependency dependency) {
-        File cacheRoot = new File("${System.getProperty('user.home')}/.cache/bower/registry/bower.herokuapp.com/lookup")
+        File cacheRoot = new File("${globalCacheDir.absolutePath}/registry/bower.herokuapp.com/lookup")
         File cacheFile = cacheRoot.listFiles()
                 .findAll { File file -> !file.directory }
                 .find { File file -> file.name.startsWith("${dependency.name}_") }
