@@ -17,7 +17,6 @@ package com.craigburke.gradle.client.dependency
 
 import com.craigburke.gradle.client.registry.core.Registry
 import groovy.transform.CompileStatic
-
 import java.util.regex.Pattern
 
 /**
@@ -25,14 +24,12 @@ import java.util.regex.Pattern
  * @author Craig Burke
  */
 @CompileStatic
-class Dependency implements Cloneable {
+class Dependency extends SimpleDependency implements Cloneable {
 
     static final String GITHUB_URL_PREFIX = 'https://github.com'
     static final Pattern GITHUB_PROJECT_PATTERN = ~/^[^\/]*\/[^\/]*$/
 
     Registry registry
-    String name
-    String versionExpression
     String url
     String from
     String into

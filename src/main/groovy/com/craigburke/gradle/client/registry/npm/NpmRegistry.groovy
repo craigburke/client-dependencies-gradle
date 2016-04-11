@@ -16,9 +16,8 @@
 package com.craigburke.gradle.client.registry.npm
 
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
-import static groovyx.gpars.GParsPool.withExistingPool
 
-import com.craigburke.gradle.client.registry.core.CircularDependencyException
+import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
 
@@ -40,37 +39,19 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         super(url, log, [NpmResolver])
     }
 
-    private Map<String, String> getDependencies(Dependency dependency) {
+    List<SimpleDependency> getChildDependencies(Dependency dependency) {
         File packageJson = new File("${dependency.sourceDir.absolutePath}/package.json")
 
         if (packageJson.exists()) {
             def json = new JsonSlurper().parse(packageJson)
-            (json.dependencies ?: [:]) + (json.peerDependencies ?: [:])
+            ((json.dependencies ?: [:]) + (json.peerDependencies ?: [:])).collect { String name, String version ->
+                new SimpleDependency(name: name, versionExpression: version)
+            }
         }
         else {
-            [:]
+            []
         }
-    }
 
-    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclude) {
-        withExistingPool(AbstractRegistry.pool) {
-            getDependencies(dependency)
-                    .findAll { String name, String childVersion -> !exclude.contains(name) }
-                    .collectParallel { String name, String versionExpression ->
-                        if (dependency.ancestorsAndSelf*.name.contains(name)) {
-                            String exceptionMessage = "Circular dependency created by dependency ${name}@${versionExpression}"
-                            throw new CircularDependencyException(exceptionMessage)
-                        }
-
-                        Dependency child = new Dependency(
-                                name: name,
-                                versionExpression: versionExpression,
-                                exclude: exclude
-                        )
-
-                        loadDependency(child, dependency)
-                    } ?: []
-        } as List<Dependency>
     }
 
     String getDependencyUrl(Dependency dependency) {

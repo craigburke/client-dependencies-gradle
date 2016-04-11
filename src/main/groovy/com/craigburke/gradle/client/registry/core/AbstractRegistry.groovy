@@ -16,14 +16,15 @@
 package com.craigburke.gradle.client.registry.core
 
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
+import static groovyx.gpars.GParsPool.withExistingPool
 
+import com.craigburke.gradle.client.dependency.SimpleDependency
 import org.apache.commons.io.FileUtils
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
 import com.craigburke.gradle.client.dependency.VersionResolver
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
-import groovy.transform.CompileStatic
 import jsr166y.ForkJoinPool
 import org.gradle.api.logging.Logger
 
@@ -33,7 +34,6 @@ import org.gradle.api.logging.Logger
  *
  * @author Craig Burke
  */
-@CompileStatic
 abstract class AbstractRegistry implements Registry {
 
     static final String DEFAULT_PATH_SEPARATOR = '/'
@@ -111,7 +111,6 @@ abstract class AbstractRegistry implements Registry {
             if (dependency.sourceDir.exists()) {
                 FileUtils.cleanDirectory(dependency.sourceDir)
             }
-
             dependency.sourceDir.mkdirs()
 
             boolean downloadedFromCache = (useGlobalCache && downloadDependencyFromCache(dependency))
@@ -121,10 +120,6 @@ abstract class AbstractRegistry implements Registry {
             }
         }
     }
-
-    abstract String getDependencyUrl(Dependency dependency)
-    abstract boolean downloadDependencyFromCache(Dependency dependency)
-    abstract List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions)
 
     static File getInfoFile(Dependency dependency) {
         new File("${dependency.baseSourceDir.absolutePath}/info.json")
@@ -163,6 +158,26 @@ abstract class AbstractRegistry implements Registry {
         }
     }
 
+    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
+        withExistingPool(pool) {
+            getChildDependencies(dependency)
+                .findAll { SimpleDependency child -> !exclusions.contains(child.name) }
+                .collectParallel { SimpleDependency child ->
+                    if (dependency.ancestorsAndSelf*.name.contains(child.name)) {
+                        String message = "Circular dependency created by dependency ${child.name}@${child.versionExpression}"
+                        throw new CircularDependencyException(message)
+                    }
+
+                    Dependency childDependency = new Dependency(name: child.name, versionExpression: child.versionExpression)
+                    loadDependency(childDependency, dependency)
+            }
+        } as List<Dependency>
+    }
+
+    abstract String getDependencyUrl(Dependency dependency)
+    abstract boolean downloadDependencyFromCache(Dependency dependency)
+
     abstract Map loadInfoFromGlobalCache(Dependency dependency)
     abstract Map loadInfoFromRegistry(Dependency dependency)
+    abstract List<SimpleDependency> getChildDependencies(Dependency dependency)
 }

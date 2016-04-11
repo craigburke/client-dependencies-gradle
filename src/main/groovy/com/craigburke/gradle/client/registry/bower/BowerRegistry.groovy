@@ -16,9 +16,8 @@
 package com.craigburke.gradle.client.registry.bower
 
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.getMD5Hash
-import static groovyx.gpars.GParsPool.withExistingPool
 
-import com.craigburke.gradle.client.registry.core.CircularDependencyException
+import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
 import org.gradle.api.logging.Logger
@@ -39,23 +38,13 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         super(url, log, [GithubResolver, GitResolver])
     }
 
-    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
+    List<SimpleDependency> getChildDependencies(Dependency dependency) {
         File bowerConfigFile = new File("${dependency.sourceDir.absolutePath}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
-        withExistingPool(AbstractRegistry.pool) {
-            bowerConfigJson.dependencies
-                    .findAll { String name, String versionExpression -> !exclusions.contains(name) }
-                    .collectParallel { String name, String versionExpression ->
 
-                if (dependency.ancestorsAndSelf*.name.contains(name)) {
-                    String message = "Circular dependency created by dependency ${name}@${versionExpression}"
-                    throw new CircularDependencyException(message)
-                }
-
-                Dependency childDependency = new Dependency(name: name, versionExpression: versionExpression)
-                loadDependency(childDependency, dependency)
-            } ?: []
-        } as List<Dependency>
+        bowerConfigJson.dependencies?.collect { String name, String versionExpression ->
+            new SimpleDependency(name: name, versionExpression: versionExpression)
+        } ?: []
     }
 
     String getDependencyUrl(Dependency dependency) {
