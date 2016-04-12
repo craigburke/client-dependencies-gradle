@@ -64,6 +64,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.task(INSTALL_TASK, group: TASK_GROUP) {
             mustRunAfter CLEAN_TASK
+            outputs.upToDateWhen {
+                (config.installDir.exists() && config.installDir.listFiles())
+            }
             doLast {
                 installDependencies(config.rootDependencies, project)
             }
