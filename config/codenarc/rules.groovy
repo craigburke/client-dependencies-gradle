@@ -384,7 +384,7 @@ ruleset {
 
     // rulesets/unused.xml
     UnusedArray
-    'UnusedMethodParameter' doNotApplyToFilesMatching: '.*TestRegistryBase.groovy'
+    'UnusedMethodParameter' doNotApplyToClassNames: 'TestRegistryBase,NpmResolver'
     UnusedObject
     UnusedPrivateField
     UnusedPrivateMethod

@@ -48,5 +48,4 @@ interface Registry {
 
     Dependency loadDependency(Dependency dependency, Dependency parent)
     Resolver getResolver(Dependency dependency)
-    Map loadInfo(Dependency dependency)
 }

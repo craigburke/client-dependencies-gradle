@@ -86,11 +86,13 @@ class Dependency extends SimpleDependency implements Cloneable {
     }
 
     String getUrl() {
-        if (url ==~ GITHUB_PROJECT_PATTERN) {
-            "${GITHUB_URL_PREFIX}/${url}"
+        String urlValue = url ?: info?.url
+
+        if (urlValue ==~ GITHUB_PROJECT_PATTERN) {
+            "${GITHUB_URL_PREFIX}/${urlValue}"
         }
         else {
-            url
+            urlValue
         }
     }
 

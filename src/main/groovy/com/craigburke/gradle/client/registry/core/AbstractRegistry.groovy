@@ -34,7 +34,6 @@ import org.gradle.api.logging.Logger
  * @author Craig Burke
  */
 abstract class AbstractRegistry implements Registry {
-
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
     String url
@@ -60,18 +59,20 @@ abstract class AbstractRegistry implements Registry {
         pool = new ForkJoinPool(poolSize)
     }
 
-    static String formatPath(String path) {
+    protected static String formatPath(String path) {
         path.replace('\\', DEFAULT_PATH_SEPARATOR).replace('//', DEFAULT_PATH_SEPARATOR)
     }
 
-    String getMainFolderPath(String dependencyName) {
+    protected String getMainFolderPath(String dependencyName) {
         formatPath("${localCacheDir.absolutePath}/${dependencyName}")
     }
 
+    @Override
     Resolver getResolver(Dependency dependency) {
         resolvers.find { it.canResolve(dependency) }
     }
 
+    @Override
     Dependency loadDependency(Dependency declaredDependency, Dependency parent) {
         log.info "Loading dependency: ${declaredDependency}"
 
@@ -79,7 +80,7 @@ abstract class AbstractRegistry implements Registry {
         dependency.registry = this
         dependency.parent = parent
         dependency.baseSourceDir = new File("${localCacheDir.absolutePath}/${dependency.name}/")
-        dependency.info = loadInfo(dependency)
+        setInfo(dependency)
 
         if (declaredDependency.url) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
@@ -88,8 +89,6 @@ abstract class AbstractRegistry implements Registry {
             List<Version> versionList = getResolver(dependency).getVersionList(dependency)
             dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, versionList)
         }
-
-        dependency.url = dependency.url ?: dependency.info.url
 
         if (!dependency.version) {
             String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
@@ -105,47 +104,48 @@ abstract class AbstractRegistry implements Registry {
         dependency
     }
 
-    void loadSource(Dependency dependency) {
+    protected void loadSource(Dependency dependency) {
         withLock(dependency.key) {
-            Resolver resolver = getResolver(dependency)
             dependency.sourceDir.mkdirs()
 
             if (useGlobalCache) {
                 loadSourceFromGlobalCache(dependency)
             }
 
+            Resolver resolver = getResolver(dependency)
             resolver.resolve(dependency)
         }
     }
 
-    static File getInfoFile(Dependency dependency) {
+    protected static File getInfoFile(Dependency dependency) {
         new File("${dependency.baseSourceDir.absolutePath}/info.json")
     }
 
-    Map loadInfo(Dependency dependency) {
+    protected void setInfo(Dependency dependency) {
         withLock(dependency.name) {
-            def info = loadInfoFromLocalCache(dependency)
-            boolean loadedFromLocalCache = info as boolean
+            dependency.info = loadInfoFromLocalCache(dependency)
+            boolean loadedFromLocalCache = dependency.info as boolean
 
             if (!loadedFromLocalCache && offline && dependency.registry.useGlobalCache) {
-                info = loadInfoFromGlobalCache(dependency)
+                dependency.info = loadInfoFromGlobalCache(dependency)
             }
 
-            if (!info && !dependency.url) {
-                info = loadInfoFromRegistry(dependency)
+            if (!dependency.info && !dependency.url) {
+                dependency.info = loadInfoFromRegistry(dependency)
             }
 
-            if (!loadedFromLocalCache && info) {
+            if (!loadedFromLocalCache && dependency.info) {
                 File infoFile = getInfoFile(dependency)
                 infoFile.parentFile.mkdirs()
-                infoFile.text = new JsonBuilder(info).toPrettyString()
+                infoFile.text = new JsonBuilder(dependency.info).toPrettyString()
             }
 
-            info ?: [:]
-        } as Map
+            Resolver resolver = getResolver(dependency)
+            resolver.afterInfoLoad(dependency)
+        }
     }
 
-    Map loadInfoFromLocalCache(Dependency dependency) {
+    protected Map loadInfoFromLocalCache(Dependency dependency) {
         File infoFile = getInfoFile(dependency)
         if (infoFile.exists() && !infoFile.directory) {
             new JsonSlurper().parse(infoFile) as Map
@@ -155,7 +155,7 @@ abstract class AbstractRegistry implements Registry {
         }
     }
 
-    List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
+    protected List<Dependency> loadChildDependencies(Dependency dependency, List<String> exclusions) {
         withExistingPool(pool) {
             getChildDependencies(dependency)
                 .findAll { SimpleDependency child -> !exclusions.contains(child.name) }

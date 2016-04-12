@@ -30,35 +30,25 @@ class GithubResolver implements Resolver {
     static final String GITHUB_BASE_URL = 'https://api.github.com/repos'
     static final Pattern GITHUB_URL = ~/.*github\.com\/(.*)\/(.*)(?:\.git)/
 
+    @Override
     boolean canResolve(Dependency dependency) {
         dependency.url?.matches(GITHUB_URL)
     }
 
-    GithubInfo getInfo(String url) {
-        GithubInfo info
-        url.find(GITHUB_URL) { String match, String orgName, String repoName ->
-            info = new GithubInfo(orgName: orgName, repoName: repoName)
-        }
-        info
-    }
-
-    private static File getDownloadFile(Dependency dependency) {
-        new File("${dependency.baseSourceDir.absolutePath}/${dependency.key}.tar.gz")
-    }
-
+    @Override
     List<Version> getVersionList(Dependency dependency) {
-        GithubInfo info = getInfo(dependency.url)
-        URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
-        new JsonSlurper().parse(url).collect { Version.parse((it.ref as String) - 'refs/tags/') } as List<Version>
+        dependency.info.tags.collect { String tag -> Version.parse(tag) } as List<Version>
     }
 
+    @Override
     void resolve(Dependency dependency) {
         if (dependency.sourceDir.listFiles()) {
             return
         }
 
         GithubInfo info = getInfo(dependency.url)
-        URL url = new URL("https://github.com/${info.orgName}/${info.repoName}/archive/v${dependency.version}.tar.gz")
+        String ref = dependency.info.tags.find { (it - 'v') == dependency.version.fullVersion } ?: 'master'
+        URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/tarball/${ref}")
 
         File downloadFile = getDownloadFile(dependency)
         downloadFile.parentFile.mkdirs()
@@ -86,6 +76,28 @@ class GithubResolver implements Resolver {
         }
 
         downloadFile.delete()
+    }
+
+    @Override
+    void afterInfoLoad(Dependency dependency) {
+        if (!dependency.info.tags) {
+            GithubInfo info = getInfo(dependency.url)
+            URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
+            List<String> tags = new JsonSlurper().parse(url).collect { (it.ref as String) - 'refs/tags/' }
+            dependency.info.tags = tags
+        }
+    }
+
+    private GithubInfo getInfo(String url) {
+        GithubInfo info
+        url.find(GITHUB_URL) { String match, String orgName, String repoName ->
+            info = new GithubInfo(orgName: orgName, repoName: repoName)
+        }
+        info
+    }
+
+    private static File getDownloadFile(Dependency dependency) {
+        new File("${dependency.baseSourceDir.absolutePath}/${dependency.key}.tar.gz")
     }
 
 }

@@ -24,15 +24,18 @@ class NpmResolver implements Resolver {
         this.log = log
     }
 
+    @Override
     boolean canResolve(Dependency dependency) {
         (dependency != null)
     }
 
+    @Override
     List<Version> getVersionList(Dependency dependency) {
-        def versionListJson = dependency.registry.loadInfo(dependency)?.versions
+        def versionListJson = dependency.info.versions
         versionListJson.collect { Version.parse(it.key as String) }
     }
 
+    @Override
     void resolve(Dependency dependency) {
         if (dependency.sourceDir.listFiles()) {
             return
@@ -40,7 +43,7 @@ class NpmResolver implements Resolver {
 
         File sourceFolder = dependency.sourceDir
         String versionKey = dependency.version.fullVersion
-        Map versionsJson = dependency.info.versions
+        Map versionsJson = dependency.info?.versions
         Map distJson = versionsJson?.containsKey(versionKey) ? versionsJson[versionKey].dist : [:]
         String downloadUrl = dependency.url ?: distJson?.tarball
 
@@ -62,9 +65,12 @@ class NpmResolver implements Resolver {
             downloadFile.delete()
         } else {
             log.info "Downloading ${dependency} from ${downloadUrl}"
-            Grgit.clone(dir: sourceFolder.absolutePath, uri: downloadUrl, refToCheckout: 'master')
+            Grgit.clone(dir: sourceFolder, uri: downloadUrl, refToCheckout: 'master')
         }
     }
+
+    @Override
+    void afterInfoLoad(Dependency dependency) { }
 
     private verifyFileChecksum(File downloadFile, String checksum) {
         log.info "Verifying checksum for file ${downloadFile.absolutePath} [${checksum}]"

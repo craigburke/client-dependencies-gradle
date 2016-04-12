@@ -38,6 +38,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         super(url, log, [GithubResolver, GitResolver])
     }
 
+    @Override
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
         File bowerConfigFile = new File("${dependency.sourceDir.absolutePath}/bower.json")
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
@@ -47,6 +48,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         } ?: []
     }
 
+    @Override
     boolean loadSourceFromGlobalCache(Dependency dependency) {
         String bowerCachePath = "${globalCacheDir.absolutePath}/packages"
         String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
@@ -66,6 +68,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         }
     }
 
+    @Override
     Map loadInfoFromGlobalCache(Dependency dependency) {
         File cacheRoot = new File("${globalCacheDir.absolutePath}/registry/bower.herokuapp.com/lookup")
         File cacheFile = cacheRoot.listFiles()
@@ -79,6 +82,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
         }
     }
 
+    @Override
     Map loadInfoFromRegistry(Dependency dependency) {
         URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
         new JsonSlurper().parse(url) as Map

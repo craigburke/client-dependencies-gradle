@@ -15,4 +15,5 @@ interface Resolver {
     boolean canResolve(Dependency dependency)
     List<Version> getVersionList(Dependency dependency)
     void resolve(Dependency dependency)
+    void afterInfoLoad(Dependency dependency)
 }

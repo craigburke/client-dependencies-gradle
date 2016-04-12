@@ -39,6 +39,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         super(url, log, [NpmResolver])
     }
 
+    @Override
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
         File packageJson = new File("${dependency.sourceDir.absolutePath}/package.json")
 
@@ -51,9 +52,9 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         else {
             []
         }
-
     }
 
+    @Override
     boolean loadSourceFromGlobalCache(Dependency dependency) {
         String cacheFilePath = "${globalCacheDir.absolutePath}/${dependency.name}/${dependency.version.fullVersion}/package.tgz"
         File cacheFile = new File(cacheFilePath)
@@ -68,6 +69,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         }
     }
 
+    @Override
     Map loadInfoFromRegistry(Dependency dependency) {
         log.info "Loading info for ${dependency} from ${dependency.registry.url}"
         boolean isScoped = dependency.name.startsWith('@')
@@ -77,6 +79,7 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         new JsonSlurper().parse(url) as Map
     }
 
+    @Override
     Map loadInfoFromGlobalCache(Dependency dependency) {
         String folderName = dependency.name.replaceAll('@', '_40').replaceAll('/', '_252')
         File cacheFile = new File("${globalCacheDir.absolutePath}/${folderName}/.cache.json")
