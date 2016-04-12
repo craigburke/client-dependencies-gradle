@@ -175,6 +175,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         }
 
         config.registryMap.each { String key, Registry registry ->
+            registry.offline = project.gradle.startParameter.isOffline()
             registry.localCacheDir = config.cacheDir
             registry.globalCacheDir = registry.globalCacheDir ?: getDefaultGlobalCache(registry)
             registry.installDir = config.installDir

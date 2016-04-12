@@ -38,7 +38,7 @@ abstract class AbstractRegistry implements Registry {
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
     String url
-
+    boolean offline
     File localCacheDir
     File globalCacheDir
     File installDir
@@ -127,7 +127,7 @@ abstract class AbstractRegistry implements Registry {
             def info = loadInfoFromLocalCache(dependency)
             boolean loadedFromLocalCache = info as boolean
 
-            if (!loadedFromLocalCache && dependency.registry.useGlobalCache) {
+            if (!loadedFromLocalCache && offline && dependency.registry.useGlobalCache) {
                 info = loadInfoFromGlobalCache(dependency)
             }
 

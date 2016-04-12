@@ -26,6 +26,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 interface Registry {
+    void setOffline(boolean offline)
+    boolean getOffline()
+
     void setInstallDir(File installDir)
     File getInstallDir()
 
