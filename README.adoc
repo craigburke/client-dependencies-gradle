@@ -1,4 +1,4 @@
-:version: 0.5.0
+:version: 1.0.0-RC1
 
 = Client Dependencies Gradle Plugin
 
@@ -46,12 +46,14 @@ clientDependencies {
     bower {
         'jquery'('2.0.0') // <1>
     }
-
     npm {
         'bootstrap'('3.3.6', exclude: 'jquery') // <2>
         'restangular'('1.5.0', transitive: false) // <3>
         'angular-animate'('1.5.0', into: 'angular/modules') // <4>
-        'animate.css'('1.0.0', url: 'https://github.com/daneden/animate.css.git') // <5>
+        'animate.css'('1.0.0', url:'daneden/animate.css') // <5>
+        'angular-ui-bootstrap'('1.3.x', from:'dist') { // <6>
+            include 'ui-bootstrap-tpls.js'
+        }
     }
 }
 ----
@@ -60,7 +62,9 @@ clientDependencies {
 <3> Installs restangular from npm but doesn't include any child dependencies
 <4> Changing the destination path using the `into` property. This is relative ot the install path meaning this would install to the
 location `src/assets/vendor/angular/modules.`
-<5> Use the url property to use a git repo as a dependency source
+<5> Use the url property to use a github repo as a dependency source (expands to https://www.github.com/danedan/animate.css.git).
+    A full URL reference any git repository will also work here.
+<6> The from property allows you to copy code only from a certain subfolder
 
 == The copy task
 

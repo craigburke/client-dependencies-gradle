@@ -36,6 +36,7 @@ import org.gradle.api.logging.Logger
 abstract class AbstractRegistry implements Registry {
     static final String DEFAULT_PATH_SEPARATOR = '/'
 
+    String name
     String url
     boolean offline
     File localCacheDir
@@ -49,7 +50,8 @@ abstract class AbstractRegistry implements Registry {
     protected Logger log
     protected List<Resolver> resolvers
 
-    protected AbstractRegistry(String url, Logger log, List<Class<Resolver>> resolvers) {
+    protected AbstractRegistry(String name, String url, Logger log, List<Class<Resolver>> resolvers) {
+        this.name = name
         this.url = url
         this.log = log
         this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }
@@ -105,7 +107,7 @@ abstract class AbstractRegistry implements Registry {
     }
 
     protected void loadSource(Dependency dependency) {
-        withLock(dependency.key) {
+        withLock("${name}:${dependency.key}") {
             dependency.sourceDir.mkdirs()
 
             if (useGlobalCache) {
@@ -122,7 +124,7 @@ abstract class AbstractRegistry implements Registry {
     }
 
     protected void setInfo(Dependency dependency) {
-        withLock(dependency.name) {
+        withLock("${name}:${dependency.name}") {
             dependency.info = loadInfoFromLocalCache(dependency)
             boolean loadedFromLocalCache = dependency.info as boolean
 

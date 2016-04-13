@@ -35,8 +35,8 @@ class NpmRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://registry.npmjs.org'
 
-    NpmRegistry(String url, Logger log) {
-        super(url, log, [NpmResolver])
+    NpmRegistry(String name, String url, Logger log) {
+        super(name, url, log, [NpmResolver])
     }
 
     @Override

@@ -50,9 +50,10 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         config = project.extensions.create('clientDependencies', ClientDependenciesExtension, project)
-        config.registryMap = [
-                npm: new NpmRegistry(NpmRegistry.DEFAULT_URL, project.logger),
-                bower: new BowerRegistry(BowerRegistry.DEFAULT_URL, project.logger)
+
+        config.registries = [
+                new NpmRegistry('npm', NpmRegistry.DEFAULT_URL, project.logger),
+                new BowerRegistry('bower', BowerRegistry.DEFAULT_URL, project.logger)
         ]
 
         project.task(CLEAN_TASK, group: TASK_GROUP) {
@@ -177,9 +178,9 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             config.cacheDir = "${project.buildDir.path}/client-cache"
         }
 
-        config.registryMap.each { String key, Registry registry ->
+        config.registries.each { Registry registry ->
             registry.offline = project.gradle.startParameter.isOffline()
-            registry.localCacheDir = config.cacheDir
+            registry.localCacheDir = project.file("${config.cacheDir.absolutePath}/${registry.name}/")
             registry.globalCacheDir = registry.globalCacheDir ?: getDefaultGlobalCache(registry)
             registry.installDir = config.installDir
             registry.useGlobalCache = config.useGlobalCache

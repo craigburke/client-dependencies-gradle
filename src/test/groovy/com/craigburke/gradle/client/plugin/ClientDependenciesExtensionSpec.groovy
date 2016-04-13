@@ -89,7 +89,7 @@ class ClientDependenciesExtensionSpec extends Specification {
     def "can register custom registry #name"() {
         when:
         extension.registry(name, type: type, url: url)
-        Registry registry = extension.registryMap[name]
+        Registry registry = extension.findRegistry(name)
 
         then:
         registry.url == url

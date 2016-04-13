@@ -34,8 +34,8 @@ class BowerRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://bower.herokuapp.com'
 
-    BowerRegistry(String url, Logger log) {
-        super(url, log, [GithubResolver, GitResolver])
+    BowerRegistry(String name, String url, Logger log) {
+        super(name, url, log, [GithubResolver, GitResolver])
     }
 
     @Override

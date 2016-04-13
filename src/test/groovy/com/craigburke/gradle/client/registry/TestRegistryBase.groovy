@@ -14,8 +14,8 @@ import org.gradle.api.logging.Logger
  */
 class TestRegistryBase extends AbstractRegistry {
 
-    TestRegistryBase(String url, Logger log, List<Class<Resolver>> resolvers) {
-        super(url, log, resolvers)
+    TestRegistryBase(String name, String url, Logger log, List<Class<Resolver>> resolvers) {
+        super(name, url, log, resolvers)
     }
 
     boolean loadSourceFromGlobalCache(Dependency dependency) { false }

@@ -26,6 +26,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 interface Registry {
+    void setName(String name)
+    String getName()
+
     void setOffline(boolean offline)
     boolean getOffline()
 

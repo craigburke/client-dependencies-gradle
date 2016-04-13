@@ -34,6 +34,8 @@ class ClientDependenciesExtension {
     Project project
 
     int threadPoolSize = 15
+    List<Registry> registries = []
+    List<Dependency> rootDependencies = []
 
     boolean useGlobalCache = true
     boolean checkDownloads = true
@@ -122,13 +124,9 @@ class ClientDependenciesExtension {
         this.cacheDir ? project.file(this.cacheDir) : null
     }
 
-    Map<String, Registry> registryMap = [:]
-
-    List<Dependency> rootDependencies = []
-
     def methodMissing(String registryName, args) {
        if (args && args.last() instanceof Closure) {
-           Registry registry = registryMap[registryName]
+           Registry registry = findRegistry(registryName)
            DependencyBuilder dependencyBuilder = new DependencyBuilder(registry)
            Closure clonedClosure = args.last().rehydrate(dependencyBuilder, this, this)
            clonedClosure.resolveStrategy = Closure.DELEGATE_FIRST
@@ -140,8 +138,12 @@ class ClientDependenciesExtension {
     void registry(Map props = [:], String name) {
         String url = props.url as String
         Logger log = project.logger
-        Registry registry = (props.type == 'bower' ? new BowerRegistry(url, log) : new NpmRegistry(url, log))
-        registryMap[name] = registry
+        Registry registry = (props.type == 'bower' ? new BowerRegistry(name, url, log) : new NpmRegistry(name, url, log))
+        registries += registry
+    }
+
+    Registry findRegistry(String name) {
+        registries.find { it.name == name  }
     }
 
     Closure getCopyConfig() {
