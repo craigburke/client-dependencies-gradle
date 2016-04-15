@@ -163,6 +163,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
        withExistingPool(AbstractRegistry.pool) {
             rootDependencies
                     .collectParallel { Dependency dependency ->
+                List<String> siblings = rootDependencies.findAll { it.name != dependency.name }*.name
+                dependency.exclude += siblings
                 dependency.registry.loadDependency(dependency as Dependency, null)
             }
         } as List<Dependency>

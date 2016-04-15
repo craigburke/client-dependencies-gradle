@@ -48,7 +48,9 @@ class DependencySpec extends Specification {
 
         File sourceFolder = baseSourceFolder.newFolder('1.0.0')
         subfolders.each { new File("${sourceFolder.absolutePath}/${it}").mkdirs() }
-        Dependency dependency = new Dependency(name: 'foo', version: Version.parse('1.0.0'), from: from, baseSourceDir: baseSourceFolder.root)
+
+        Version version = Version.parse('1.0.0')
+        Dependency dependency = new Dependency(name: 'foo', version: version, from: from, baseSourceDir: baseSourceFolder.root)
 
         expect:
         dependency.getReleaseFolder(releaseFolders) == releaseFolder
