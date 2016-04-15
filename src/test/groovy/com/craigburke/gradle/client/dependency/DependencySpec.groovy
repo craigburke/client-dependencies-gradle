@@ -43,10 +43,12 @@ class DependencySpec extends Specification {
     @Unroll
     def "from property is correct resolves to #releaseFolder"() {
         setup:
-        TemporaryFolder temporaryFolder = new TemporaryFolder()
-        temporaryFolder.create()
-        subfolders.each { temporaryFolder.newFolder(it as String) }
-        Dependency dependency = new Dependency(name: 'foo', from: from, baseSourceDir: temporaryFolder.root)
+        TemporaryFolder baseSourceFolder = new TemporaryFolder()
+        baseSourceFolder.create()
+
+        File sourceFolder = baseSourceFolder.newFolder('1.0.0')
+        subfolders.each { new File("${sourceFolder.absolutePath}/${it}").mkdirs() }
+        Dependency dependency = new Dependency(name: 'foo', version: Version.parse('1.0.0'), from: from, baseSourceDir: baseSourceFolder.root)
 
         expect:
         dependency.getReleaseFolder(releaseFolders) == releaseFolder

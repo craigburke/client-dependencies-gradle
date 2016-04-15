@@ -113,7 +113,7 @@ class Dependency extends SimpleDependency implements Cloneable {
             return from
         }
 
-        File[] sourceFolders = baseSourceDir?.listFiles()?.findAll { File file -> file.directory }
+        File[] sourceFolders = sourceDir?.listFiles()?.findAll { File file -> file.directory } ?: []
         List<String> folderNames = sourceFolders*.name
         releaseFolders?.find { folderNames.contains(it) } ?: ''
     }
