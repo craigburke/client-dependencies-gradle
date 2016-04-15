@@ -109,7 +109,7 @@ class Dependency extends SimpleDependency implements Cloneable {
     }
 
     String getReleaseFolder(List<String> releaseFolders) {
-        if (from) {
+        if (from != null) {
             return from
         }
 
