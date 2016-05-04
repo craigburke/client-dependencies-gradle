@@ -29,13 +29,6 @@ plugins {
 }
 ----
 
-[source,gradle,subs='attributes']
-----
-plugins {
-    id 'com.craigburke.client-dependencies' version '{version}'
-}
-----
-
 == Tasks
 
 The plugin adds the following tasks to your build:
