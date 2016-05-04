@@ -66,7 +66,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         project.task(INSTALL_TASK, group: TASK_GROUP) {
             mustRunAfter CLEAN_TASK
             outputs.upToDateWhen {
-                (config.installDir.exists() && config.installDir.listFiles())
+                isClientInstallUpToDate(project)
             }
             doLast {
                 installDependencies(config.rootDependencies, project)
@@ -149,7 +149,6 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 String releaseFolder = dependency.getReleaseFolder(config.releaseFolders)
 
                 project.copy {
-                    includeEmptyDirs = false
                     into "${registry.installDir.absolutePath}/${dependency.destinationPath}"
                     from( "${dependency.sourceDir.absolutePath}/${releaseFolder}" ) {
                         with copyConfig
@@ -202,6 +201,14 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             cachePath = os.windows ? "${userHome}/AppData/Roaming/bower/cache/" : "${userHome}/.cache/bower/"
         }
         new File(cachePath)
+    }
+
+    boolean isClientInstallUpToDate(Project project) {
+        config.rootDependencies.every { Dependency dependency ->
+            String destinationPath = "${dependency.registry.installDir.absolutePath}/${dependency.destinationPath}"
+            File destination = project.file(destinationPath)
+            destination.exists() && destination.listFiles()
+        }
     }
 
     static void setTaskDependencies(Project project) {

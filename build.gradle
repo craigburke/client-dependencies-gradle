@@ -1,12 +1,12 @@
-
 buildscript {
     repositories {
         maven {
-            url "https://plugins.gradle.org/m2/"
+            url 'https://plugins.gradle.org/m2/'
         }
     }
     dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.4"
+        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
     }
 }
 
@@ -15,6 +15,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'idea'
 apply plugin: 'codenarc'
 apply plugin: 'com.gradle.plugin-publish'
+apply plugin: 'com.jfrog.bintray'
 
 ext {
     artifactId = 'client-dependencies'
@@ -24,7 +25,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.craigburke.gradle'
-version = '1.0.0-RC2'
+version = '1.0.0'
 
 repositories {
     jcenter()
@@ -36,7 +37,7 @@ dependencies {
     compile 'org.codehaus.gpars:gpars:1.2.1'
     compile 'org.ajoberstar:grgit:1.5.0'
     testCompile('org.spockframework:spock-core:1.0-groovy-2.3') {
-        exclude  module: 'groovy-all'
+        exclude module: 'groovy-all'
     }
     testCompile 'com.github.tomakehurst:wiremock:1.58:standalone'
 }
@@ -55,6 +56,37 @@ publishing {
     }
 }
 
+bintray {
+    user = project.hasProperty('bintrayUsername') ? project.bintrayUsername : ''
+    key = project.hasProperty('bintrayApiKey') ? project.bintrayApiKey : ''
+    publications = ['maven']
+    publish = true
+
+    pkg {
+        repo = 'gradle'
+        userOrg = 'craigburke'
+        name = project.artifactId
+        githubRepo = 'craigburke/client-dependencies-gradle'
+        githubReleaseNotesFile = 'README.adoc'
+        version {
+            mavenCentralSync {
+                user = project.hasProperty('mavenCentralUsername') ? project.mavenCentralUsername : ''
+                password = project.hasProperty('mavenCentralPassword') ? project.mavenCentralPassword : ''
+            }
+        }
+    }
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
 pluginBundle {
     website = 'https://github.com/craigburke/client-dependencies-gradle'
     vcsUrl = 'https://github.com/craigburke/client-dependencies-gradle'
@@ -69,6 +101,7 @@ pluginBundle {
     }
 }
 
+task('release', dependsOn: ['bintrayUpload', 'publishPlugins'])
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.0'
