@@ -8,6 +8,7 @@ with a much clearer dependencies resolution model. This plugin queries the regis
 == Getting Started
 
 === Gradle 2.0
+
 [source,gradle,subs='attributes']
 ----
 buildscript {
@@ -17,7 +18,7 @@ buildscript {
 }
 
 apply plugin: 'com.craigburke.client-dependencies'
----
+----
 
 === Gradle 2.1 and higher
 
