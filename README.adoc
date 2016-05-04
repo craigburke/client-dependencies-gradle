@@ -81,6 +81,8 @@ location `src/assets/vendor/angular/modules.`
     A full URL reference any git repository will also work here.
 <6> The from property allows you to copy code only from a certain subfolder
 
+TIP: If you update your config and it doesn't seem to be taking effect, try running the `clientRefresh` task.
+
 == The copy task
 
 The files are copied using the DSL of Gradle's copy task. See: https://docs.gradle.org/current/dsl/org.gradle.api.tasks.Copy.html[Gradle Copy].
