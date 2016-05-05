@@ -19,6 +19,7 @@ apply plugin: 'com.jfrog.bintray'
 
 ext {
     artifactId = 'client-dependencies'
+    githubUrl = 'https://github.com/craigburke/client-dependencies-gradle'
 }
 
 sourceCompatibility = 1.7
@@ -51,7 +52,36 @@ publishing {
     publications {
         maven(MavenPublication) {
             artifactId project.artifactId
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    name project.artifactId
+                    description project.description
+                    url project.githubUrl
+                    scm {
+                        url project.githubUrl
+                        connection "scm:${project.githubUrl}.git"
+                        developerConnection "scm:${project.githubUrl}.git"
+                    }
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'craigburke'
+                            name 'Craig Burke'
+                            email 'craig@craigburke.com'
+                        }
+                    }
+                }
+            }
             from components.java
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
 }
@@ -88,8 +118,8 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 pluginBundle {
-    website = 'https://github.com/craigburke/client-dependencies-gradle'
-    vcsUrl = 'https://github.com/craigburke/client-dependencies-gradle'
+    website = project.githubUrl
+    vcsUrl = project.githubUrl
     description = 'Install client side dependencies from NPM or Bower by declaring dependencies in build.gradle.'
     tags = ['npm', 'bower', 'client', 'web']
 
