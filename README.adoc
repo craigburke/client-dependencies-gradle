@@ -12,6 +12,9 @@ with a much clearer dependencies resolution model. This plugin queries the regis
 [source,gradle,subs='attributes']
 ----
 buildscript {
+    repositories {
+        jcenter()
+    }
     dependencies {
         classpath 'com.craigburke.gradle:client-dependencies:{version}'
     }
@@ -53,10 +56,6 @@ You can specify dependencies from different sources (npm, bower or git) and cont
 
 [source,gradle,subs='attributes']
 ----
-plugins {
-    id 'com.craigburke.client-dependencies' version '{version}'
-}
-
 clientDependencies {
     bower {
         'jquery'('2.0.0') // <1>
