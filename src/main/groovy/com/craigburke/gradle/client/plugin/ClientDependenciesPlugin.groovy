@@ -56,14 +56,15 @@ class ClientDependenciesPlugin implements Plugin<Project> {
                 new BowerRegistry('bower', BowerRegistry.DEFAULT_URL, project.logger)
         ]
 
-        project.task(CLEAN_TASK, group: TASK_GROUP) {
+        project.task(CLEAN_TASK, group: TASK_GROUP,
+                description: 'Clears the project cache and removes all files from the installDir') {
             doLast {
                 project.delete config.installDir
                 project.delete config.cacheDir
             }
         }
 
-        project.task(INSTALL_TASK, group: TASK_GROUP) {
+        project.task(INSTALL_TASK, group: TASK_GROUP, description: 'Resolves and installs client dependencies') {
             mustRunAfter CLEAN_TASK
             outputs.upToDateWhen {
                 isClientInstallUpToDate(project)
@@ -73,7 +74,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             }
         }
 
-        project.task(REPORT_TASK, group: TASK_GROUP) {
+        project.task(REPORT_TASK, group: TASK_GROUP, description: 'Displays a dependency tree for the client dependencies') {
             doLast {
                 List<Dependency> allDependencies = loadDependencies(config.rootDependencies)
                 List<Dependency> finalDependencies = Dependency.flattenList(allDependencies).unique(false) { it.name }
@@ -83,7 +84,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             }
         }
 
-        project.task(REFRESH_TASK, group: TASK_GROUP, dependsOn: [CLEAN_TASK, INSTALL_TASK])
+        project.task(REFRESH_TASK, group: TASK_GROUP, dependsOn: [CLEAN_TASK, INSTALL_TASK],
+                description: 'Clears project cache and re-installs all client dependencies')
 
         project.afterEvaluate {
             AbstractRegistry.threadPoolSize = config.threadPoolSize
