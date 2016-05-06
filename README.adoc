@@ -12,6 +12,9 @@ with a much clearer dependencies resolution model. This plugin queries the regis
 [source,gradle,subs='attributes']
 ----
 buildscript {
+    repositories {
+        jcenter()
+    }
     dependencies {
         classpath 'com.craigburke.gradle:client-dependencies:{version}'
     }
