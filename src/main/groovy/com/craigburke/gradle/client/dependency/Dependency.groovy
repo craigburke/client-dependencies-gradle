@@ -105,7 +105,7 @@ class Dependency extends SimpleDependency implements Cloneable {
     }
 
     private String formatFolderName(String name) {
-        name.replaceAll('@', '').replaceAll(/[\s+|\/]/, '-')
+        name.replaceAll(/\s+/, '-')
     }
 
     String getReleaseFolder(List<String> releaseFolders) {

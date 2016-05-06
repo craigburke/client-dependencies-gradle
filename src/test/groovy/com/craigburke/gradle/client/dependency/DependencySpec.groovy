@@ -34,7 +34,7 @@ class DependencySpec extends Specification {
         name       | into       | destinationPath
         'foo'      | null       | 'foo'
         'foo bar'  | null       | 'foo-bar'
-        '@foo/bar' | null       | 'foo-bar'
+        '@foo/bar' | null       | '@foo/bar'
         'foo'      | 'foo2'     | 'foo2'
         'foo bar'  | 'foo-bar2' | 'foo-bar2'
         '@foo/bar' | 'foo-bar2' | 'foo-bar2'
