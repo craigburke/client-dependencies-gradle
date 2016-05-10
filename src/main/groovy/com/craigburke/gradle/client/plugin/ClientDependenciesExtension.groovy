@@ -48,7 +48,7 @@ class ClientDependenciesExtension {
 
     private final List<Object> copyIncludes = []
     private final List<Object> copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
-                                 'index.js', 'gulpfile.js', 'source/**']
+                                 'gulpfile.js', 'source/**']
 
     Closure defaultCopy
 
