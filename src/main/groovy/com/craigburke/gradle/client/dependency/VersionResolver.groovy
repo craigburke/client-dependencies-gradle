@@ -66,7 +66,10 @@ class VersionResolver {
         expression.find(EQUALS) { String match, String versionExpression ->
             Version matchedVersion = Version.parse(versionExpression)
 
-            if (matchedVersion.fuzzy) {
+            if (version.tag && !matchedVersion.tag) {
+                results += false
+            }
+            else if (matchedVersion.fuzzy) {
                 results += (version >= matchedVersion.floor && version < matchedVersion.ceiling)
             } else {
                 results += version == matchedVersion
