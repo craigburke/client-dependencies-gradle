@@ -51,7 +51,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     @Override
     boolean loadSourceFromGlobalCache(Dependency dependency) {
         String bowerCachePath = "${globalCacheDir.absolutePath}/packages"
-        String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.url)}/${dependency.version.fullVersion}/"
+        String cachePath = "${bowerCachePath}/${getMD5Hash(dependency.fullUrl)}/${dependency.version.fullVersion}/"
         File cacheFolder = new File(cachePath)
 
         if (cacheFolder.exists()) {

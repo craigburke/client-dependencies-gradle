@@ -32,7 +32,7 @@ class GithubResolver implements Resolver {
 
     @Override
     boolean canResolve(Dependency dependency) {
-        dependency.url?.matches(GITHUB_URL)
+        dependency.fullUrl?.matches(GITHUB_URL)
     }
 
     @Override
@@ -46,7 +46,7 @@ class GithubResolver implements Resolver {
             return
         }
 
-        GithubInfo info = getInfo(dependency.url)
+        GithubInfo info = getInfo(dependency.fullUrl)
         String ref = dependency.info.tags.find { (it - 'v') == dependency.version.fullVersion } ?: 'master'
         URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/tarball/${ref}")
 
@@ -81,7 +81,7 @@ class GithubResolver implements Resolver {
     @Override
     void afterInfoLoad(Dependency dependency) {
         if (!dependency.info.tags) {
-            GithubInfo info = getInfo(dependency.url)
+            GithubInfo info = getInfo(dependency.fullUrl)
             URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
             List<String> tags = new JsonSlurper().parse(url).collect { (it.ref as String) - 'refs/tags/' }
             dependency.info.tags = tags

@@ -84,7 +84,7 @@ abstract class AbstractRegistry implements Registry {
         dependency.baseSourceDir = new File("${localCacheDir.absolutePath}/${dependency.name}/")
         setInfo(dependency)
 
-        if (declaredDependency.url) {
+        if (declaredDependency.fullUrl) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
         }
         else {
@@ -132,7 +132,7 @@ abstract class AbstractRegistry implements Registry {
                 dependency.info = loadInfoFromGlobalCache(dependency)
             }
 
-            if (!dependency.info && !dependency.url) {
+            if (!dependency.info && !dependency.fullUrl) {
                 dependency.info = loadInfoFromRegistry(dependency)
             }
 

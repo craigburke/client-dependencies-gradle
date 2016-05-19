@@ -45,7 +45,7 @@ class NpmResolver implements Resolver {
         String versionKey = dependency.version.fullVersion
         Map versionsJson = dependency.info?.versions
         Map distJson = versionsJson?.containsKey(versionKey) ? versionsJson[versionKey].dist : [:]
-        String downloadUrl = dependency.url ?: distJson?.tarball
+        String downloadUrl = dependency.fullUrl ?: distJson?.tarball
 
         if (downloadUrl.endsWith('tgz')) {
             log.info "Downloading ${dependency} from ${downloadUrl}"

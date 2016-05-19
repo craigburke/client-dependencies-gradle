@@ -30,7 +30,6 @@ class Dependency extends SimpleDependency implements Cloneable {
     static final Pattern GITHUB_PROJECT_PATTERN = ~/^[^\/]*\/[^\/]*$/
 
     Registry registry
-    String url
     String from
     String into
 
@@ -85,7 +84,7 @@ class Dependency extends SimpleDependency implements Cloneable {
         }
     }
 
-    String getUrl() {
+    String getFullUrl() {
         String urlValue = url ?: info?.url
 
         if (urlValue ==~ GITHUB_PROJECT_PATTERN) {
@@ -125,7 +124,7 @@ class Dependency extends SimpleDependency implements Cloneable {
         result.with {
             name = source.name
             transitive = source.transitive
-            url = source.@url
+            url = source.url
             versionExpression = source.versionExpression
             from = source.from
             into = source.into

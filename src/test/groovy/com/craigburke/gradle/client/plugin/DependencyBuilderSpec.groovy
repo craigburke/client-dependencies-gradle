@@ -61,7 +61,7 @@ class DependencyBuilderSpec extends Specification {
         dependency.versionExpression == '1.0.0'
 
         and:
-        dependency.url == 'http://www.example.com/foo.git'
+        dependency.fullUrl == 'http://www.example.com/foo.git'
 
         where:
         dependencies = {

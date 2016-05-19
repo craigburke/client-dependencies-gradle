@@ -41,7 +41,7 @@ class GitResolver implements Resolver {
 
     @Override
     void afterInfoLoad(Dependency dependency) {
-        Grgit.clone(dir:  dependency.sourceDir, uri: dependency.url)
+        Grgit.clone(dir:  dependency.sourceDir, uri: dependency.fullUrl)
     }
 
 }

@@ -71,7 +71,7 @@ class DependencySpec extends Specification {
         Dependency dependency = new Dependency(name: 'foo', url: url)
 
         expect:
-        dependency.url == expectedUrl
+        dependency.fullUrl == expectedUrl
 
         where:
         url                             | expectedUrl
@@ -80,5 +80,26 @@ class DependencySpec extends Specification {
         'foo/bar'                       | 'https://github.com/foo/bar'
         'file:///foo/bar'               | 'file:///foo/bar'
     }
+
+    @Unroll
+    def "can parse version expression #versionExpression"() {
+        setup:
+        Dependency dependency = new Dependency(name: 'foo', versionExpression: versionExpression)
+
+        expect:
+        dependency.fullUrl == expectedUrl
+
+        and:
+        dependency.versionExpression == expectedVersion
+
+        where:
+        versionExpression      | expectedVersion | expectedUrl
+        'org/repo'             | ''              | 'https://github.com/org/repo'
+        'org/repo#1.0.0'       | '1.0.0'         | 'https://github.com/org/repo'
+        'org/repo#254e400'     | ''              | 'https://github.com/org/repo#254e400'
+        'org/repo#development' | ''              | 'https://github.com/org/repo#development'
+        'org/repo@1.0.0'       | '1.0.0'         | 'https://github.com/org/repo'
+    }
+
 
 }
