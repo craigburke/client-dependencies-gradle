@@ -65,7 +65,7 @@ class NpmResolver implements Resolver {
             downloadFile.delete()
         } else {
             log.info "Downloading ${dependency} from ${downloadUrl}"
-            Grgit.clone(dir: sourceFolder, uri: downloadUrl, refToCheckout: 'master')
+            Grgit.clone(dir: sourceFolder, uri: downloadUrl, refToCheckout: 'master').close()
         }
     }
 
