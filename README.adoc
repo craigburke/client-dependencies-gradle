@@ -182,3 +182,9 @@ clientDependencies {
 <3> Whether the global caches for bower and npm are searched when resolving dependencies
 <4> Whether downloads are checked and verified
 <5> Size of thread pool used when downloading and installing dependencies
+
+== Contributors
+
+Thank you to the following people who have made significant contributions to this project:
+
+* Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
