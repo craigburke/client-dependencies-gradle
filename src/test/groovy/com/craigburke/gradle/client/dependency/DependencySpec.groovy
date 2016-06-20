@@ -101,5 +101,4 @@ class DependencySpec extends Specification {
         'org/repo@1.0.0'       | '1.0.0'         | 'https://github.com/org/repo'
     }
 
-
 }

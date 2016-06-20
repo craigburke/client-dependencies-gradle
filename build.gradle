@@ -26,7 +26,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 group = 'com.craigburke.gradle'
-version = '1.1.3'
+version = '1.1.4'
 
 repositories {
     jcenter()
