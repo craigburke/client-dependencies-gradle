@@ -152,9 +152,7 @@ clientDependencies {
 
 == Registering custom registry
 
-By default npm and bower are installed but you can register additional registries.  These
-will override the default registries (as in do not add in an npm or bower section).  You can
-also separate out dependencies (setup production vs dev dependencies for instance).
+By default two registries named npm and bower are installed. You can either override these or register new custom registries. This allows you to also use it to separate out dependencies (production versus devevelopment dependencies for example).
 
 [source,gradle,subs='attributes']
 ----
