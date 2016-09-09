@@ -152,13 +152,31 @@ clientDependencies {
 
 == Registering custom registry
 
-By default npm and bower are installed but you can register additional registries
+By default two registries named npm and bower are installed. You can either override these or register new custom registries. This allows you to also use it to separate out dependencies (production versus devevelopment dependencies for example).
 
 [source,gradle,subs='attributes']
 ----
 clientDependencies {
     registry 'npmLocal', type:'npm', url:'http://www.example.com/npm/'
+    registry 'npmDev', type: 'npm', url:'http://www.example.com/npm/'
     registry 'bowerLocal', type:'bower', url:'http://www.example.com/bower/'
+
+    npmLocal {
+        'bootstrap'('3.3.6')
+        'myJSLib'('1.0.0')
+    }
+
+    npmDev {
+        'lodash'('2.4.1')
+        'grunt'('1.0.0')
+        'grunt-contrib-clean'('~0.6.0')
+        'colors'('^0.6.2')
+    }
+
+    bowerLocal {
+        'jquery'('2.0.0')
+        'myBowerJSLib'('1.0.0')
+     }
 }
 ----
 
@@ -182,3 +200,9 @@ clientDependencies {
 <3> Whether the global caches for bower and npm are searched when resolving dependencies
 <4> Whether downloads are checked and verified
 <5> Size of thread pool used when downloading and installing dependencies
+
+== Contributors
+
+Thank you to the following people who have made significant contributions to this project:
+
+* Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
