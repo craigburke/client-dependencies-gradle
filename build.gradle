@@ -134,9 +134,11 @@ pluginBundle {
 }
 
 processTestResources {
-    doFirst {
-        DirectoryScanner.removeDefaultExclude('**/.git')
-        DirectoryScanner.removeDefaultExclude('**/.git/**')
+    String gitFolder = File.separator + '_git' + File.separator
+    String updatedGitFolder = File.separator + '.git' + File.separator
+
+    eachFile {
+        it.path = it.path.replace gitFolder, updatedGitFolder
     }
 }
 
