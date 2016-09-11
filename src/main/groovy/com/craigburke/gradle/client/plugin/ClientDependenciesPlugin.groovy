@@ -43,7 +43,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
     static final String REFRESH_TASK = 'clientRefresh'
     static final String REPORT_TASK = 'clientReport'
 
-    static final String[] INSTALL_DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile', 'integrationTest', 'karmaRun', 'karmaWatch']
+    static final String[] INSTALL_DEPENDENT_TASKS = ['run', 'bootRun', 'assetCompile',
+        'integrationTest', 'karmaRun', 'karmaWatch']
 
     ClientDependenciesExtension config
 

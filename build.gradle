@@ -1,3 +1,5 @@
+import org.apache.tools.ant.DirectoryScanner
+
 buildscript {
     repositories {
         maven {
@@ -128,6 +130,13 @@ pluginBundle {
             id = 'com.craigburke.client-dependencies'
             displayName = 'Client Dependencies Plugin'
         }
+    }
+}
+
+processTestResources {
+    doFirst {
+        DirectoryScanner.removeDefaultExclude('**/.git')
+        DirectoryScanner.removeDefaultExclude('**/.git/**')
     }
 }
 

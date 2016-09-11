@@ -15,14 +15,13 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         init(BowerRegistry, 'bower')
         String gitUrl = "file://${resource('bower').path}"
 
-        mockResponses([
-                '/bower/packages/foo'      : resource('bower/packages/foo').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
-                '/bower/packages/bar'      : resource('bower/packages/bar').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
-                '/bower/packages/baz'      : resource('bower/packages/baz').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
-                '/bower/packages/foobar'   : resource('bower/packages/foobar').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
-                '/bower/packages/circular1': resource('bower/packages/circular1').text.replace(GIT_URL_PLACEHOLDER, gitUrl),
-                '/bower/packages/circular2': resource('bower/packages/circular2').text.replace(GIT_URL_PLACEHOLDER, gitUrl)
-        ])
+        Map responses = ['foo', 'bar', 'baz', 'foobar', 'circular1', 'circular2', 'dotbower'].collectEntries {
+            String url = "/bower/packages/${it}" as String
+            String response = resource("bower/packages/${it}").text.replace(GIT_URL_PLACEHOLDER, gitUrl)
+            [(url) : response]
+        }
+
+        mockResponses(responses)
     }
 
     @Unroll
@@ -58,6 +57,19 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         url                                  | resolverClass
         'http://www.example.com/foo/bar.git' | GitResolver
         'http://www.github.com/foo/bar.git'  | GithubResolver
+    }
+
+    def "can handle repository with a .bower.json file"() {
+        given:
+        Dependency simpleDependency = new Dependency(name: 'dotbower',
+                baseSourceDir: sourceFolder,
+                versionExpression: '1.0.0')
+
+        when:
+        Dependency dependency = registry.loadDependency(simpleDependency, null)
+
+        then:
+        dependency.children*.name == ['foo']
     }
 
 }
