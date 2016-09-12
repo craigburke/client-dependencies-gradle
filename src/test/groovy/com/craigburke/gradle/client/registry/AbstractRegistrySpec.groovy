@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import static com.github.tomakehurst.wiremock.client.WireMock.get
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
-import com.craigburke.gradle.client.registry.core.CircularDependencyException
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
 
@@ -188,15 +187,22 @@ abstract class AbstractRegistrySpec extends Specification {
         dependency.children.every { it.parent == dependency }
     }
 
-    def "circular dependencies are detected"() {
+    def "circular dependencies are ignored"() {
         setup:
         Dependency declaredDependency = new Dependency(name: 'circular1', versionExpression: '1.0.0')
 
         when:
-        registry.loadDependency(declaredDependency, null)
+        Dependency circular1 = registry.loadDependency(declaredDependency, null)
+        Dependency circular2 = circular1.children.first()
 
         then:
-        thrown(CircularDependencyException)
+        circular1.children.size() == 1
+
+        and:
+        circular2.name == 'circular2'
+
+        and:
+        circular2.children.size() == 0
     }
 
 }

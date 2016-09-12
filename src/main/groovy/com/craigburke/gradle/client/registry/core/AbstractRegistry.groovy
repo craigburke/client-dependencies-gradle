@@ -163,13 +163,18 @@ abstract class AbstractRegistry implements Registry {
                 .findAll { SimpleDependency child -> !exclusions.contains(child.name) }
                 .collectParallel { SimpleDependency child ->
                     if (dependency.ancestorsAndSelf*.name.contains(child.name)) {
-                        String message = "Circular dependency created by dependency ${child.name}@${child.versionExpression}"
-                        throw new CircularDependencyException(message)
+                        null
                     }
-
-                    Dependency childDependency = new Dependency(name: child.name, versionExpression: child.versionExpression)
-                    loadDependency(childDependency, dependency)
+                    else {
+                        Dependency childDependency = new Dependency(
+                                name: child.name,
+                                versionExpression: child.versionExpression,
+                                exclude: exclusions
+                        )
+                        loadDependency(childDependency, dependency)
+                    }
             }
+            .findAllParallel { it != null }
         } as List<Dependency>
     }
 
