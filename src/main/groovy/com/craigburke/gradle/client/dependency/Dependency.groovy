@@ -16,6 +16,7 @@
 package com.craigburke.gradle.client.dependency
 
 import com.craigburke.gradle.client.registry.core.Registry
+import com.craigburke.gradle.client.registry.core.RegistryUtil
 import groovy.transform.CompileStatic
 import java.util.regex.Pattern
 
@@ -55,7 +56,7 @@ class Dependency extends SimpleDependency implements Cloneable {
     }
 
     File getSourceDir() {
-        new File("${baseSourceDir.absolutePath}/${version ?: versionExpression}/")
+        new File("${baseSourceDir.absolutePath}/${RegistryUtil.getMD5Hash(versionExpression)}/")
     }
 
     void setChildren(List<Dependency> children) {

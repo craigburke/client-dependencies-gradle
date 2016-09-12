@@ -37,7 +37,12 @@ class GithubResolver implements Resolver {
 
     @Override
     List<Version> getVersionList(Dependency dependency) {
-        dependency.info.tags.collect { String tag -> Version.parse(tag) } as List<Version>
+        if (dependency.info.tags) {
+            dependency.info.tags?.collect { String tag -> Version.parse(tag) } as List<Version>
+        }
+        else {
+            []
+        }
     }
 
     @Override
@@ -86,6 +91,11 @@ class GithubResolver implements Resolver {
             List<String> tags = new JsonSlurper().parse(url).collect { (it.ref as String) - 'refs/tags/' }
             dependency.info.tags = tags
         }
+    }
+
+    @Override
+    Version getVersionFromSource(Dependency dependency) {
+        BowerConfig.getVersion(dependency.sourceDir)
     }
 
     private GithubInfo getInfo(String url) {

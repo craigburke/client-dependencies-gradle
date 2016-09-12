@@ -46,11 +46,11 @@ class DependencySpec extends Specification {
         TemporaryFolder baseSourceFolder = new TemporaryFolder()
         baseSourceFolder.create()
 
-        File sourceFolder = baseSourceFolder.newFolder('1.0.0')
-        subfolders.each { new File("${sourceFolder.absolutePath}/${it}").mkdirs() }
-
         Version version = Version.parse('1.0.0')
-        Dependency dependency = new Dependency(name: 'foo', version: version, from: from, baseSourceDir: baseSourceFolder.root)
+        Dependency dependency = new Dependency(name: 'foo', versionExpression: '1.0.0',
+                version: version, from: from, baseSourceDir: baseSourceFolder.root)
+
+        subfolders.each { new File("${dependency.sourceDir.absolutePath}/${it}").mkdirs() }
 
         expect:
         dependency.getReleaseFolder(releaseFolders) == releaseFolder

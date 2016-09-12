@@ -17,6 +17,7 @@ package com.craigburke.gradle.client.registry.npm
 
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
+import com.craigburke.gradle.client.registry.bower.NpmConfig
 import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
@@ -41,10 +42,10 @@ class NpmRegistry extends AbstractRegistry implements Registry {
 
     @Override
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
-        File packageJson = new File("${dependency.sourceDir.absolutePath}/package.json")
+        File configFile = NpmConfig.getConfigFile(dependency.sourceDir)
 
-        if (packageJson.exists()) {
-            def json = new JsonSlurper().parse(packageJson)
+        if (configFile?.exists()) {
+            def json = new JsonSlurper().parse(configFile)
             ((json.dependencies ?: [:]) + (json.peerDependencies ?: [:])).collect { String name, String version ->
                 new SimpleDependency(name: name, versionExpression: version)
             }

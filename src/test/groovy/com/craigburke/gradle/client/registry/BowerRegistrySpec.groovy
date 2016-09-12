@@ -15,7 +15,7 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
         init(BowerRegistry, 'bower')
         String gitUrl = "file://${resource('bower').path}"
 
-        Map responses = ['foo', 'bar', 'baz', 'foobar', 'circular1', 'circular2', 'dotbower'].collectEntries {
+        Map responses = ['foo', 'bar', 'baz', 'foobar', 'circular1', 'circular2', 'dotbower', 'notag'].collectEntries {
             String url = "/bower/packages/${it}" as String
             String response = resource("bower/packages/${it}").text.replace(GIT_URL_PLACEHOLDER, gitUrl)
             [(url) : response]
@@ -70,6 +70,23 @@ class BowerRegistrySpec extends AbstractRegistrySpec {
 
         then:
         dependency.children*.name == ['foo']
+    }
+
+    def "git repo with no tags can still resolve a single version"() {
+        given:
+        Dependency simpleDependency = new Dependency(
+                name: 'notag',
+                baseSourceDir: sourceFolder,
+                versionExpression: '*')
+
+        when:
+        Dependency dependency = registry.loadDependency(simpleDependency, null)
+
+        then:
+        notThrown(Exception)
+
+        and:
+        dependency.version.fullVersion == '1.0.0'
     }
 
 }

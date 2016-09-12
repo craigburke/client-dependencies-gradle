@@ -40,6 +40,10 @@ class VersionResolver {
     private static final List<String> ALL_VERSIONS = ['*', '', 'x']
 
     static Version resolve(String expression, List<Version> versions) {
+        if (!versions) {
+            return null
+        }
+
         List<Version> sortedVersions = versions.sort(false) { Version v1, Version v2 -> v2 <=> v1 }
 
         if (expression?.trim() in ['latest'] + ALL_VERSIONS) {

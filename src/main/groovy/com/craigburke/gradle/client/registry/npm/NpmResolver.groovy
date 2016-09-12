@@ -3,6 +3,7 @@ package com.craigburke.gradle.client.registry.npm
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.getShaHash
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
+import com.craigburke.gradle.client.registry.bower.NpmConfig
 import com.craigburke.gradle.client.registry.core.Resolver
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
@@ -71,6 +72,11 @@ class NpmResolver implements Resolver {
 
     @Override
     void afterInfoLoad(Dependency dependency) { }
+
+    @Override
+    Version getVersionFromSource(Dependency dependency) {
+        NpmConfig.getVersion(dependency.sourceDir)
+    }
 
     private verifyFileChecksum(File downloadFile, String checksum) {
         log.info "Verifying checksum for file ${downloadFile.absolutePath} [${checksum}]"

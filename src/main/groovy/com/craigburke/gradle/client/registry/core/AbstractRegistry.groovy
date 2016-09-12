@@ -83,21 +83,23 @@ abstract class AbstractRegistry implements Registry {
         dependency.parent = parent
         dependency.baseSourceDir = new File("${localCacheDir.absolutePath}/${dependency.name}/")
         setInfo(dependency)
+        Resolver resolver = getResolver(dependency)
 
         if (declaredDependency.fullUrl) {
             dependency.version = Version.parse(declaredDependency.versionExpression)
         }
         else {
-            List<Version> versionList = getResolver(dependency).getVersionList(dependency)
+            List<Version> versionList = resolver.getVersionList(dependency)
             dependency.version = VersionResolver.resolve(declaredDependency.versionExpression, versionList)
         }
+
+        loadSource(dependency)
+        dependency.version = dependency.version ?: resolver.getVersionFromSource(dependency)
 
         if (!dependency.version) {
             String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
             throw new DependencyResolveException(exceptionMessage)
         }
-
-        loadSource(dependency)
 
         if (declaredDependency.transitive) {
             dependency.children = loadChildDependencies(dependency, declaredDependency.exclude)

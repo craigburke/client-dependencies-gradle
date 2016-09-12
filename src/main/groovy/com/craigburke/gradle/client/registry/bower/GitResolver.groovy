@@ -35,20 +35,26 @@ class GitResolver implements Resolver {
 
     @Override
     List<Version> getVersionList(Dependency dependency) {
+        List<Version> versionList = []
         Grgit repo = Grgit.open(dir: dependency.sourceDir)
         try {
-          repo.tag.list().collect { Version.parse(it.name as String) }
+            versionList = repo.tag.list().collect { Version.parse(it.name as String) }
         } finally {
           repo.close()
         }
+
+        versionList
     }
 
     @Override
     void resolve(Dependency dependency) {
         Grgit repo = Grgit.open(dir: dependency.sourceDir)
         try {
-          String commit = repo.tag.list().find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
-          repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
+            List tags = repo.tag.list()
+            if (tags) {
+                String commit = tags.find { (it.name - 'v') == dependency.version.fullVersion }.commit.id
+                repo.reset(commit: commit, mode: ResetOp.Mode.HARD)
+            }
         } finally {
           repo.close()
         }
@@ -59,4 +65,8 @@ class GitResolver implements Resolver {
         Grgit.clone(dir:  dependency.sourceDir, uri: dependency.fullUrl).close()
     }
 
+    @Override
+    Version getVersionFromSource(Dependency dependency) {
+        BowerConfig.getVersion(dependency.sourceDir)
+    }
 }
