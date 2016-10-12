@@ -20,7 +20,6 @@ import static com.craigburke.gradle.client.registry.core.RegistryUtil.getMD5Hash
 import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
-import org.gradle.api.logging.Logger
 import com.craigburke.gradle.client.dependency.Dependency
 import groovy.json.JsonSlurper
 
@@ -32,11 +31,11 @@ import groovy.json.JsonSlurper
  */
 class BowerRegistry extends AbstractRegistry implements Registry {
 
-    static final String DEFAULT_URL = 'https://bower.herokuapp.com'
-    static final String[] DEFAULT_FILENAMES = ['bower.json', '.bower.json']
+    static final String DEFAULT_BOWER_URL = 'https://bower.herokuapp.com'
+    static final List<String> DEFAULT_BOWER_FILENAMES = ['bower.json', '.bower.json']
 
-    BowerRegistry(String name, String url, Logger log) {
-        super(name, url, log, DEFAULT_FILENAMES, [GithubResolver, GitResolver])
+    BowerRegistry(String name, String url = DEFAULT_BOWER_URL, List<String> configFilenames = DEFAULT_BOWER_FILENAMES) {
+        super(name, url, configFilenames, [GithubResolver, GitResolver])
     }
 
     @Override

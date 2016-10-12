@@ -18,6 +18,8 @@ package com.craigburke.gradle.client.registry.core
 import static com.craigburke.gradle.client.registry.core.RegistryUtil.withLock
 import static groovyx.gpars.GParsPool.withExistingPool
 
+import com.craigburke.gradle.client.plugin.ClientDependenciesPlugin
+import org.gradle.api.logging.Logging
 import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
@@ -49,16 +51,15 @@ abstract class AbstractRegistry implements Registry {
     static ForkJoinPool pool
     protected Logger log
     protected List<Resolver> resolvers
-    protected String[] configFilenames
+    protected List<String> configFilenames
 
     protected AbstractRegistry(String name,
                                String url,
-                               Logger log,
-                               String[] configFilenames,
+                               List<String> configFilenames,
                                List<Class<Resolver>> resolvers) {
         this.name = name
         this.url = url
-        this.log = log
+        this.log = Logging.getLogger(ClientDependenciesPlugin)
         this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }
         this.configFilenames = configFilenames
     }

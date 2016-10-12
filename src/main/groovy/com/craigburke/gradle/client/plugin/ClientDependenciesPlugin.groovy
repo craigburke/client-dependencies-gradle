@@ -52,8 +52,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         config = project.extensions.create('clientDependencies', ClientDependenciesExtension, project)
 
         config.registries = [
-                new NpmRegistry('npm', NpmRegistry.DEFAULT_URL, project.logger),
-                new BowerRegistry('bower', BowerRegistry.DEFAULT_URL, project.logger)
+                new NpmRegistry('npm'),
+                new BowerRegistry('bower')
         ]
 
         project.task(CLEAN_TASK, group: TASK_GROUP,
