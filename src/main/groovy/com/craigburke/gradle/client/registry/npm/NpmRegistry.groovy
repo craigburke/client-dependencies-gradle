@@ -17,7 +17,6 @@ package com.craigburke.gradle.client.registry.npm
 
 import static com.craigburke.gradle.client.registry.npm.NpmUtil.extractTarball
 
-import com.craigburke.gradle.client.registry.bower.NpmConfig
 import com.craigburke.gradle.client.dependency.SimpleDependency
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
@@ -35,14 +34,15 @@ import groovy.json.JsonSlurper
 class NpmRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://registry.npmjs.org'
+    static final String[] DEFAULT_FILENAMES = ['package.json']
 
     NpmRegistry(String name, String url, Logger log) {
-        super(name, url, log, [NpmResolver])
+        super(name, url, log, DEFAULT_FILENAMES, [NpmResolver])
     }
 
     @Override
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
-        File configFile = NpmConfig.getConfigFile(dependency.sourceDir)
+        File configFile = getConfigFile(dependency.sourceDir)
 
         if (configFile?.exists()) {
             def json = new JsonSlurper().parse(configFile)
@@ -92,4 +92,5 @@ class NpmRegistry extends AbstractRegistry implements Registry {
             null
         }
     }
+
 }

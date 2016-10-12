@@ -33,14 +33,15 @@ import groovy.json.JsonSlurper
 class BowerRegistry extends AbstractRegistry implements Registry {
 
     static final String DEFAULT_URL = 'https://bower.herokuapp.com'
+    static final String[] DEFAULT_FILENAMES = ['bower.json', '.bower.json']
 
     BowerRegistry(String name, String url, Logger log) {
-        super(name, url, log, [GithubResolver, GitResolver])
+        super(name, url, log, DEFAULT_FILENAMES, [GithubResolver, GitResolver])
     }
 
     @Override
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
-        File bowerConfigFile = BowerConfig.getConfigFile(dependency.sourceDir)
+        File bowerConfigFile = getConfigFile(dependency.sourceDir)
         def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
 
         bowerConfigJson.dependencies?.collect { String name, String versionExpression ->

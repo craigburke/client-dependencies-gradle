@@ -49,12 +49,18 @@ abstract class AbstractRegistry implements Registry {
     static ForkJoinPool pool
     protected Logger log
     protected List<Resolver> resolvers
+    protected String[] configFilenames
 
-    protected AbstractRegistry(String name, String url, Logger log, List<Class<Resolver>> resolvers) {
+    protected AbstractRegistry(String name,
+                               String url,
+                               Logger log,
+                               String[] configFilenames,
+                               List<Class<Resolver>> resolvers) {
         this.name = name
         this.url = url
         this.log = log
         this.resolvers = resolvers.collect { it.newInstance(log) as Resolver }
+        this.configFilenames = configFilenames
     }
 
     static void setThreadPoolSize(int poolSize) {
@@ -94,7 +100,7 @@ abstract class AbstractRegistry implements Registry {
         }
 
         loadSource(dependency)
-        dependency.version = dependency.version ?: resolver.getVersionFromSource(dependency)
+        dependency.version = dependency.version ?: getVersionFromSource(dependency.sourceDir)
 
         if (!dependency.version) {
             String exceptionMessage = "Couldn't resolve ${dependency.name}@${dependency.versionExpression}"
@@ -178,6 +184,23 @@ abstract class AbstractRegistry implements Registry {
             }
             .findAllParallel { it != null }
         } as List<Dependency>
+    }
+
+    File getConfigFile(File sourceDir) {
+        configFilenames
+                .collect { String filename -> new File("${sourceDir.absolutePath}/${filename}") }
+                .find { it.exists() }
+    }
+
+    Version getVersionFromSource(File sourceDir) {
+        File configFile = getConfigFile(sourceDir)
+        if (configFile) {
+            Map config = new JsonSlurper().parse(configFile) as Map
+            Version.parse(config.version as String)
+        }
+        else {
+            null
+        }
     }
 
     abstract boolean loadSourceFromGlobalCache(Dependency dependency)

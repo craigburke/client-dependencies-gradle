@@ -65,8 +65,4 @@ class GitResolver implements Resolver {
         Grgit.clone(dir:  dependency.sourceDir, uri: dependency.fullUrl).close()
     }
 
-    @Override
-    Version getVersionFromSource(Dependency dependency) {
-        BowerConfig.getVersion(dependency.sourceDir)
-    }
 }

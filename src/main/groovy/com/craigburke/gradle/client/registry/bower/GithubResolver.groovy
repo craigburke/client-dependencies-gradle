@@ -93,11 +93,6 @@ class GithubResolver implements Resolver {
         }
     }
 
-    @Override
-    Version getVersionFromSource(Dependency dependency) {
-        BowerConfig.getVersion(dependency.sourceDir)
-    }
-
     private GithubInfo getInfo(String url) {
         GithubInfo info
         url.find(GITHUB_URL) { String match, String orgName, String repoName ->
