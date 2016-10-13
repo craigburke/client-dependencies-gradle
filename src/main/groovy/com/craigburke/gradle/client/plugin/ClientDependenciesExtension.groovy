@@ -19,6 +19,7 @@ import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
+import com.craigburke.gradle.client.registry.npm.YarnRegistry
 import org.gradle.api.Project
 import org.gradle.util.CollectionUtils
 
@@ -136,8 +137,17 @@ class ClientDependenciesExtension {
 
     void registry(Map props = [:], String name) {
         String url = props.url as String
-        Registry registry = (props.type == 'bower' ? new BowerRegistry(name, url) : new NpmRegistry(name, url))
-        registries += registry
+        switch (props.type) {
+            case 'bower':
+                registries += new BowerRegistry(name, url)
+                break
+            case 'npm':
+                registries += new NpmRegistry(name, url)
+                break
+            case 'yarn':
+                registries += new YarnRegistry(name, url)
+                break
+        }
     }
 
     Registry findRegistry(String name) {

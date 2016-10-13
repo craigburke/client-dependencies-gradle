@@ -22,6 +22,7 @@ import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.VersionResolver
 import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
+import com.craigburke.gradle.client.registry.npm.YarnRegistry
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.core.AbstractRegistry
 import org.gradle.api.Plugin
@@ -53,7 +54,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         config.registries = [
                 new NpmRegistry('npm'),
-                new BowerRegistry('bower')
+                new BowerRegistry('bower'),
+                new YarnRegistry('yarn')
         ]
 
         project.task(CLEAN_TASK, group: TASK_GROUP,

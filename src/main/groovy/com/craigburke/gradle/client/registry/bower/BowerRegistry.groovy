@@ -85,7 +85,8 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     @Override
     Map loadInfoFromRegistry(Dependency dependency) {
         URL url = new URL("${dependency.registry.url}/packages/${dependency.name}")
-        new JsonSlurper().parse(url) as Map
+        String jsonText = url.getText(requestProperties: ['User-Agent': DEFAULT_USER_AGENT])
+        new JsonSlurper().parseText(jsonText) as Map
     }
 
 }
