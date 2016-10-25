@@ -68,9 +68,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
 
         project.task(INSTALL_TASK, group: TASK_GROUP, description: 'Resolves and installs client dependencies') {
             mustRunAfter CLEAN_TASK
-            outputs.upToDateWhen {
-                isClientInstallUpToDate(project)
-            }
+            onlyIf { !clientDependenciesAreInstalled(project) }
             doLast {
                 installDependencies(config.rootDependencies, project)
             }
@@ -207,7 +205,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
         new File(cachePath)
     }
 
-    boolean isClientInstallUpToDate(Project project) {
+    boolean clientDependenciesAreInstalled(Project project) {
         config.rootDependencies.every { Dependency dependency ->
             String destinationPath = "${dependency.registry.installDir.absolutePath}/${dependency.destinationPath}"
             File destination = project.file(destinationPath)
