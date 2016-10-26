@@ -222,3 +222,4 @@ can set the values in `~/.gradle/gradle.properties` where they are for your eyes
 Thank you to the following people who have made significant contributions to this project:
 
 * Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
+* Søren Berg Glasius - link:https://github.com/sbglasius[@sbglasius]
