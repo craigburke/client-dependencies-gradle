@@ -1,8 +1,16 @@
-:version: 1.2.0
+:version: 1.3.0
+
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
 
 = Client Dependencies Gradle Plugin
 
-This Gradle plugin allows you to declare client side dependencies in *build.gradle* from bower, npm or git and
+This Gradle plugin allows you to declare client side dependencies in *build.gradle* from bower, npm, yarn or git and
 with a much clearer dependencies resolution model. This plugin queries the registries directly so it doesn't require or install node, npm or bower.
 
 == Getting Started
@@ -54,6 +62,8 @@ The plugin adds the following tasks to your build:
 
 You can specify dependencies from different sources (npm, bower or git) and control which files are included in your project by using the DSL shown below.
 
+WARNING: The following example shows the use of several different types of registries, this works but it's best to stick to a single registry (NPM is recommended).
+
 [source,gradle,subs='attributes']
 ----
 clientDependencies {
@@ -69,6 +79,9 @@ clientDependencies {
             include 'ui-bootstrap-tpls.js'
         }
     }
+    yarn {
+        'angular'('1.5.8') // <7>
+    }
 }
 ----
 <1> Installs jquery from bower and into the location (`src/assets/vendor/jquery`) using the default copy settings
@@ -79,6 +92,7 @@ location `src/assets/vendor/angular/modules.`
 <5> Use the url property to use a github repo as a dependency source (expands to https://www.github.com/danedan/animate.css.git).
     A full URL reference any git repository will also work here.
 <6> The from property allows you to copy code only from a certain subfolder
+<7> Installs angular from Yarn's registry
 
 TIP: If you update your config and it doesn't seem to be taking effect, try running the `clientRefresh` task.
 
@@ -214,7 +228,7 @@ clientDependencies {
 <1> Your Github Username
 <2> Your Github password or if you use two factor login (and you really should), your personal access token (see: https://github.com/settings/tokens)
 
-**Remember** that it is important never to store your Github credentials in your `build.gradle` file. Instead you
+CAUTION: that it is important never to store your Github credentials in your `build.gradle` file. Instead you
 can set the values in `~/.gradle/gradle.properties` where they are for your eyes only.
 
 == Contributors
