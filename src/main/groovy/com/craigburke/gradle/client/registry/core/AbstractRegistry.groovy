@@ -151,7 +151,7 @@ abstract class AbstractRegistry implements Registry {
                 infoFile.parentFile.mkdirs()
                 infoFile.text = new JsonBuilder(dependency.info).toPrettyString()
             }
-
+            dependency.info = dependency.info ?: [:]
             Resolver resolver = getResolver(dependency)
             resolver.afterInfoLoad(dependency)
         }
