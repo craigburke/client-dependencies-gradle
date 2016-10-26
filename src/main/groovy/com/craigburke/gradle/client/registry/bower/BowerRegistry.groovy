@@ -90,7 +90,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
             return new JsonSlurper().parseText(jsonText) as Map
         } catch (e) {
             log.info("Dependency not found in $url ")
-            return null
+            return [:]
         }
     }
 

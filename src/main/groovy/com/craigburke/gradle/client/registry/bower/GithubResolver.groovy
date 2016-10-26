@@ -68,7 +68,6 @@ class GithubResolver implements Resolver, GithubCredentials {
             }
         }
 
-
         AntBuilder builder = new AntBuilder()
         builder.project.buildListeners.first().setMessageOutputLevel(0)
 
@@ -116,17 +115,19 @@ class GithubResolver implements Resolver, GithubCredentials {
     }
 
     private URLConnection openConnection(URL url) {
-        HttpURLConnection httpURLConnection = url.openConnection()
-        if(githubUsername && githubPassword) {
-            String userCredentials = "${githubUsername}:${githubPassword}".bytes.encodeBase64().toString()
+        HttpURLConnection httpConnection = url.openConnection()
+
+        if (githubUsername && githubPassword) {
+            String userCredentials = "${githubUsername}:${githubPassword}".bytes.encodeBase64()
             String basicAuth = "Basic ${userCredentials}"
-            httpURLConnection.setRequestProperty("Authorization", basicAuth)
+            httpConnection.setRequestProperty('Authorization', basicAuth)
         }
-        if(httpURLConnection.responseCode == 200) {
-            return httpURLConnection
-        } else {
+
+        if (httpConnection.responseCode != 200) {
             throw new GradleException("Could not authorize $url")
         }
+
+        httpConnection
     }
 
 }

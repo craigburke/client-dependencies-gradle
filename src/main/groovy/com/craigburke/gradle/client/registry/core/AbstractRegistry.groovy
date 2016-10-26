@@ -83,11 +83,11 @@ abstract class AbstractRegistry implements Registry {
     @Override
     Resolver getResolver(Dependency dependency) {
         Resolver resolver = resolvers.find { it.canResolve(dependency) }
-        if(resolver instanceof GithubCredentials) {
+        if (resolver instanceof GithubCredentials) {
             resolver.githubUsername = githubUsername
             resolver.githubPassword = githubPassword
         }
-        return resolver
+        resolver
     }
 
     @Override
