@@ -20,6 +20,7 @@ import com.craigburke.gradle.client.registry.bower.BowerRegistry
 import com.craigburke.gradle.client.registry.npm.NpmRegistry
 import com.craigburke.gradle.client.registry.core.Registry
 import com.craigburke.gradle.client.registry.npm.YarnRegistry
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.util.CollectionUtils
 
@@ -39,6 +40,9 @@ class ClientDependenciesExtension {
 
     boolean useGlobalCache = true
     boolean checkDownloads = true
+
+    String githubUsername
+    String githubPassword
 
     private Object installDir
     private Object cacheDir
@@ -137,17 +141,23 @@ class ClientDependenciesExtension {
 
     void registry(Map props = [:], String name) {
         String url = props.url as String
+        Registry registry
         switch (props.type) {
             case 'bower':
-                registries += new BowerRegistry(name, url)
+                registry = new BowerRegistry(name, url)
                 break
             case 'npm':
-                registries += new NpmRegistry(name, url)
+                registry = new NpmRegistry(name, url)
                 break
             case 'yarn':
-                registries += new YarnRegistry(name, url)
+                registry = new YarnRegistry(name, url)
                 break
+            default:
+                throw new GradleException("Unknown Registry: $name")
         }
+        registry.githubUsername = githubUsername
+        registry.githubPassword = githubPassword
+        registries += registry
     }
 
     Registry findRegistry(String name) {

@@ -47,6 +47,12 @@ interface Registry {
     void setCheckDownloads(boolean checkDownloads)
     boolean getCheckDownloads()
 
+    void setGithubUsername(String githubUsername)
+    String getGithubUsername()
+
+    void setGithubPassword(String githubPassword)
+    String getGithubPassword()
+
     String getUrl()
 
     Dependency loadDependency(Dependency dependency, Dependency parent)

@@ -15,6 +15,8 @@
  */
 package com.craigburke.gradle.client.plugin
 
+import groovy.util.logging.Slf4j
+
 import static groovyx.gpars.GParsPool.withExistingPool
 
 import org.gradle.internal.os.OperatingSystem
@@ -188,6 +190,8 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             registry.installDir = config.installDir
             registry.useGlobalCache = config.useGlobalCache
             registry.checkDownloads = config.checkDownloads
+            registry.githubUsername = config.githubUsername
+            registry.githubPassword = config.githubPassword
         }
     }
 
