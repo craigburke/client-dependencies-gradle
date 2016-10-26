@@ -201,8 +201,25 @@ clientDependencies {
 <4> Whether downloads are checked and verified
 <5> Size of thread pool used when downloading and installing dependencies
 
+== Special for Bower repositories
+Github credentials can be set in the `clientDependencies` block:
+
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    githubUsername = project.hasProperty('githubUsername') ? project.githubUsername : '' // <1>
+    githubPassword = project.hasProperty('githubPassword') ? project.githubPassword : '' // <2>
+}
+----
+<1> Your Github Username
+<2> Your Github password or if you use two factor login (and you really should), your personal access token (see: https://github.com/settings/tokens)
+
+**Remember** that it is important never to store your Github credentials in your `build.gradle` file. Instead you
+can set the values in `~/.gradle/gradle.properties` where they are for your eyes only.
+
 == Contributors
 
 Thank you to the following people who have made significant contributions to this project:
 
 * Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
+* Søren Berg Glasius - link:https://github.com/sbglasius[@sbglasius]

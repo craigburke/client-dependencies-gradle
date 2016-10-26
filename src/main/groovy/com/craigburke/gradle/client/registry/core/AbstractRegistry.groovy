@@ -49,6 +49,9 @@ abstract class AbstractRegistry implements Registry {
     boolean useGlobalCache
     boolean checkDownloads
 
+    String githubUsername
+    String githubPassword
+
     static ForkJoinPool pool
     protected Logger log
     protected List<Resolver> resolvers
@@ -79,7 +82,12 @@ abstract class AbstractRegistry implements Registry {
 
     @Override
     Resolver getResolver(Dependency dependency) {
-        resolvers.find { it.canResolve(dependency) }
+        Resolver resolver = resolvers.find { it.canResolve(dependency) }
+        if(resolver instanceof GithubCredentials) {
+            resolver.githubUsername = githubUsername
+            resolver.githubPassword = githubPassword
+        }
+        return resolver
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.craigburke.gradle.client.registry.bower
 
 import com.craigburke.gradle.client.dependency.Dependency
 import com.craigburke.gradle.client.dependency.Version
+import com.craigburke.gradle.client.registry.core.GithubCredentials
 import com.craigburke.gradle.client.registry.core.Resolver
 import groovy.json.JsonSlurper
+import org.gradle.api.GradleException
 
 import java.util.regex.Pattern
 import org.gradle.api.logging.Logger
@@ -14,9 +16,12 @@ import org.gradle.api.logging.Logger
  *
  * @author Craig Burke
  */
-class GithubResolver implements Resolver {
+class GithubResolver implements Resolver, GithubCredentials {
 
     private final Logger log
+
+    String githubUsername
+    String githubPassword
 
     GithubResolver(Logger log) {
         this.log = log
@@ -57,10 +62,12 @@ class GithubResolver implements Resolver {
 
         File downloadFile = getDownloadFile(dependency)
         downloadFile.parentFile.mkdirs()
-
-        downloadFile.withOutputStream { out ->
-            out << url.openStream()
+        openConnection(url).inputStream.withStream { input ->
+            downloadFile.withOutputStream { out ->
+                out << input
+            }
         }
+
 
         AntBuilder builder = new AntBuilder()
         builder.project.buildListeners.first().setMessageOutputLevel(0)
@@ -88,8 +95,11 @@ class GithubResolver implements Resolver {
         if (!dependency.info.tags) {
             GithubInfo info = getInfo(dependency.fullUrl)
             URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
-            List<String> tags = new JsonSlurper().parse(url).collect { (it.ref as String) - 'refs/tags/' }
-            dependency.info.tags = tags
+
+            openConnection(url).inputStream.withStream { inputStream ->
+                List<String> tags = new JsonSlurper().parse(inputStream).collect { (it.ref as String) - 'refs/tags/' }
+                dependency.info.tags = tags
+            }
         }
     }
 
@@ -103,6 +113,20 @@ class GithubResolver implements Resolver {
 
     private static File getDownloadFile(Dependency dependency) {
         new File("${dependency.baseSourceDir.absolutePath}/${dependency.key}.tar.gz")
+    }
+
+    private URLConnection openConnection(URL url) {
+        HttpURLConnection httpURLConnection = url.openConnection()
+        if(githubUsername && githubPassword) {
+            String userCredentials = "${githubUsername}:${githubPassword}".bytes.encodeBase64().toString()
+            String basicAuth = "Basic ${userCredentials}"
+            httpURLConnection.setRequestProperty("Authorization", basicAuth)
+        }
+        if(httpURLConnection.responseCode == 200) {
+            return httpURLConnection
+        } else {
+            throw new GradleException("Could not authorize $url")
+        }
     }
 
 }

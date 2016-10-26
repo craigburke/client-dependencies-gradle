@@ -5,3 +5,4 @@ build
 *.ipr
 *.iws
 **/.DS_Store
+atlassian-ide-plugin.xml
