@@ -107,7 +107,7 @@ The default settings for the copy task are as follows:
 ----
 clientDependencies {
     fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts', 
-                        'jpg', 'jpeg', 'png', 'gif'] // <1>
+                      'jpg', 'jpeg', 'png', 'gif'] // <1>
     releaseFolders = ['dist', 'release'] // <2>
     copyIncludes = [] // <3>
     copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
