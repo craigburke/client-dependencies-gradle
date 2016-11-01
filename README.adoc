@@ -1,4 +1,4 @@
-:version: 1.3.0
+:version: 1.3.1
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -102,8 +102,23 @@ The files are copied using the DSL of Gradle's copy task. See: https://docs.grad
 
 === Default copy task
 
-When the files for a dependency are copied to the install directory, the plugin uses reasonable defaults for what to include and exclude.
-This default behavior can be controlled with the following properties:
+The default settings for the copy task are as follows:
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts', 'jpg', 'jpeg', 'png', 'gif'] // <1>
+    releaseFolders = ['dist', 'release'] // <2>
+    copyIncludes = [] // <3>
+    copyExcludes = ['**/*.min.js', '**/*.min.css', '**/*.map', '**/Gruntfile.js',
+                        'gulpfile.js', 'source/**'] // <4>
+}
+----
+<1> Default included file extensions
+<2> Default release folders to look for. If a folder by this name is found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
+<3> Default includes to append to the end of the copy task
+<4> Default excludes to append to the end of the copy task
+
+You can add to the default values listed above by using the following methods:
 
 [source,gradle,subs='attributes']
 ----
@@ -111,30 +126,15 @@ clientDependencies {
     fileExtensions 'ts' // <1>
     releaseFolders 'lib' // <2>
     copyIncludes '**' // <3>
-    copyExcludes '**' // <4>
+    copyExcludes 'index.js' // <4>
 }
 ----
-<1> Add additional file extension to default include
-<2> Adds a release folders to look for. If a folder by this name is found then the file extension includes are relative to this folder. (ex `dist/{asterisk}{asterisk}/{asterisk}.js` instead of `{asterisk}{asterisk}/{asterisk}.js`)
+<1> Adds the file extension (`ts`) to default fileExtensions
+<2> Adds a release folders (`lib`) to the default release folder list
 <3> Additional includes to append to the end of the copy task
 <4> Additional excludes to append to the end of the copy task
 
-You can also completely override the default values for each of the properties above:
-[source,gradle,subs='attributes']
-----
-clientDependencies {
-    fileExtensions = ['js', 'css', 'ts'] // <1>
-    releaseFolders = ['release', 'dist', 'lib'] // <2>
-    copyIncludes = ['**'] // <3>
-    copyExcludes = ['**/*.txt'] // <4>
-}
-----
-<1> Sets default file extensions to include
-<2> Sets release folders to look for
-<3> Sets includes to append to the end of the copy task
-<4> Sets excludes to append to the end of the copy task
-
-You can also completely override the default copy task (which also ignores the settings above)
+You can also completely override the default copy task (this will then completely ignores the settings above)
 
 [source,gradle,subs='attributes']
 ----

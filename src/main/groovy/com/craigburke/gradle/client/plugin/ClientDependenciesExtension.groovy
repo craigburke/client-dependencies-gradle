@@ -47,7 +47,9 @@ class ClientDependenciesExtension {
     private Object installDir
     private Object cacheDir
 
-    private final List<Object> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts']
+    private final List<Object> fileExtensions = ['css', 'js', 'eot', 'svg', 'ttf', 'woff', 'woff2', 'ts',
+                                                 'jpg', 'jpeg', 'png', 'gif']
+
     private final List<Object> releaseFolders = ['dist', 'release']
 
     private final List<Object> copyIncludes = []
