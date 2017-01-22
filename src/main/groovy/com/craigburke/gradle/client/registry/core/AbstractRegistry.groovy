@@ -204,9 +204,9 @@ abstract class AbstractRegistry implements Registry {
 
     Version getVersionFromSource(File sourceDir) {
         File configFile = getConfigFile(sourceDir)
-        if (configFile) {
+        if (configFile?.exists()) {
             Map config = new JsonSlurper().parse(configFile) as Map
-            Version.parse(config.version as String)
+            config?.version ? Version.parse(config.version as String) : null
         }
         else {
             null
