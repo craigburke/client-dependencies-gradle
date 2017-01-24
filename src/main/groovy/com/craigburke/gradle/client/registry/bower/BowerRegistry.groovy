@@ -42,7 +42,7 @@ class BowerRegistry extends AbstractRegistry implements Registry {
     List<SimpleDependency> getChildDependencies(Dependency dependency) {
         File bowerConfigFile = getConfigFile(dependency.sourceDir)
 
-        if(bowerConfigFile?.exists()) {
+        if (bowerConfigFile?.exists()) {
             def bowerConfigJson = new JsonSlurper().parse(bowerConfigFile)
 
             bowerConfigJson?.dependencies?.collect { String name, String versionExpression ->
