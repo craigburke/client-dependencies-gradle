@@ -57,7 +57,7 @@ class GithubResolver implements Resolver, GithubCredentials {
         }
 
         GithubInfo info = getInfo(dependency.fullUrl)
-        String ref = dependency.info.tags.find { (it - 'v') == dependency.version.fullVersion } ?: 'master'
+        String ref = dependency.info.tags.find { (it - 'v') == dependency?.version?.fullVersion } ?: 'master'
         URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/tarball/${ref}")
 
         File downloadFile = getDownloadFile(dependency)
