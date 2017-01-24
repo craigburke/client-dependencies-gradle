@@ -238,3 +238,4 @@ Thank you to the following people who have made significant contributions to thi
 
 * Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
 * Søren Berg Glasius - link:https://github.com/sbglasius[@sbglasius]
+* Eric Helgeson - link:https://github.com/erichelgeson[@erichelgeson]
