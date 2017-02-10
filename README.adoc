@@ -87,7 +87,7 @@ clientDependencies {
 <1> Installs jquery from bower and into the location (`src/assets/vendor/jquery`) using the default copy settings
 <2> Installs bootstrap from npm and excludes the dependency `jquery`
 <3> Installs restangular from npm but doesn't include any child dependencies
-<4> Changing the destination path using the `into` property. This is relative ot the install path meaning this would install to the
+<4> Changing the destination path using the `into` property. This is relative to the install path meaning this would install to the
 location `src/assets/vendor/angular/modules.`
 <5> Use the url property to use a github repo as a dependency source (expands to https://www.github.com/danedan/animate.css.git).
     A full URL reference any git repository will also work here.
