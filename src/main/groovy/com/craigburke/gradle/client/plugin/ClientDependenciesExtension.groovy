@@ -43,6 +43,7 @@ class ClientDependenciesExtension {
 
     String githubUsername
     String githubPassword
+    String githubToken
 
     private Object installDir
     private Object cacheDir
@@ -159,6 +160,7 @@ class ClientDependenciesExtension {
         }
         registry.githubUsername = githubUsername
         registry.githubPassword = githubPassword
+        registry.githubToken = githubToken
         registries += registry
     }
 

@@ -51,6 +51,7 @@ abstract class AbstractRegistry implements Registry {
 
     String githubUsername
     String githubPassword
+    String githubToken
 
     static ForkJoinPool pool
     protected Logger log

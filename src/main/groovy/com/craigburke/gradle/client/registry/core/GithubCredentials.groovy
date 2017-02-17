@@ -12,4 +12,7 @@ interface GithubCredentials {
 
     void setGithubPassword(String githubPassword)
     String getGithubPassword()
+
+    void setGithubToken(String githubToken)
+    String getGithubToken()
 }

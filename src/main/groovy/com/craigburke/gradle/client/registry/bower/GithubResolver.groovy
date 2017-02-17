@@ -22,6 +22,7 @@ class GithubResolver implements Resolver, GithubCredentials {
 
     String githubUsername
     String githubPassword
+    String githubToken
 
     GithubResolver(Logger log) {
         this.log = log
@@ -121,6 +122,9 @@ class GithubResolver implements Resolver, GithubCredentials {
             String userCredentials = "${githubUsername}:${githubPassword}".bytes.encodeBase64()
             String basicAuth = "Basic ${userCredentials}"
             httpConnection.setRequestProperty('Authorization', basicAuth)
+        } else if(githubToken) {
+            String tokenAuth = "token ${githubToken}"
+            httpConnection.setRequestProperty('Authorization', tokenAuth)
         }
 
         if (httpConnection.responseCode != 200) {
