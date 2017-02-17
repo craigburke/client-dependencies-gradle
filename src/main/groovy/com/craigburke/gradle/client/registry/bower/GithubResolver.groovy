@@ -123,9 +123,18 @@ class GithubResolver implements Resolver, GithubCredentials {
             httpConnection.setRequestProperty('Authorization', basicAuth)
         }
 
-        if (httpConnection.responseCode != 200) {
-            throw new GradleException("Could not authorize $url")
-        }
+		def code = httpConnection.responseCode
+		if (code == 401 || code == 403) {
+			throw new GradleException("Could not authorize $url, response code ${code}")
+		} else if (code == 404) {
+			throw new GradleException("Url $url not found (404)")
+		} else if (code >= 500 && code <= 599) {
+			throw new GradleException("Server error for $url, response code $code")
+		} else if (code >= 400 && code <= 499) {
+			throw new GradleException("Client error for $url, response code $code")
+		} else if (code != 200) {
+			throw new GradleException("Not known error for $url, response code ${code}")
+		}
 
         httpConnection
     }
