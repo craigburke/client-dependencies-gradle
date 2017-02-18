@@ -229,6 +229,15 @@ clientDependencies {
 <1> Your Github Username
 <2> Your Github password or if you use two factor login (and you really should), your personal access token (see: https://github.com/settings/tokens)
 
+If you don't want to use your username and password you can obtain Github token here https://github.com/settings/tokens/new and use it this way:
+
+[source,gradle,subs='attributes']
+----
+clientDependencies {
+    githubToken = project.hasProperty('githubToken') ? project.githubToken : ''
+}
+----
+
 CAUTION: that it is important never to store your Github credentials in your `build.gradle` file. Instead you
 can set the values in `~/.gradle/gradle.properties` where they are for your eyes only.
 

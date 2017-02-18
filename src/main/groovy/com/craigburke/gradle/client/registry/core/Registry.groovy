@@ -25,7 +25,7 @@ import groovy.transform.CompileStatic
  * @author Craig Burke
  */
 @CompileStatic
-interface Registry {
+interface Registry extends GithubCredentials {
     void setName(String name)
     String getName()
 
@@ -52,6 +52,9 @@ interface Registry {
 
     void setGithubPassword(String githubPassword)
     String getGithubPassword()
+
+    void setGithubToken(String githubToken)
+    String getGithubToken()
 
     String getUrl()
 

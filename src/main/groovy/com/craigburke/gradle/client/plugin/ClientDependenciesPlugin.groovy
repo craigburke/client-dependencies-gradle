@@ -190,6 +190,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             registry.checkDownloads = config.checkDownloads
             registry.githubUsername = config.githubUsername
             registry.githubPassword = config.githubPassword
+            registry.githubToken = config.githubToken
         }
     }
 
