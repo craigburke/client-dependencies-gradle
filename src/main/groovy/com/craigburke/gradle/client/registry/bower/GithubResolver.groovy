@@ -94,10 +94,17 @@ class GithubResolver implements Resolver, GithubCredentials {
             GithubInfo info = getInfo(dependency.fullUrl)
             URL url = new URL("${GITHUB_BASE_URL}/${info.orgName}/${info.repoName}/git/refs/tags")
 
-            openConnection(url).inputStream.withStream { inputStream ->
-                List<String> tags = new JsonSlurper().parse(inputStream).collect { (it.ref as String) - 'refs/tags/' }
-                dependency.info.tags = tags
+            try {
+                openConnection(url).inputStream.withStream { inputStream ->
+                    List<String> tags = new JsonSlurper().parse(inputStream).collect { (it.ref as String) - 'refs/tags/' }
+                    dependency.info.tags = tags
+                }
             }
+            catch (IOException ex) {
+                log.debug("Could not load tags from ${url}")
+                dependency.info.tags = []
+            }
+
         }
     }
 
