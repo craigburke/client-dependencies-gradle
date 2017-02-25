@@ -44,6 +44,7 @@ class ClientDependenciesExtension {
     String githubUsername
     String githubPassword
     String githubToken
+    String userAgent = 'client-dependencies-gradle'
 
     private Object installDir
     private Object cacheDir

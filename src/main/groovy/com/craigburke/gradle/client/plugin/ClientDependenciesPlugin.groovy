@@ -191,6 +191,7 @@ class ClientDependenciesPlugin implements Plugin<Project> {
             registry.githubUsername = config.githubUsername
             registry.githubPassword = config.githubPassword
             registry.githubToken = config.githubToken
+            registry.userAgent = config.userAgent
         }
     }
 

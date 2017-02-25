@@ -75,7 +75,13 @@ class NpmRegistry extends AbstractRegistry implements Registry {
         String name = isScoped ? dependency.name[1..-1] : dependency.name
         String encodedName = "${isScoped ? '@' : ''}${URLEncoder.encode(name, 'UTF-8')}"
         URL url = new URL("${dependency.registry.url}/${encodedName}")
-        String jsonText = url.getText(requestProperties: ['User-Agent': DEFAULT_USER_AGENT])
+
+        Map requestProperties = [:]
+        if (userAgent) {
+            requestProperties['User-Agent'] = userAgent
+        }
+
+        String jsonText = url.getText(requestProperties: requestProperties)
         new JsonSlurper().parseText(jsonText) as Map
     }
 

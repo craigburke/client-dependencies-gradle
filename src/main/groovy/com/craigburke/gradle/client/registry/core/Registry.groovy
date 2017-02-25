@@ -56,6 +56,9 @@ interface Registry extends GithubCredentials {
     void setGithubToken(String githubToken)
     String getGithubToken()
 
+    void setUserAgent(String userAgent)
+    String getUserAgent()
+
     String getUrl()
 
     Dependency loadDependency(Dependency dependency, Dependency parent)

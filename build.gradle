@@ -1,3 +1,5 @@
+import groovy.io.FileType
+
 buildscript {
     repositories {
         maven {
@@ -131,14 +133,24 @@ pluginBundle {
     }
 }
 
-processTestResources {
-    String gitFolder = File.separator + '_git' + File.separator
-    String updatedGitFolder = File.separator + '.git' + File.separator
+task fixResourcePaths() {
+    doLast {
+        List<File> gitFolders = []
 
-    eachFile {
-        it.path = it.path.replace gitFolder, updatedGitFolder
+        project.file("build/resources/test/").eachFileRecurse(FileType.DIRECTORIES) {
+            if (it.name == '_git') {
+                gitFolders += it
+            }
+        }
+
+        gitFolders.each {
+            it.renameTo(it.absolutePath.replaceAll('_git', '.git'))
+        }
+
     }
 }
+
+processTestResources.finalizedBy 'fixResourcePaths'
 
 task('release', dependsOn: ['bintrayUpload', 'publishPlugins'])
 

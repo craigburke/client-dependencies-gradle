@@ -367,7 +367,7 @@ ruleset {
     UnnecessaryModOne
     UnnecessaryNullCheck
     UnnecessaryNullCheckBeforeInstanceOf
-    'UnnecessaryObjectReferences' maxReferencesAllowed: 8
+    'UnnecessaryObjectReferences' maxReferencesAllowed: 10
     UnnecessaryOverridingMethod
     UnnecessaryPackageReference
     UnnecessaryParenthesesForMethodCallWithClosure

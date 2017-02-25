@@ -45,8 +45,7 @@ class GithubResolver implements Resolver, GithubCredentials {
     List<Version> getVersionList(Dependency dependency) {
         if (dependency.info.tags) {
             dependency.info.tags?.collect { String tag -> Version.parse(tag) } as List<Version>
-        }
-        else {
+        } else {
             []
         }
     }
@@ -81,8 +80,7 @@ class GithubResolver implements Resolver, GithubCredentials {
                     fileSet(dir: file.absolutePath)
                 }
                 file.deleteDir()
-            }
-            else {
+            } else {
                 file.delete()
             }
         }
@@ -122,23 +120,23 @@ class GithubResolver implements Resolver, GithubCredentials {
             String userCredentials = "${githubUsername}:${githubPassword}".bytes.encodeBase64()
             String basicAuth = "Basic ${userCredentials}"
             httpConnection.setRequestProperty('Authorization', basicAuth)
-        } else if(githubToken) {
+        } else if (githubToken) {
             String tokenAuth = "token ${githubToken}"
             httpConnection.setRequestProperty('Authorization', tokenAuth)
         }
 
-		def code = httpConnection.responseCode
-		if (code == 401 || code == 403) {
-			throw new GradleException("Could not authorize $url, response code ${code}")
-		} else if (code == 404) {
-			throw new GradleException("Url $url not found (404)")
-		} else if (code >= 500 && code <= 599) {
-			throw new GradleException("Server error for $url, response code $code")
-		} else if (code >= 400 && code <= 499) {
-			throw new GradleException("Client error for $url, response code $code")
-		} else if (code != 200) {
-			throw new GradleException("Not known error for $url, response code ${code}")
-		}
+        def code = httpConnection.responseCode
+        if (code == 401 || code == 403) {
+            throw new GradleException("Could not authorize $url, response code ${code}")
+        } else if (code == 404) {
+            throw new GradleException("Url $url not found (404)")
+        } else if (code >= 500 && code <= 599) {
+            throw new GradleException("Server error for $url, response code $code")
+        } else if (code >= 400 && code <= 499) {
+            throw new GradleException("Client error for $url, response code $code")
+        } else if (code != 200) {
+            throw new GradleException("Not known error for $url, response code ${code}")
+        }
 
         httpConnection
     }

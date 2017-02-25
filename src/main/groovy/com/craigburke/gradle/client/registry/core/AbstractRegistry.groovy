@@ -37,7 +37,6 @@ import org.gradle.api.logging.Logger
  */
 abstract class AbstractRegistry implements Registry {
     static final String DEFAULT_PATH_SEPARATOR = '/'
-    static final String DEFAULT_USER_AGENT = 'client-dependencies-gradle'
 
     String name
     String url
@@ -52,6 +51,7 @@ abstract class AbstractRegistry implements Registry {
     String githubUsername
     String githubPassword
     String githubToken
+    String userAgent
 
     static ForkJoinPool pool
     protected Logger log
