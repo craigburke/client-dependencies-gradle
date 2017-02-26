@@ -104,7 +104,6 @@ class GithubResolver implements Resolver, GithubCredentials {
                 log.debug("Could not load tags from ${url}")
                 dependency.info.tags = []
             }
-
         }
     }
 
@@ -132,16 +131,20 @@ class GithubResolver implements Resolver, GithubCredentials {
             httpConnection.setRequestProperty('Authorization', tokenAuth)
         }
 
-        def code = httpConnection.responseCode
+        int code = httpConnection.responseCode
         if (code == 401 || code == 403) {
             throw new GradleException("Could not authorize $url, response code ${code}")
-        } else if (code == 404) {
+        }
+        else if (code == 404) {
             throw new GradleException("Url $url not found (404)")
-        } else if (code >= 500 && code <= 599) {
+        }
+        else if (code >= 500 && code <= 599) {
             throw new GradleException("Server error for $url, response code $code")
-        } else if (code >= 400 && code <= 499) {
+        }
+        else if (code >= 400 && code <= 499) {
             throw new GradleException("Client error for $url, response code $code")
-        } else if (code != 200) {
+        }
+        else if (code != 200) {
             throw new GradleException("Not known error for $url, response code ${code}")
         }
 

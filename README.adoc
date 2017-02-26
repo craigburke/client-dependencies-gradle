@@ -1,4 +1,4 @@
-:version: 1.3.2
+:version: 1.4.0
 
 ifdef::env-github[]
 :tip-caption: :bulb:
@@ -205,16 +205,18 @@ need to set any of these options.
 clientDependencies {
     installDir = 'src/assets/vendor' // <1>
     cacheDir = 'build/client-cache/' // <2>
-    useGlobalCache = true // <3>
-    checkDownloads = true // <4>
-    threadPoolSize = 10 // <5>
+    userAgent = 'client-dependencies-gradle' // <3>
+    useGlobalCache = true // <4>
+    checkDownloads = true // <5>
+    threadPoolSize = 10 // <6>
 }
 ----
 <1> Location that dependencies are installed to
 <2> Location of the local project cache
-<3> Whether the global caches for bower and npm are searched when resolving dependencies
-<4> Whether downloads are checked and verified
-<5> Size of thread pool used when downloading and installing dependencies
+<3> User agent used when making web requests
+<4> Whether the global caches for bower and npm are searched when resolving dependencies
+<5> Whether downloads are checked and verified
+<6> Size of thread pool used when downloading and installing dependencies
 
 == Special for Bower repositories
 Github credentials can be set in the `clientDependencies` block:
@@ -248,3 +250,4 @@ Thank you to the following people who have made significant contributions to thi
 * Janne Ruuttunen - link:https://github.com/jruuttun[@jruuttun]
 * Søren Berg Glasius - link:https://github.com/sbglasius[@sbglasius]
 * Eric Helgeson - link:https://github.com/erichelgeson[@erichelgeson]
+* Martin Grześlowski - link:https://github.com/magx2[@magx2]
