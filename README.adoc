@@ -72,7 +72,7 @@ clientDependencies {
     }
     npm {
         'bootstrap'('3.3.6', exclude: 'jquery') // <2>
-        'restangular'('1.5.0', transitive: false) // <3>
+        'restangular'('1.5.1', transitive: false) // <3>
         'angular-animate'('1.5.0', into: 'angular/modules') // <4>
         'animate.css'('1.0.0', url:'daneden/animate.css') // <5>
         'angular-ui-bootstrap'('1.3.x', from:'dist') { // <6>
