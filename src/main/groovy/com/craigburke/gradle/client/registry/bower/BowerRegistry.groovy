@@ -31,7 +31,7 @@ import groovy.json.JsonSlurper
  */
 class BowerRegistry extends AbstractRegistry implements Registry {
 
-    static final String DEFAULT_BOWER_URL = 'https://bower.herokuapp.com'
+    static final String DEFAULT_BOWER_URL = 'https://registry.bower.io'
     static final List<String> DEFAULT_BOWER_FILENAMES = ['bower.json', '.bower.json']
 
     BowerRegistry(String name, String url = DEFAULT_BOWER_URL, List<String> configFilenames = DEFAULT_BOWER_FILENAMES) {
@@ -97,6 +97,10 @@ class BowerRegistry extends AbstractRegistry implements Registry {
                 requestProperties['User-Agent'] = userAgent
             }
             String jsonText = url.getText(requestProperties: requestProperties)
+            if (!jsonText) {
+                log.warn("Unable to retrieve dependency info from $url")
+                return [:]
+            }
             return new JsonSlurper().parseText(jsonText) as Map
         } catch (e) {
             log.info("Dependency not found in $url ")
